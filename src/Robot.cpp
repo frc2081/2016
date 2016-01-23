@@ -1,5 +1,6 @@
 #include "WPILib.h"
 #include <iostream>
+#include <string>
 
 class Robot: public IterativeRobot {
 private:
@@ -84,11 +85,11 @@ private:
 
 	void TeleopPeriodic()
 	{
-		double LaxisX;
-		double LaxisY;
+		bool button1, button2, button3, button4, button5, button6, button7, button8, button9, button10;
 
-		double RaxisX;
-		double RaxisY;
+		double LaxisX, LaxisY;
+
+		double RaxisX, RaxisY;
 
 		LaxisX = stick->GetX();
 		LaxisY = stick->GetY();
@@ -97,7 +98,37 @@ private:
 		RaxisY = stick->GetRawAxis(5);
 
 		drive->ArcadeDrive(LaxisY, RaxisX);
-		//printf("drive %.3f", LaxisY);
+		if(button1 == 1) {
+			printf("A\n");
+		}
+		if(button2 == TRUE) {
+			printf("B\n");
+		}
+		if(button3 == TRUE) {
+			printf("X\n");
+		}
+		if(button4 == TRUE) {
+			printf("Y\n");
+		}
+		if(button5 == TRUE) {
+			printf("LBumper\n");
+		}
+		if(button6 == TRUE) {
+			printf("RBumper\n");
+		}
+		if(button7 == TRUE) {
+			printf("Back\n");
+		}
+		if(button8 == TRUE) {
+			printf("Start\n");
+		}
+		if(button9 == TRUE) {
+			printf("LStick\n");
+		}
+		if(button10 == TRUE) {
+			printf("RStick\n");
+		}
+
 	}
 
 	void TestPeriodic()
