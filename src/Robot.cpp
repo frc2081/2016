@@ -11,9 +11,12 @@ private:
 	Encoder*LEnc;
 	Encoder*REnc;
 	Encoder*ArmEnc;
+	Joystick *stick;
 	float count;
+	VictorSP *mot;
 	void RobotInit()
 	{
+
 		chooser = new SendableChooser();
 		chooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
 		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
@@ -21,6 +24,8 @@ private:
 		LEnc = new Encoder(0, 5, false, Encoder::EncodingType::k4X); // New encoder instance (Left drive)
 		ArmEnc = new Encoder(2, 6, false, Encoder::EncodingType::k4X); // New encoder instance (Winch)
 		REnc = new Encoder(1, 7, false, Encoder::EncodingType::k4X); // New encoder instance (Right Drive)
+		stick = new Joystick(0);
+		mot = new VictorSP(0);
 
 	}
 
@@ -64,7 +69,19 @@ private:
 
 	void TeleopPeriodic()
 	{
+		float RTrig;
+		float LTrig;
+		float Trig;
 
+		RTrig = stick->GetRawAxis(3);
+		LTrig = stick->GetRawAxis(2);
+		LTrig *= -1;
+		Trig = LTrig + RTrig;
+
+		printf("Right Trig: %.2f \n", RTrig);
+		printf("Left Trig: %.2f \n", LTrig);
+
+		mot->Set(Trig);
 
 	}
 
