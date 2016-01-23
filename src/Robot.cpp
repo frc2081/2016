@@ -8,13 +8,26 @@ private:
 	const std::string autoNameDefault = "Default";
 	const std::string autoNameCustom = "My Auto";
 	std::string autoSelected;
-
+	enum states {
+		IDLE,
+		MV_TO_CAP,
+		WT_FOR_BALL,
+		HOLD_BALL,
+	};
+	int currentState;
+	int success;
+	int start;
+	Compressor *c;
+	Solenoid *s;
 	void RobotInit()
 	{
 		chooser = new SendableChooser();
 		chooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
 		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
 		SmartDashboard::PutData("Auto Modes", chooser);
+		currentState = IDLE;
+		success = 0;
+		start = 0;
 	}
 
 
@@ -56,7 +69,16 @@ private:
 
 	void TeleopPeriodic()
 	{
-
+		switch (currentState) {
+		case IDLE:
+			break;
+		case MV_TO_CAP:
+			break;
+		case WT_FOR_BALL:
+			break;
+		case HOLD_BALL:
+			break;
+		}
 	}
 
 	void TestPeriodic()
