@@ -111,8 +111,8 @@ private:
 		RaxisY = stick->GetRawAxis(5);
 
 		drive->ArcadeDrive(LaxisY, RaxisX);
-
-		if(bA == TRUE) {
+		//Prints button inputs to logs
+		/*if(bA == TRUE) {
 			printf("A\n");
 		}
 		if(bB == TRUE) {
@@ -141,7 +141,7 @@ private:
 		}
 		if(bRS == TRUE) {
 			printf("RStick\n");
-		}
+		}*/
 
 	}
 
