@@ -2,7 +2,8 @@
 #include <iostream>
 #include <string>
 
-class Robot: public IterativeRobot {
+class Robot: public IterativeRobot 
+{
 private:
 	LiveWindow *lw = LiveWindow::GetInstance();
 	SendableChooser *chooser;
