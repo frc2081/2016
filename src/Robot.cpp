@@ -93,26 +93,6 @@ private:
 
 	void TeleopPeriodic()
 	{
-		sArm1->Set(true);
-		sArm2->Set(true);
-		sPoker->Set(true);
-		sLever->Set(true);
-//		sArm1->Set(false);
-//		sArm2->Set(false);
-//		sPoker->Set(false);
-//		sLever->Set(false);
-		current = c->GetCompressorCurrent();
-		printf("Current %.5f \n", current); // Current 0.28536
-		yn = c->GetPressureSwitchValue();
-		printf(yn ? "trueV" : "falseV");
-		yn = c->GetClosedLoopControl();
-		printf(yn ? "trueL" : "falseL");
-		yn = c->GetCompressorCurrentTooHighFault();
-		printf(yn ? "trueH" : "falseH");
-		yn = c->GetCompressorShortedFault();
-		printf(yn ? "trueS" : "falseS");
-		yn = c->GetCompressorNotConnectedFault();
-		printf(yn ? "trueN" : "falseN");
 
 		/*
 		 *
