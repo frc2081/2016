@@ -1,0 +1,27 @@
+Left Drive Encoder:
+	Channel A: DIO 0
+	Channel B: DIO 1
+Right Drive Encoder: 
+	Channel A: DIO 2
+	Channel B: DIO 3
+Winch Encoder: 
+	Channel A: DIO 4
+	Channel B: DIO 5	
+	
+Photo-Eye: DIO 4
+
+Left Motors: PWM 0
+	Left Motor 1: Motor Port 0
+	Left Motor 2: Motor Port 1
+Right Motors: PWM 1
+	Right Motor 1: Motor Port 2
+	Right Motor 2: Motor Port 3
+Winch Left CIM: PWM 2
+	Winch Left CIM : Motor Port 4
+	Winch Right CIM: Motor Port 5 
+	Winch Motor Mini-CIM: Motor Port 6
+
+Solenoid Arm Closer: PCM 0
+Solenoid Arm Closer 2: PCM 1
+Solenoid Poker: PCM 2
+Solenoid Arm Lever: PCM 4
