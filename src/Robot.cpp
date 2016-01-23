@@ -8,13 +8,20 @@ private:
 	const std::string autoNameDefault = "Default";
 	const std::string autoNameCustom = "My Auto";
 	std::string autoSelected;
-
+	Encoder*LEnc;
+	Encoder*REnc;
+	Encoder*ArmEnc;
+	float count;
 	void RobotInit()
 	{
 		chooser = new SendableChooser();
 		chooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
 		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
 		SmartDashboard::PutData("Auto Modes", chooser);
+		LEnc = new Encoder(0, 5, false, Encoder::EncodingType::k4X); // New encoder instance (Left drive)
+		ArmEnc = new Encoder(2, 6, false, Encoder::EncodingType::k4X); // New encoder instance (Winch)
+		REnc = new Encoder(1, 7, false, Encoder::EncodingType::k4X); // New encoder instance (Right Drive)
+
 	}
 
 
@@ -28,6 +35,7 @@ private:
 	 * If using the SendableChooser make sure to add them to the chooser code above as well.
 	 */
 	void AutonomousInit()
+
 	{
 		autoSelected = *((std::string*)chooser->GetSelected());
 		//std::string autoSelected = SmartDashboard::GetString("Auto Selector", autoNameDefault);
@@ -57,6 +65,7 @@ private:
 	void TeleopPeriodic()
 	{
 
+
 	}
 
 	void TestPeriodic()
@@ -66,3 +75,4 @@ private:
 };
 
 START_ROBOT_CLASS(Robot)
+
