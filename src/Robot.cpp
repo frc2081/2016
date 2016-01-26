@@ -11,18 +11,23 @@ private:
 	Encoder*LEnc;
 	Encoder*REnc;
 	Encoder*ArmEnc;
+	DigitalInput*PhoSen;
 	float count;
+	bool yn;
+
 	void RobotInit()
+
 	{
 		chooser = new SendableChooser();
 		chooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
 		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
 		SmartDashboard::PutData("Auto Modes", chooser);
 		LEnc = new Encoder(0, 5, false, Encoder::EncodingType::k4X); // New encoder instance (Left drive)
-		ArmEnc = new Encoder(2, 6, false, Encoder::EncodingType::k4X); // New encoder instance (Winch)
-		REnc = new Encoder(1, 7, false, Encoder::EncodingType::k4X); // New encoder instance (Right Drive)
-
+		ArmEnc = new Encoder(2, 3, false, Encoder::EncodingType::k4X); // New encoder instance (Winch)
+		REnc = new Encoder(4, 5, false, Encoder::EncodingType::k4X); // New encoder instance (Right Drive)
+		PhoSen = new DigitalInput (6);
 	}
+
 
 
 	/**
@@ -58,19 +63,22 @@ private:
 	}
 
 	void TeleopInit()
-	{
+	{		yn = PhoSen->Get();
+	while (yn == true) {
+		printf("Hello World");
+		Wait(10);
+		lw->Run();}
 
 	}
 
 	void TeleopPeriodic()
 	{
 
-
 	}
 
 	void TestPeriodic()
 	{
-		lw->Run();
+
 	}
 };
 
