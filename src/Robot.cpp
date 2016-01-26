@@ -142,30 +142,12 @@ private:
 		bRS = stick->GetRawButton(10);
 	}
 
-	void checkbuttons() {
-		bA = stick->GetRawButton(1);
-		bB = stick->GetRawButton(2);
-		bX = stick->GetRawButton(3);
-		bY = stick->GetRawButton(4);
-		bLB = stick->GetRawButton(5);
-		bRB = stick->GetRawButton(6);
-		bBack = stick->GetRawButton(7);
-		bStart = stick->GetRawButton(8);
-		bLS = stick->GetRawButton(9);
-		bRS = stick->GetRawButton(10);
-	}
-
 	void TeleopPeriodic()
 	{
-
 		float RTrig;
 		float LTrig;
 		float Trig;
 		
-		checkbuttons();
-		double LaxisX, LaxisY;
-		double RaxisX, RaxisY;
-
 		checkbuttons();
 		double LaxisX, LaxisY;
 		double RaxisX, RaxisY;
