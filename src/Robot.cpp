@@ -45,6 +45,19 @@ private:
 		//Starts the compressor
 		c->SetClosedLoopControl(true);
 		c->Start();
+		stick = new Joystick(0);
+		drive = new RobotDrive(0, 1);
+
+		buttonA = new JoystickButton(stick, 1),
+		buttonB = new JoystickButton(stick, 2),
+		buttonX = new JoystickButton(stick, 3),
+		buttonY = new JoystickButton(stick, 4),
+		buttonLB = new JoystickButton(stick, 5),
+		buttonRB = new JoystickButton(stick, 6),
+		buttonBack = new JoystickButton(stick, 7),
+		buttonStart = new JoystickButton(stick, 8),
+		buttonLS = new JoystickButton(stick, 9),
+		buttonRS = new JoystickButton(stick, 10);
 	}
 
 
