@@ -14,6 +14,26 @@ private:
 	Joystick *stick;
 	float count;
 	VictorSP *mot;
+
+	/*
+	enum states {
+		IDLE,
+		MV_TO_CAP,
+		WT_FOR_BALL,
+		HOLD_BALL,
+	};
+	int currentState;
+	int success;
+	int start;
+	*/
+	Compressor *c;
+	Solenoid *sArm1 = new Solenoid(0);
+	Solenoid *sArm2 = new Solenoid(1);
+	Solenoid *sPoker = new Solenoid(2);
+	Solenoid *sLever = new Solenoid(3);
+	float current;
+	bool yn;
+
 	void RobotInit()
 	{
 
@@ -21,12 +41,20 @@ private:
 		chooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
 		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
 		SmartDashboard::PutData("Auto Modes", chooser);
+
 		LEnc = new Encoder(0, 5, false, Encoder::EncodingType::k4X); // New encoder instance (Left drive)
 		ArmEnc = new Encoder(2, 6, false, Encoder::EncodingType::k4X); // New encoder instance (Winch)
 		REnc = new Encoder(1, 7, false, Encoder::EncodingType::k4X); // New encoder instance (Right Drive)
 		stick = new Joystick(0);
 		mot = new VictorSP(0);
 
+
+		//currentState = IDLE;
+		//success = 0;
+		//start = 0;
+		c = new Compressor(0);
+		c->SetClosedLoopControl(true);
+		c->Start();
 	}
 
 
@@ -83,6 +111,19 @@ private:
 
 		mot->Set(Trig);
 
+		/*
+		 *
+		switch (currentState) {
+		case IDLE:
+			break;
+		case MV_TO_CAP:
+			break;
+		case WT_FOR_BALL:
+			break;
+		case HOLD_BALL:
+			break;
+		}
+		*/
 	}
 
 	void TestPeriodic()
