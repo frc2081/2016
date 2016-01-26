@@ -35,6 +35,7 @@ private:
 	JoystickButton *buttonLS;
 	JoystickButton *buttonRS;
 	DigitalInput*PhoSen;
+	bool bA, bB, bX, bY, bLB, bRB, bBack, bStart, bLS, bRS;
 	void RobotInit()
 	{
 		chooser = new SendableChooser();
@@ -114,11 +115,12 @@ private:
 
 	void TeleopPeriodic()
 	{
+		checkbuttons();
 		//Start  of the state machine that manages the auto load sequence
 		switch (currentState) {
 		case IDLE: //Idle state, nothing happens
 			sLever->Set(false); //Keeps arms in the robot
-			yn = buttonA->WhenPressed; //Gets the value of the A button
+			yn = bA; //Gets the value of the A button
 			if (yn == true) { //If the A button is pressed, change state to MV_TO_CAP
 				currentState = MV_TO_CAP;
 			}
