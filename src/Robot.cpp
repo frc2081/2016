@@ -59,6 +59,7 @@ private:
 		buttonStart = new JoystickButton(stick, 8),
 		buttonLS = new JoystickButton(stick, 9),
 		buttonRS = new JoystickButton(stick, 10);
+		PhoSen = new DigitalInput (6);
 	}
 
 
@@ -104,7 +105,7 @@ private:
 		switch (currentState) {
 		case IDLE: //Idle state, nothing happens
 			sLever->Set(false); //Keeps arms in the robot
-			yn = buttonA->GetRawButton(); //Gets the value of the A button
+			yn = buttonA->WhenPressed; //Gets the value of the A button
 			if (yn == true) { //If the A button is pressed, change state to MV_TO_CAP
 				currentState = MV_TO_CAP;
 			}
@@ -124,7 +125,7 @@ private:
 			}
 			break;
 		case HOLD_BALL: //Holds the ball in front of the robot
-			yn = buttonA->GetRawButton(); //Checks if the A button is pressed
+			yn = buttonA->WhenPressed; //Checks if the A button is pressed
 			if (yn == true) { //If the A button is pressed, open and arms move them inside the robot, and go back to IDLE
 				sArm1->Set(false);
 				sArm2->Set(false);
