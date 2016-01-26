@@ -2,5 +2,8 @@
 
 .settings/
 sysprops.xml
+<<<<<<< HEAD
 /sysProps.xml
 /.gitignore
+=======
+>>>>>>> branch 'master' of https://github.com/matthewknecht/RealRoboCode2016.git

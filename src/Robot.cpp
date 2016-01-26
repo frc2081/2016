@@ -8,11 +8,13 @@ private:
 	const std::string autoNameDefault = "Default";
 	const std::string autoNameCustom = "My Auto";
 	std::string autoSelected;
+
 	Encoder*LEnc;
 	Encoder*REnc;
 	Encoder*ArmEnc;
 	Joystick *stick;
 	float count;
+
 	VictorSP *mot;
 
 	/*
@@ -110,7 +112,19 @@ private:
 		printf("Left Trig: %.2f \n", LTrig);
 
 		mot->Set(Trig);
-
+		/*
+		 *
+		switch (currentState) {
+		case IDLE:
+			break;
+		case MV_TO_CAP:
+			break;
+		case WT_FOR_BALL:
+			break;
+		case HOLD_BALL:
+			break;
+		}
+		*/
 		/*
 		 *
 		switch (currentState) {
