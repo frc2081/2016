@@ -128,19 +128,6 @@ private:
 	{
 
 	}
-	
-	void checkbuttons() {
-		bA = stick->GetRawButton(1);
-		bB = stick->GetRawButton(2);
-		bX = stick->GetRawButton(3);
-		bY = stick->GetRawButton(4);
-		bLB = stick->GetRawButton(5);
-		bRB = stick->GetRawButton(6);
-		bBack = stick->GetRawButton(7);
-		bStart = stick->GetRawButton(8);
-		bLS = stick->GetRawButton(9);
-		bRS = stick->GetRawButton(10);
-	}
 
 	void checkbuttons() {
 		bA = stick->GetRawButton(1);
@@ -166,10 +153,6 @@ private:
 		double LaxisX, LaxisY;
 		double RaxisX, RaxisY;
 
-		checkbuttons();
-		double LaxisX, LaxisY;
-		double RaxisX, RaxisY;
-
 		LaxisX = stick->GetX();
 		LaxisY = stick->GetY();
 
@@ -209,45 +192,6 @@ private:
 			printf("RStick\n");
 		}*/
 
-
-		LaxisX = stick->GetX();
-		LaxisY = stick->GetY();
-
-		RaxisX = stick->GetTwist();
-		RaxisY = stick->GetRawAxis(5);
-
-		drive->ArcadeDrive(LaxisY, RaxisX);
-		//Prints button inputs to logs
-		/*if(bA == TRUE) {
-			printf("A\n");
-		}
-		if(bB == TRUE) {
-			printf("B\n");
-		}
-		if(bX == TRUE) {
-			printf("X\n");
-		}
-		if(bY == TRUE) {
-			printf("Y\n");
-		}
-		if(bLB == TRUE) {
-			printf("LBumper\n");
-		}
-		if(bRB == TRUE) {
-			printf("RBumper\n");
-		}
-		if(bBack == TRUE) {
-			printf("Back\n");
-		}
-		if(bStart == TRUE) {
-			printf("Start\n");
-		}
-		if(bLS == TRUE) {
-			printf("LStick\n");
-		}
-		if(bRS == TRUE) {
-			printf("RStick\n");
-		}*/
 
 		RTrig = stick->GetRawAxis(3);
 		LTrig = stick->GetRawAxis(2);
@@ -258,19 +202,6 @@ private:
 		printf("Left Trig: %.2f \n", LTrig);
 
 		mot->Set(Trig);
-		/*
-		 *
-		switch (currentState) {
-		case IDLE:
-			break;
-		case MV_TO_CAP:
-			break;
-		case WT_FOR_BALL:
-			break;
-		case HOLD_BALL:
-			break;
-		}
-		*/
 		/*
 		 *
 		switch (currentState) {
