@@ -8,28 +8,29 @@ private:
 	const std::string autoNameDefault = "Default";
 	const std::string autoNameCustom = "My Auto";
 	std::string autoSelected;
-	enum states {
+	enum states { //States for the auto load sequence
 		IDLE,
 		MV_TO_CAP,
 		WT_FOR_BALL,
 		HOLD_BALL,
 	};
-	int currentState = IDLE;
-	Compressor *c;
-	Solenoid *sArm1 = new Solenoid(0);
-	Solenoid *sArm2 = new Solenoid(1);
-	Solenoid *sPoker = new Solenoid(2);
-	Solenoid *sLever = new Solenoid(3);
-	float current;
-	bool yn;
+	int currentState  = IDLE;
+	Compressor *c; //Creates the compressor object
+	Solenoid *sArm1 = new Solenoid(0); //Solenoid for the opening and closing of the arms
+	Solenoid *sArm2 = new Solenoid(1); //Solenoid for the opening and closing of the arms
+	Solenoid *sPoker = new Solenoid(2); //Solenoid for the poker
+	Solenoid *sLever = new Solenoid(3); //Solenoid to raise and lower the arms
+	float current; //Current state the state machine is on
+	bool yn; //Varaible to hold true or false for the state machine
 	void RobotInit()
 	{
 		chooser = new SendableChooser();
 		chooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
 		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
 		SmartDashboard::PutData("Auto Modes", chooser);
-		currentState = IDLE;
-		c = new Compressor(0);
+		currentState = IDLE; //Sets current state to IDLE, where nothing happens
+		c = new Compressor(0); //Tells the robot where the compressor is plugged in
+		//Starts the compressor
 		c->SetClosedLoopControl(true);
 		c->Start();
 	}
@@ -73,41 +74,32 @@ private:
 
 	void TeleopPeriodic()
 	{
-		sArm1->Set(true);
-		sArm2->Set(true);
-		sPoker->Set(true);
-		sLever->Set(true);
-//		sArm1->Set(false);
-//		sArm2->Set(false);
-//		sPoker->Set(false);
-//		sLever->Set(false);
-
-
+		//Start  of the state machine that manages the auto load sequence
 		switch (currentState) {
-		case IDLE:
-			sLever->Set(false);
-			yn = buttonA->GetRawButton();
-			if (yn == true) {
+		case IDLE: //Idle state, nothing happens
+			sLever->Set(false); //Keeps arms in the robot
+			yn = buttonA->GetRawButton(); //Gets the value of the A button
+			if (yn == true) { //If the A button is pressed, change state to MV_TO_CAP
 				currentState = MV_TO_CAP;
 			}
 			break;
-		case MV_TO_CAP:
-			sLever->Set(true);
-			sArm1->Set(false);
-			sArm2->Set(false);
-			currentState = WT_FOR_BALL;
+		case MV_TO_CAP: //Moves arms into posistion and opens them
+			sLever->Set(true); //Lowers the arms
+			sArm1->Set(false); //Opens the arms
+			sArm2->Set(false); //Opens the arms
+			currentState = WT_FOR_BALL; //Sets state to WT_FOR_BALL
 			break;
-		case WT_FOR_BALL:
-			yn = PhoSen->Get();
-			if (yn == true) {
+		case WT_FOR_BALL: //Waiting for the ball to trip the photo sensor
+			yn = PhoSen->Get(); //Gets value of the photo sensor
+			if (yn == true) { //If photo sensor is tripped, close the arms and changee state to HOLD_BALL
 				sArm1->Set(true);
 				sArm2->Set(true);
 				currentState = HOLD_BALL;
 			}
 			break;
-		case HOLD_BALL:
-			yn = buttonA->GetRawButton();
-			if (yn == true) {
+		case HOLD_BALL: //Holds the ball in front of the robot
+			yn = buttonA->GetRawButton(); //Checks if the A button is pressed
+			if (yn == true) { //If the A button is pressed, open and arms move them inside the robot, and go back to IDLE
 				sArm1->Set(false);
 				sArm2->Set(false);
 				sLever->Set(false);
