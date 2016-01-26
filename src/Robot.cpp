@@ -156,7 +156,7 @@ private:
 		LaxisX = stick->GetX();
 		LaxisY = stick->GetY();
 
-		RaxisX = stick->GetTwist();
+		RaxisX = stick->GetRawAxis(4);
 		RaxisY = stick->GetRawAxis(5);
 
 		drive->ArcadeDrive(LaxisY, RaxisX);
