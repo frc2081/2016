@@ -108,12 +108,10 @@ private:
 		LTrig *= -1;
 		Trig = LTrig + RTrig;
 
-		printf("Right Trig: %.2f \n", RTrig);
-		printf("Left Trig: %.2f \n", LTrig);
+		SmartDashboard::PutNumber("Winch", Trig);
 
 		mot->Set(Trig);
 		/*
-		 *
 		switch (currentState) {
 		case IDLE:
 			break;
