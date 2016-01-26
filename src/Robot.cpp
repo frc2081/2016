@@ -22,6 +22,18 @@ private:
 	Solenoid *sLever = new Solenoid(3); //Solenoid to raise and lower the arms
 	float current; //Current state the state machine is on
 	bool yn; //Varaible to hold true or false for the state machine
+	Joystick *stick;
+		RobotDrive *drive;
+		JoystickButton *buttonA;
+		JoystickButton *buttonB;
+		JoystickButton *buttonX;
+		JoystickButton *buttonY;
+		JoystickButton *buttonLB;
+		JoystickButton *buttonRB;
+		JoystickButton *buttonBack;
+		JoystickButton *buttonStart;
+		JoystickButton *buttonLS;
+		JoystickButton *buttonRS;
 	void RobotInit()
 	{
 		chooser = new SendableChooser();
