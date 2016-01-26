@@ -117,6 +117,7 @@ private:
 	{
 		checkbuttons();
 		//Start  of the state machine that manages the auto load sequence
+		SmartDashboard::PutNumber("Current State: ", currentState);
 		switch (currentState) {
 		case IDLE: //Idle state, nothing happens
 			sLever->Set(false); //Keeps arms in the robot
@@ -140,7 +141,7 @@ private:
 			}
 			break;
 		case HOLD_BALL: //Holds the ball in front of the robot
-			yn = buttonA->WhenPressed; //Checks if the A button is pressed
+			yn = bA; //Checks if the A button is pressed
 			if (yn == true) { //If the A button is pressed, open and arms move them inside the robot, and go back to IDLE
 				sArm1->Set(false);
 				sArm2->Set(false);
