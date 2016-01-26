@@ -8,17 +8,13 @@ private:
 	const std::string autoNameDefault = "Default";
 	const std::string autoNameCustom = "My Auto";
 	std::string autoSelected;
-	/*
 	enum states {
 		IDLE,
 		MV_TO_CAP,
 		WT_FOR_BALL,
 		HOLD_BALL,
 	};
-	int currentState;
-	int success;
-	int start;
-	*/
+	int currentState = IDLE;
 	Compressor *c;
 	Solenoid *sArm1 = new Solenoid(0);
 	Solenoid *sArm2 = new Solenoid(1);
@@ -32,9 +28,7 @@ private:
 		chooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
 		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
 		SmartDashboard::PutData("Auto Modes", chooser);
-		//currentState = IDLE;
-		//success = 0;
-		//start = 0;
+		currentState = IDLE;
 		c = new Compressor(0);
 		c->SetClosedLoopControl(true);
 		c->Start();
@@ -87,32 +81,40 @@ private:
 //		sArm2->Set(false);
 //		sPoker->Set(false);
 //		sLever->Set(false);
-		current = c->GetCompressorCurrent();
-		printf("Current %.5f \n", current); // Current 0.28536
-		yn = c->GetPressureSwitchValue();
-		printf(yn ? "trueV" : "falseV");
-		yn = c->GetClosedLoopControl();
-		printf(yn ? "trueL" : "falseL");
-		yn = c->GetCompressorCurrentTooHighFault();
-		printf(yn ? "trueH" : "falseH");
-		yn = c->GetCompressorShortedFault();
-		printf(yn ? "trueS" : "falseS");
-		yn = c->GetCompressorNotConnectedFault();
-		printf(yn ? "trueN" : "falseN");
 
-		/*
-		 *
+
 		switch (currentState) {
 		case IDLE:
+			sLever->Set(false);
+			yn = buttonA->GetRawButton();
+			if (yn == true) {
+				currentState = MV_TO_CAP;
+			}
 			break;
 		case MV_TO_CAP:
+			sLever->Set(true);
+			sArm1->Set(false);
+			sArm2->Set(false);
+			currentState = WT_FOR_BALL;
 			break;
 		case WT_FOR_BALL:
+			yn = PhoSen->Get();
+			if (yn == true) {
+				sArm1->Set(true);
+				sArm2->Set(true);
+				currentState = HOLD_BALL;
+			}
 			break;
 		case HOLD_BALL:
+			yn = buttonA->GetRawButton();
+			if (yn == true) {
+				sArm1->Set(false);
+				sArm2->Set(false);
+				sLever->Set(false);
+				currentState = IDLE;
+			}
 			break;
 		}
-		*/
 	}
 
 	void TestPeriodic()
