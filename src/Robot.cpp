@@ -36,6 +36,7 @@ private:
 	JoystickButton *buttonLS;
 	JoystickButton *buttonRS;
 	DigitalInput*PhoSen;
+	bool mancon; //Manual control varaible
 	bool bA, bB, bX, bY, bLB, bRB, bBack, bStart, bLS, bRS;
 	void RobotInit()
 	{
@@ -117,55 +118,88 @@ private:
 	void TeleopPeriodic()
 	{
 		checkbuttons();
+		if (bY == true) {
+			mancon = true;
+		}
 		float currentStateP = currentState;
 		//Start  of the state machine that manages the auto load sequence
 		SmartDashboard::PutNumber("Current State: ", currentStateP);
-		switch (currentState) {
-		case IDLE: //Idle state, nothing happens
-			sLever->Set(false); //Keeps arms in the robot
-			sArm1->Set(false);
-			sArm2->Set(false);
-			sPoker->Set(false);
-			yn = bA; //Gets the value of the A button
-			if (yn == true) { //If the A button is pressed, change state to MV_TO_CAP
-				currentState = MV_TO_CAP;
+		if (mancon != true) {
+			switch (currentState) {
+			case IDLE: //Idle state, nothing happens
+				sLever->Set(false); //Keeps arms in the robot
+				sArm1->Set(false);
+				sArm2->Set(false);
+				sPoker->Set(false);
+				yn = bA; //Gets the value of the A button
+				if (yn == true) { //If the A button is pressed, change state to MV_TO_CAP
+					currentState = MV_TO_CAP;
+				}
+				break;
+			case MV_TO_CAP: //Moves arms into posistion and opens them
+				sLever->Set(true); //Lowers the arms
+				sArm1->Set(false); //Opens the arms
+				sArm2->Set(false); //Opens the arms
+				currentState = WT_FOR_BALL; //Sets state to WT_FOR_BALL
+				break;
+			case WT_FOR_BALL: //Waiting for the ball to trip the photo sensor
+				yn = PhoSen->Get(); //Gets value of the photo sensor
+				if (yn == true) { //If photo sensor is tripped, close the arms and changee state to HOLD_BALL
+					sArm1->Set(true);
+					sArm2->Set(true);
+					currentState = HOLD_BALL;
+				}
+				if (bStart == true) { //If start button is pressed, change to idle state
+					currentState = IDLE;
+				}
+				break;
+			case HOLD_BALL: //Holds the ball in front of the robot
+				yn = bA; //Checks if the A button is pressed
+				if (yn == true) { //If the A button is pressed, open and arms move them inside the robot, and go back to IDLE
+					currentState = UNLOAD;
+				}
+				if (bStart == true) { //If start button is pressed, move to idle state
+					currentState = IDLE;
+				}
+				break;
+			case UNLOAD:
+				sArm1->Set(false);
+				sArm2->Set(false);
+				sPoker->Set(true);
+				yn = PhoSen->Get();
+				if (yn != true) {
+					currentState = IDLE;
+				}
+				break;
 			}
-			break;
-		case MV_TO_CAP: //Moves arms into posistion and opens them
-			sLever->Set(true); //Lowers the arms
-			sArm1->Set(false); //Opens the arms
-			sArm2->Set(false); //Opens the arms
-			currentState = WT_FOR_BALL; //Sets state to WT_FOR_BALL
-			break;
-		case WT_FOR_BALL: //Waiting for the ball to trip the photo sensor
-			yn = PhoSen->Get(); //Gets value of the photo sensor
-			if (yn == true) { //If photo sensor is tripped, close the arms and changee state to HOLD_BALL
-				sArm1->Set(true);
-				sArm2->Set(true);
-				currentState = HOLD_BALL;
+		} else {
+			if (bLB == true) {
+				yn = false;
+				if (yn == false) {
+					sArm1->Set(false);
+					sArm2->Set(false);
+					SmartDashboard::PutBoolean("yn: \n", yn);
+					yn = true;
+				} else {
+					sArm1->Set(true);
+					sArm2->Set(true);
+					SmartDashboard::PutBoolean("yn: \n", yn);
+					yn = false;
+				}
 			}
-			if (bStart == true) {
-				currentState = IDLE;
+			if (bRB == true) {
+				yn = false;
+				if (yn == false) {
+					sLever->Set(false);
+					SmartDashboard::PutBoolean("yn: \n", yn);
+					yn = true;
+				} else {
+					sLever->Set(true);
+					SmartDashboard::PutBoolean("yn: \n", yn);
+					yn = false;
+				}
 			}
-			break;
-		case HOLD_BALL: //Holds the ball in front of the robot
-			yn = bA; //Checks if the A button is pressed
-			if (yn == true) { //If the A button is pressed, open and arms move them inside the robot, and go back to IDLE
-				currentState = UNLOAD;
-			}
-			if (bStart == true) {
-				currentState = IDLE;
-			}
-			break;
-		case UNLOAD:
-			sArm1->Set(false);
-			sArm2->Set(false);
-			sPoker->Set(true);
-			yn = PhoSen->Get();
-			if (yn != true) {
-				currentState = IDLE;
-			}
-			break;
+			currentState = IDLE;
 		}
 	}
 
