@@ -30,7 +30,7 @@ private:
 	Encoder*ArmEnc;
 	float count;
 
-	VictorSP *mot;
+	VictorSP *winchmot;
 
 	/*
 	enum states {
@@ -80,7 +80,7 @@ private:
 		ArmEnc = new Encoder(2, 6, false, Encoder::EncodingType::k4X); // New encoder instance (Winch)
 		REnc = new Encoder(1, 7, false, Encoder::EncodingType::k4X); // New encoder instance (Right Drive)
 		stick = new Joystick(0);
-		mot = new VictorSP(0);
+		winchmot = new VictorSP(0);
 
 
 		//currentState = IDLE;
@@ -201,7 +201,7 @@ private:
 		printf("Right Trig: %.2f \n", RTrig);
 		printf("Left Trig: %.2f \n", LTrig);
 
-		mot->Set(Trig);
+		winchmot->Set(Trig);
 		/*
 		 *
 		switch (currentState) {
