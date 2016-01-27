@@ -6,13 +6,13 @@ class Robot: public IterativeRobot {
 private:
 	LiveWindow *lw = LiveWindow::GetInstance();
 	SendableChooser *chooser;
-	const std::string autoNameDefault = "Default";
-	const std::string autoNameCustom = "My Auto";
-	std::string autoSelected;
+	const std::string autoNameDefault = "Default"; //Default auto name
+	const std::string autoNameCustom = "My Auto"; //Custom auto name
+	std::string autoSelected; //What auto is selected
 
-	Joystick *stick;
-	RobotDrive *drive;
-	JoystickButton *buttonA;
+	Joystick *stick; //Pointer to a joystick
+	RobotDrive *drive; //Pointer to a drive
+	JoystickButton *buttonA; //All the button pointers
 	JoystickButton *buttonB;
 	JoystickButton *buttonX;
 	JoystickButton *buttonY;
@@ -21,17 +21,37 @@ private:
 	JoystickButton *buttonBack;
 	JoystickButton *buttonStart;
 	JoystickButton *buttonLS;
-	JoystickButton *buttonRS;
+	JoystickButton *buttonRS; //End button pointers
 
-	bool bA, bB, bX, bY, bLB, bRB, bBack, bStart, bLS, bRS;
+	Encoder *LEnc; //Pointer to left encoder
+	Encoder *REnc; //Pointer to right encoder
+	Encoder *ArmEnc; //Pointer to Arm encoder
+
+	VictorSP *winchmot; //PROPERLY NAMED pointer to winch motor
 	
-	Encoder*LEnc;
-	Encoder*REnc;
-	Encoder*ArmEnc;
-	float count;
+	Compressor *compress; //Pointer to compressor
+	
+	//Solenoid pointers
+	Solenoid *sArm1 = new Solenoid(0);
+	Solenoid *sArm2 = new Solenoid(1);
+	Solenoid *sPoker = new Solenoid(2);
+	Solenoid *sLever = new Solenoid(3);
 
-	VictorSP *winchmot;
-
+	bool bA, bB, bX, bY, bLB, bRB, bBack, bStart, bLS, bRS; //Booleans on the states of each button
+	
+	//Trigger variable values
+	float RTrig;
+	float LTrig;
+	float Trig;
+	
+	//Declaring variables for joystick axes
+	double LaxisX, LaxisY;
+	double RaxisX, RaxisY;
+	
+	//Not sure, ask Doug
+	//float count;
+	//float current;
+	
 	/*
 	enum states {
 		IDLE,
@@ -43,23 +63,16 @@ private:
 	int success;
 	int start;
 	*/
-	Compressor *c;
-	Solenoid *sArm1 = new Solenoid(0);
-	Solenoid *sArm2 = new Solenoid(1);
-	Solenoid *sPoker = new Solenoid(2);
-	Solenoid *sLever = new Solenoid(3);
-	float current;
-	bool yn;
-
-
 	void RobotInit()
 	{
 
-
+		//Declare new Joystick from (USB port?) 0
 		stick = new Joystick(0);
+		
+		//Declare new drive on PWM's 0 and 1
 		drive = new RobotDrive(0, 1);
 
-
+		//Declate buttons based on what button they literally are
 		buttonA = new JoystickButton(stick, 1),
 		buttonB = new JoystickButton(stick, 2),
 		buttonX = new JoystickButton(stick, 3),
@@ -71,24 +84,31 @@ private:
 		buttonLS = new JoystickButton(stick, 9),
 		buttonRS = new JoystickButton(stick, 10);
 
+		//Built-in something stuff
 		chooser = new SendableChooser();
 		chooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
 		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
+		
+		//SmartDashboard thing of sorts
 		SmartDashboard::PutData("Auto Modes", chooser);
 
 		LEnc = new Encoder(0, 5, false, Encoder::EncodingType::k4X); // New encoder instance (Left drive)
 		ArmEnc = new Encoder(2, 6, false, Encoder::EncodingType::k4X); // New encoder instance (Winch)
 		REnc = new Encoder(1, 7, false, Encoder::EncodingType::k4X); // New encoder instance (Right Drive)
-		stick = new Joystick(0);
+		
+		//Declare winch motor
 		winchmot = new VictorSP(0);
-
+		
+		//Declare compressor
+		compress = new Compressor(0);
 
 		//currentState = IDLE;
 		//success = 0;
 		//start = 0;
-		c = new Compressor(0);
-		c->SetClosedLoopControl(true);
-		c->Start();
+
+		//Just ask Doug
+		compress->SetClosedLoopControl(true);
+		compress->Start();
 	}
 
 
@@ -104,11 +124,12 @@ private:
 	void AutonomousInit()
 
 	{
+		//Weird built-in thing for auto modes
 		autoSelected = *((std::string*)chooser->GetSelected());
 		//std::string autoSelected = SmartDashboard::GetString("Auto Selector", autoNameDefault);
 		std::cout << "Auto selected: " << autoSelected << std::endl;
 
-		if(autoSelected == autoNameCustom){
+		if(autoSelected == autoNameCustom) {
 			//Custom Auto goes here
 		} else {
 			//Default Auto goes here
@@ -117,7 +138,7 @@ private:
 
 	void AutonomousPeriodic()
 	{
-		if(autoSelected == autoNameCustom){
+		if(autoSelected == autoNameCustom) {
 			//Custom Auto goes here
 		} else {
 			//Default Auto goes here
@@ -130,6 +151,7 @@ private:
 	}
 
 	void checkbuttons() {
+		//Check the states of all buttons (updates each loop of TeleopPeriodic)
 		bA = stick->GetRawButton(1);
 		bB = stick->GetRawButton(2);
 		bX = stick->GetRawButton(3);
@@ -144,64 +166,37 @@ private:
 
 	void TeleopPeriodic()
 	{
-
-		float RTrig;
-		float LTrig;
-		float Trig;
-		
+		//Run function to check button values
 		checkbuttons();
-		double LaxisX, LaxisY;
-		double RaxisX, RaxisY;
 
+		//Get left joystick values
 		LaxisX = stick->GetX();
 		LaxisY = stick->GetY();
 
+		//Get right joystick values
 		RaxisX = stick->GetRawAxis(4);
 		RaxisY = stick->GetRawAxis(5);
 
+		//Apply joystick values to motors 0 and 1
 		drive->ArcadeDrive(LaxisY, RaxisX);
-		//Prints button inputs to logs
-		/*if(bA == TRUE) {
-			printf("A\n");
-		}
-		if(bB == TRUE) {
-			printf("B\n");
-		}
-		if(bX == TRUE) {
-			printf("X\n");
-		}
-		if(bY == TRUE) {
-			printf("Y\n");
-		}
-		if(bLB == TRUE) {
-			printf("LBumper\n");
-		}
-		if(bRB == TRUE) {
-			printf("RBumper\n");
-		}
-		if(bBack == TRUE) {
-			printf("Back\n");
-		}
-		if(bStart == TRUE) {
-			printf("Start\n");
-		}
-		if(bLS == TRUE) {
-			printf("LStick\n");
-		}
-		if(bRS == TRUE) {
-			printf("RStick\n");
-		}*/
+		
+		//Prints button inputs to logs [Removed]
 
-
+		//Get trigger values
 		RTrig = stick->GetRawAxis(3);
 		LTrig = stick->GetRawAxis(2);
+		
+		//Math for trigger/winch thing
 		LTrig *= -1;
 		Trig = LTrig + RTrig;
 
-		printf("Right Trig: %.2f \n", RTrig);
-		printf("Left Trig: %.2f \n", LTrig);
+		//Print out trigger values
+		//printf("Right Trig: %.2f \n", RTrig);
+		//printf("Left Trig: %.2f \n", LTrig);
 
+		//Tell winch motor to do things based on value of Trig
 		winchmot->Set(Trig);
+		
 		/*
 		 *
 		switch (currentState) {
@@ -219,9 +214,9 @@ private:
 
 	void TestPeriodic()
 	{
-		lw->Run();
+		//Run livewindow
+		//lw->Run();
 	}
 };
-
+//Start robot 
 START_ROBOT_CLASS(Robot)
-
