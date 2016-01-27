@@ -4,7 +4,6 @@
 
 class Robot: public IterativeRobot {
 private:
-	LiveWindow *lw = LiveWindow::GetInstance();
 	SendableChooser *chooser;
 	const std::string autoNameDefault = "Default"; //Default auto name
 	const std::string autoNameCustom = "My Auto"; //Custom auto name
@@ -214,8 +213,7 @@ private:
 
 	void TestPeriodic()
 	{
-		//Run livewindow
-		//lw->Run();
+		
 	}
 };
 //Start robot 
