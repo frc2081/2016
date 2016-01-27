@@ -144,11 +144,17 @@ private:
 				sArm2->Set(true);
 				currentState = HOLD_BALL;
 			}
+			if (bStart == true) {
+				currentState = IDLE;
+			}
 			break;
 		case HOLD_BALL: //Holds the ball in front of the robot
 			yn = bA; //Checks if the A button is pressed
 			if (yn == true) { //If the A button is pressed, open and arms move them inside the robot, and go back to IDLE
 				currentState = UNLOAD;
+			}
+			if (bStart == true) {
+				currentState = IDLE;
 			}
 			break;
 		case UNLOAD:
