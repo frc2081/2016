@@ -36,7 +36,6 @@ private:
 	JoystickButton *buttonLS;
 	JoystickButton *buttonRS;
 	DigitalInput*PhoSen;
-	bool mancon; //Manual control varaible
 	bool bA, bB, bX, bY, bLB, bRB, bBack, bStart, bLS, bRS;
 	void RobotInit()
 	{
@@ -51,6 +50,7 @@ private:
 		c->Start();
 		stick = new Joystick(0);
 		drive = new RobotDrive(0, 1);
+		PhoSen = new DigitalInput(2);
 
 		buttonA = new JoystickButton(stick, 1),
 		buttonB = new JoystickButton(stick, 2),
@@ -62,7 +62,6 @@ private:
 		buttonStart = new JoystickButton(stick, 8),
 		buttonLS = new JoystickButton(stick, 9),
 		buttonRS = new JoystickButton(stick, 10);
-		PhoSen = new DigitalInput (6);
 	}
 
 
@@ -118,13 +117,10 @@ private:
 	void TeleopPeriodic()
 	{
 		checkbuttons();
-		if (bY == true) {
-			mancon = true;
-		}
 		float currentStateP = currentState;
 		//Start  of the state machine that manages the auto load sequence
 		SmartDashboard::PutNumber("Current State: ", currentStateP);
-		if (mancon != true) {
+		if (bY != true) {
 			switch (currentState) {
 			case IDLE: //Idle state, nothing happens
 				sLever->Set(false); //Keeps arms in the robot
@@ -167,14 +163,14 @@ private:
 				sArm2->Set(false);
 				sPoker->Set(true);
 				yn = PhoSen->Get();
-				if (yn != true) {
+				if (yn == true) {
 					currentState = IDLE;
 				}
 				break;
 			}
 		} else {
+			yn = false;
 			if (bLB == true) {
-				yn = false;
 				if (yn == false) {
 					sArm1->Set(false);
 					sArm2->Set(false);
@@ -188,7 +184,6 @@ private:
 				}
 			}
 			if (bRB == true) {
-				yn = false;
 				if (yn == false) {
 					sLever->Set(false);
 					SmartDashboard::PutBoolean("yn: \n", yn);
