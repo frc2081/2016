@@ -26,6 +26,8 @@ private:
 	Encoder *REnc; //Pointer to right encoder
 	Encoder *ArmEnc; //Pointer to Arm encoder
 
+	DigitalInput *PhoSen;
+
 	VictorSP *winchmot; //PROPERLY NAMED pointer to winch motor
 	
 	Compressor *compress; //Pointer to compressor
@@ -47,6 +49,8 @@ private:
 	double LaxisX, LaxisY;
 	double RaxisX, RaxisY;
 	
+	bool yn;
+
 	//Not sure, ask Doug
 	//float count;
 	//float current;
@@ -83,10 +87,8 @@ private:
 		buttonLS = new JoystickButton(stick, 9),
 		buttonRS = new JoystickButton(stick, 10);
 
-		//Built-in something stuff
-		chooser = new SendableChooser();
-		chooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
-		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
+		PhoSen = new DigitalInput(2);
+
 		
 		//SmartDashboard thing of sorts
 		SmartDashboard::PutData("Auto Modes", chooser);
@@ -167,6 +169,12 @@ private:
 	{
 		//Run function to check button values
 		checkbuttons();
+
+		yn = PhoSen->Get();
+		if(yn == TRUE) {
+			printf("Hello World!");
+			//SmartDashboard::PutBoolean("Limit switch: ", yn);
+		};
 
 		//Get left joystick values
 		LaxisX = stick->GetX();
