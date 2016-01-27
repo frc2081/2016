@@ -13,6 +13,7 @@ private:
 		MV_TO_CAP,
 		WT_FOR_BALL,
 		HOLD_BALL,
+		UNLOAD
 	};
 	int currentState  = IDLE;
 	Compressor *c; //Creates the compressor object
@@ -20,7 +21,7 @@ private:
 	Solenoid *sArm2 = new Solenoid(1); //Solenoid for the opening and closing of the arms
 	Solenoid *sPoker = new Solenoid(2); //Solenoid for the poker
 	Solenoid *sLever = new Solenoid(3); //Solenoid to raise and lower the arms
-	float current; //Current state the state machine is on
+	Solenoid *sLifter = new Solenoid(4); //Lifter solenoid
 	bool yn; //Varaible to hold true or false for the state machine
 	Joystick *stick;
 	RobotDrive *drive;
@@ -116,11 +117,15 @@ private:
 	void TeleopPeriodic()
 	{
 		checkbuttons();
+		float currentStateP = currentState;
 		//Start  of the state machine that manages the auto load sequence
-		SmartDashboard::PutNumber("Current State: ", currentState);
+		SmartDashboard::PutNumber("Current State: ", currentStateP);
 		switch (currentState) {
 		case IDLE: //Idle state, nothing happens
 			sLever->Set(false); //Keeps arms in the robot
+			sArm1->Set(false);
+			sArm2->Set(false);
+			sPoker->Set(false);
 			yn = bA; //Gets the value of the A button
 			if (yn == true) { //If the A button is pressed, change state to MV_TO_CAP
 				currentState = MV_TO_CAP;
@@ -143,9 +148,15 @@ private:
 		case HOLD_BALL: //Holds the ball in front of the robot
 			yn = bA; //Checks if the A button is pressed
 			if (yn == true) { //If the A button is pressed, open and arms move them inside the robot, and go back to IDLE
-				sArm1->Set(false);
-				sArm2->Set(false);
-				sLever->Set(false);
+				currentState = UNLOAD;
+			}
+			break;
+		case UNLOAD:
+			sArm1->Set(false);
+			sArm2->Set(false);
+			sPoker->Set(true);
+			yn = PhoSen->Get();
+			if (yn != true) {
 				currentState = IDLE;
 			}
 			break;
