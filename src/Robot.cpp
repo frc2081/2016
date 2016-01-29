@@ -92,6 +92,7 @@ private:
 		//SmartDashboard thing of sorts
 		SmartDashboard::PutData("Auto Modes", chooser);
 
+
 		LEnc = new Encoder(0, 5, false, Encoder::EncodingType::k4X); // New encoder instance (Left drive)
 		ArmEnc = new Encoder(2, 6, false, Encoder::EncodingType::k4X); // New encoder instance (Winch)
 		REnc = new Encoder(1, 7, false, Encoder::EncodingType::k4X); // New encoder instance (Right Drive)
@@ -172,14 +173,15 @@ private:
 		int Vout = PreSen->GetVoltage();
 		int Pres = 250*(Vout/5)-25;
 		int printf(Pres);
+		SmartDashboard::PutNumber("Pressure", Pres);
 
 		//Run function to check button values
 		checkbuttons();
 
 		yn = PhoSen->Get();
 		if(yn == TRUE) {
-			printf("Hello World!");
-			//SmartDashboard::PutBoolean("Limit switch: ", yn);
+			//printf("Hello World!");
+			//SmartDashboar`d::PutBoolean("Limit switch: ", yn);
 		};
 
 		//Get left joystick values
