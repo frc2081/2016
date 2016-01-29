@@ -191,11 +191,21 @@ private:
 
 		SmartDashboard::PutNumber("Winch", Trig);
 
+		// Creates two integers: t and Tcurve
+		int t, Tcurve;
+
+		// Multiplies trigger value by 100 to get percent
+		t = Trig * 100;
+
+		// Creates parabolic throttle curve with equation of y=0.000001x^4
+		Tcurve =0.000001 * pow(t, 4);
+
+		SmartDashboard::PutNumber("Edited", Tcurve);
+
 		// Tell winch motor to do things based on value of Trig
-		winchmot->Set(Trig);
+		winchmot->Set(Tcurve/100);
 
 		/*
-		 *
 		switch (currentState) {
 		case IDLE:
 			break;
