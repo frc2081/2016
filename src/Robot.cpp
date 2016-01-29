@@ -172,7 +172,7 @@ private:
 	{
 		int Vout = PreSen->GetVoltage();
 		int Pres = 250*(Vout/5)-25;
-		int printf(Pres);
+		printf (Pres);
 		SmartDashboard::PutNumber("Pressure", Pres);
 
 		//Run function to check button values
