@@ -1,9 +1,32 @@
-/Debug/
+### C++ ###
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
 
-.settings/
-sysprops.xml
-<<<<<<< HEAD
-/sysProps.xml
-/.gitignore
-=======
->>>>>>> branch 'master' of https://github.com/matthewknecht/RealRoboCode2016.git
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+XML
+*.xml
