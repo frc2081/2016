@@ -94,11 +94,6 @@ enum states { // States for the auto load sequence
 
 	Compressor *compress; // Pointer to compressor
 
-	// Solenoid pointers
-	Solenoid *sArm1 = new Solenoid(0);
-	Solenoid *sArm2 = new Solenoid(1);
-	Solenoid *sPoker = new Solenoid(2);
-	Solenoid *sLever = new Solenoid(3);
 
 	bool bA, bB, bX, bY, bLB, bRB, bBack, bStart, bLS, bRS; // Booleans on the states of each button
 
