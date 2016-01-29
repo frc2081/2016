@@ -5,14 +5,14 @@
 class Robot: public IterativeRobot {
 private:
 	SendableChooser *chooser;
-	const std::string autoNameDefault = "Default"; //Default auto name
-	const std::string autoNameCustom = "My Auto"; //Custom auto name
-	std::string autoSelected; //What auto is selected
+	const std::string autoNameDefault = "Default";	// Default auto name
+	const std::string autoNameCustom = "My Auto";	// Custom auto name
+	std::string autoSelected; // What auto is selected
 
-	Joystick *stick; //Pointer to a joystick
+	Joystick *stick; 	// Pointer to a joystick
 	Joystick *stick2;
-	RobotDrive *drive; //Pointer to a drive
-	JoystickButton *buttonA; //All the button pointers
+	RobotDrive *drive;	// Pointer to a drive
+	JoystickButton *buttonA; // All the button pointers
 	JoystickButton *buttonB;
 	JoystickButton *buttonX;
 	JoystickButton *buttonY;
@@ -32,37 +32,37 @@ private:
 	JoystickButton *buttonBack2;
 	JoystickButton *buttonStart2;
 	JoystickButton *buttonLS2;
-	JoystickButton *buttonRS2; //End button pointers
+	JoystickButton *buttonRS2; // End button pointers
 
-	Encoder *LEnc; //Pointer to left encoder
-	Encoder *REnc; //Pointer to right encoder
-	Encoder *ArmEnc; //Pointer to Arm encoder
+	Encoder *LEnc;		// Pointer to left encoder
+	Encoder *REnc;		// Pointer to right encoder
+	Encoder *ArmEnc;	// Pointer to Arm encoder
 
 	DigitalInput *PhoSen;
 
-	VictorSP *winchmot; //PROPERLY NAMED pointer to winch motor
+	VictorSP *winchmot; // PROPERLY NAMED pointer to winch motor
 	
-	Compressor *compress; //Pointer to compressor
+	Compressor *compress; // Pointer to compressor
 	
 
-	bool bA, bB, bX, bY, bLB, bRB, bBack, bStart, bLS, bRS, bA2, bB2, bX2, bY2, bLB2, bRB2, bBack2, bStart2, bLS2, bRS2; //Booleans on the states of each button
+	bool bA, bB, bX, bY, bLB, bRB, bBack, bStart, bLS, bRS, bA2, bB2, bX2, bY2, bLB2, bRB2, bBack2, bStart2, bLS2, bRS2; // Booleans on the states of each button
 	
-	//Trigger variable values
+	// Trigger variable values
 	float RTrig;
 	float LTrig;
 	float Trig;
 	
-	//Declaring variables for joystick axes
+	// Declaring variables for joystick axes
 	double LaxisX, LaxisY;
 	double RaxisX, RaxisY;
 	
 	bool yn;
-	DoubleSolenoid *sArm = new DoubleSolenoid(0, 1); //Solenoid for the opening and closing of the arms
-	DoubleSolenoid *sLifter = new DoubleSolenoid(6, 7); //Solenoid for lifting up the robot
-	DoubleSolenoid *sPoker = new DoubleSolenoid(2, 3); //Solenoid for the poker
-	DoubleSolenoid *sLever = new DoubleSolenoid(4, 5); //Solenoid to raise and lower the arms
+	DoubleSolenoid *sArm = new DoubleSolenoid(0, 1);	// Solenoid for the opening and closing of the arms
+	DoubleSolenoid *sLifter = new DoubleSolenoid(6, 7);	// Solenoid for lifting up the robot
+	DoubleSolenoid *sPoker = new DoubleSolenoid(2, 3);	// Solenoid for the poker
+	DoubleSolenoid *sLever = new DoubleSolenoid(4, 5);	// Solenoid to raise and lower the arms
 
-enum states { //States for the auto load sequence
+enum states { // States for the auto load sequence
 		IDLE,
 		MV_TO_CAP,
 		WT_FOR_BALL,
@@ -70,20 +70,74 @@ enum states { //States for the auto load sequence
 		UNLOAD
 	};
 	int currentState  = IDLE;
-	bool arms, lever, poker, lifter; //Varaibles to display where their respective parts are
+	bool arms, lever, poker, lifter; // Varaibles to display where their respective parts are
 	bool sensor;
+
+
+	RobotDrive *drive; // Pointer to a drive
+	JoystickButton *buttonA; // All the button pointers
+	JoystickButton *buttonB;
+	JoystickButton *buttonX;
+	JoystickButton *buttonY;
+	JoystickButton *buttonLB;
+	JoystickButton *buttonRB;
+	JoystickButton *buttonBack;
+	JoystickButton *buttonStart;
+	JoystickButton *buttonLS;
+	JoystickButton *buttonRS; // End button pointers
+
+	Encoder *LEnc;		// Pointer to left encoder
+	Encoder *REnc;		// Pointer to right encoder
+	Encoder *ArmEnc;	// Pointer to Arm encoder
+
+	VictorSP *winchmot; // PROPERLY NAMED pointer to winch motor
+
+	Compressor *compress; // Pointer to compressor
+
+	// Solenoid pointers
+	Solenoid *sArm1 = new Solenoid(0);
+	Solenoid *sArm2 = new Solenoid(1);
+	Solenoid *sPoker = new Solenoid(2);
+	Solenoid *sLever = new Solenoid(3);
+
+	bool bA, bB, bX, bY, bLB, bRB, bBack, bStart, bLS, bRS; // Booleans on the states of each button
+
+	// Trigger variable values
+	float RTrig;
+	float LTrig;
+	float Trig;
+
+	// Declaring variables for joystick axes
+	double LaxisX, LaxisY;
+	double RaxisX, RaxisY;
+
+	// Not sure, ask Doug
+	// float count;
+	// float current;
+
+	/*
+	enum states {
+		IDLE,
+		MV_TO_CAP,
+		WT_FOR_BALL,
+		HOLD_BALL,
+	};
+	int currentState;
+	int success;
+	int start;
+	*/
 
 	void RobotInit()
 	{
 
-		//Declare new Joystick from (USB port?) 0
+		// Declare new Joystick from (USB port?) 0
 		stick = new Joystick(0);
 		stick2 = new Joystick(1);
 		
-		//Declare new drive on PWM's 0 and 1
+		// Declare new drive on PWM's 0 and 1
 		drive = new RobotDrive(0, 1);
 
-		//Declate buttons based on what button they literally are
+		// Declate buttons based on what button they literally are
 		buttonA = new JoystickButton(stick, 1),
 		buttonB = new JoystickButton(stick, 2),
 		buttonX = new JoystickButton(stick, 3),
@@ -108,20 +162,51 @@ enum states { //States for the auto load sequence
 
 		PhoSen = new DigitalInput(6);
 
-		
-		//SmartDashboard thing of sorts
+
+		// Declare new drive on PWM's 0 and 1
+		drive = new RobotDrive(0, 1);
+
+		// Declate buttons based on what button they literally are
+		buttonA = new JoystickButton(stick, 1),
+		buttonB = new JoystickButton(stick, 2),
+		buttonX = new JoystickButton(stick, 3),
+		buttonY = new JoystickButton(stick, 4),
+		buttonLB = new JoystickButton(stick, 5),
+		buttonRB = new JoystickButton(stick, 6),
+		buttonBack = new JoystickButton(stick, 7),
+		buttonStart = new JoystickButton(stick, 8),
+		buttonLS = new JoystickButton(stick, 9),
+		buttonRS = new JoystickButton(stick, 10);
+
+		// Built-in something stuff
+		chooser = new SendableChooser();
+		chooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
+		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
+
+		// SmartDashboard thing of sorts
 		SmartDashboard::PutData("Auto Modes", chooser);
 
-		LEnc = new Encoder(0, 5, false, Encoder::EncodingType::k4X); // New encoder instance (Left drive)
-		ArmEnc = new Encoder(2, 6, false, Encoder::EncodingType::k4X); // New encoder instance (Winch)
-		REnc = new Encoder(1, 7, false, Encoder::EncodingType::k4X); // New encoder instance (Right Drive)
+		LEnc = new Encoder(0, 5, false, Encoder::EncodingType::k4X);	// New encoder instance (Left drive)
+		ArmEnc = new Encoder(2, 6, false, Encoder::EncodingType::k4X);	// New encoder instance (Winch)
+		REnc = new Encoder(1, 7, false, Encoder::EncodingType::k4X);	// New encoder instance (Right Drive)
 		
-		//Declare winch motor
+		// Declare winch motor
 		winchmot = new VictorSP(0);
 		
-		//Declare compressor
+		// Declare compressor
 		compress = new Compressor(0);
 
+		// Declare winch motor
+		winchmot = new VictorSP(0);
+
+		// Declare compressor
+		compress = new Compressor(0);
+
+		// currentState = IDLE;
+		// success = 0;
+		// start = 0;
+
+		// Just ask Doug
 		compress->SetClosedLoopControl(true);
 		compress->Start();
 	}
@@ -139,24 +224,24 @@ enum states { //States for the auto load sequence
 	void AutonomousInit()
 
 	{
-		//Weird built-in thing for auto modes
+		// Weird built-in thing for auto modes
 		autoSelected = *((std::string*)chooser->GetSelected());
-		//std::string autoSelected = SmartDashboard::GetString("Auto Selector", autoNameDefault);
+		// std::string autoSelected = SmartDashboard::GetString("Auto Selector", autoNameDefault);
 		std::cout << "Auto selected: " << autoSelected << std::endl;
 
 		if(autoSelected == autoNameCustom) {
-			//Custom Auto goes here
+			// Custom Auto goes here
 		} else {
-			//Default Auto goes here
+			// Default Auto goes here
 		}
 	}
 
 	void AutonomousPeriodic()
 	{
 		if(autoSelected == autoNameCustom) {
-			//Custom Auto goes here
+			// Custom Auto goes here
 		} else {
-			//Default Auto goes here
+			// Default Auto goes here
 		}
 	}
 
@@ -166,7 +251,7 @@ enum states { //States for the auto load sequence
 	}
 
 	void checkbuttons() {
-		//Check the states of all buttons (updates each loop of TeleopPeriodic)
+		// Check the states of all buttons (updates each loop of TeleopPeriodic)
 		bA = stick->GetRawButton(1);
 		bB = stick->GetRawButton(2);
 		bX = stick->GetRawButton(3);
@@ -192,33 +277,49 @@ enum states { //States for the auto load sequence
 
 	void TeleopPeriodic()
 	{
-		//Run function to check button values
+		// Run function to check button values
 		checkbuttons();
 
 		yn = PhoSen->Get();
 		if(yn == TRUE) {
 			printf("Hello World!");
-			//SmartDashboard::PutBoolean("Limit switch: ", yn);
+			// SmartDashboard::PutBoolean("Limit switch: ", yn);
 		};
 
-		//Get left joystick values
+		// Get left joystick values
 		LaxisX = stick->GetX();
 		LaxisY = stick->GetY();
 
-		//Get right joystick values
+		// Get right joystick values
 		RaxisX = stick->GetRawAxis(4);
 		RaxisY = stick->GetRawAxis(5);
 
-		//Apply joystick values to motors 0 and 1
+		// Apply joystick values to motors 0 and 1
 		drive->ArcadeDrive(LaxisY, RaxisX);
 		
-		//Prints button inputs to logs [Removed]
+		// Prints button inputs to logs [Removed]
 
-		//Get trigger values
+		// Get trigger values
+		// Get left joystick values
+		LaxisX = stick->GetX();
+		LaxisY = stick->GetY();
+
+		// Get right joystick values
+		RaxisX = stick->GetRawAxis(4);
+		RaxisY = stick->GetRawAxis(5);
+
+		// Apply joystick values to motors 0 and 1
+		drive->ArcadeDrive(LaxisY, RaxisX);
+
+		// Prints button inputs to logs [Removed]
+
+		// Get trigger values
 		RTrig = stick->GetRawAxis(3);
 		LTrig = stick->GetRawAxis(2);
 		
 		//Math for trigger/winch thing
+
+		// Math for trigger/winch thing
 		LTrig *= -1;
 		Trig = LTrig + RTrig;
 
@@ -226,6 +327,7 @@ enum states { //States for the auto load sequence
 		//printf("Right Trig: %.2f \n", RTrig);
 		//printf("Left Trig: %.2f \n", LTrig);
 
+		SmartDashboard::PutNumber("Winch", Trig);
 		//Tell winch motor to do things based on value of Trig
 		winchmot->Set(Trig);
 		
@@ -372,12 +474,43 @@ enum states { //States for the auto load sequence
 			}
 			currentState = IDLE;
 		}
+		// Creates two integers: t and Tcurve
+		int t, Tcurve;
+
+		// Multiplies trigger value by 100 to get percent
+		t = Trig * 100;
+
+		// Creates parabolic throttle curve with equation of y=0.000001x^4
+		//Tcurve = 0.000001 * pow(t, 4);
+		// Creates linear throttle curve
+		Tcurve = abs(t);
+
+		SmartDashboard::PutNumber("Edited", Tcurve);
+
+		// Tell winch motor to do things based on value of Trig
+		winchmot->Set(Tcurve/100);
+
+		/*
+		switch (currentState) {
+		case IDLE:
+			break;
+		case MV_TO_CAP:
+			break;
+		case WT_FOR_BALL:
+			break;
+		case HOLD_BALL:
+			break;
+		}
+		*/
 	}
 
 	void TestPeriodic()
 	{
-		
+
 	}
 };
+
 //Start robot 
+
+//Start robot
 START_ROBOT_CLASS(Robot)
