@@ -8,6 +8,10 @@ private:
 	const std::string autoNameDefault = "Default";
 	const std::string autoNameCustom = "My Auto";
 	std::string autoSelected;
+	Encoder *winchEnc;
+	//ADXRS450_Gyro *gyro;
+	AnalogInput *rangeFinder;
+	float range, voltToRangeConv;
 
 	//This is Dan's Branch
 
@@ -16,7 +20,14 @@ private:
 		chooser = new SendableChooser();
 		chooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
 		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
-		SmartDashboard::PutData("Auto Modes", chooser);
+		//SmartDashboard::PutData("Auto Modes", chooser);
+		winchEnc = new Encoder(0,1);
+		//gyro = new ADXRS450_Gyro();
+		//gyro->Calibrate();
+		rangeFinder = new AnalogInput(0);
+		range = 0;
+		voltToRangeConv = 1.0238;
+
 	}
 
 
@@ -59,6 +70,12 @@ private:
 	void TeleopPeriodic()
 	{
 
+		range = rangeFinder->GetVoltage()*voltToRangeConv;
+		//SmartDashboard::PutNumber("Winch Encoder", winchEnc->GetDistance());
+		//SmartDashboard::PutNumber("Gyro Angle", gyro->GetAngle());
+		SmartDashboard::PutNumber("Range in volts", rangeFinder->GetVoltage());
+		SmartDashboard::PutNumber("Range in mm", range*1000);
+		SmartDashboard::PutNumber("Range in m", range);
 	}
 
 	void TestPeriodic()
