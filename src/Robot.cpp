@@ -69,7 +69,6 @@ private:
 
 	void TeleopPeriodic()
 	{
-
 		range = rangeFinder->GetVoltage()*voltToRangeConv;
 		//SmartDashboard::PutNumber("Winch Encoder", winchEnc->GetDistance());
 		//SmartDashboard::PutNumber("Gyro Angle", gyro->GetAngle());
