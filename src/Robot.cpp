@@ -62,7 +62,7 @@ private:
 	DoubleSolenoid *sPoker = new DoubleSolenoid(2, 3);	// Solenoid for the poker
 	DoubleSolenoid *sLever = new DoubleSolenoid(4, 5);	// Solenoid to raise and lower the arms
 
-enum states { // States for the auto load sequence
+	enum armStates { // States for the auto load sequence
 		IDLE,
 		MV_TO_CAP,
 		WT_FOR_BALL,
@@ -72,6 +72,14 @@ enum states { // States for the auto load sequence
 	int currentState  = IDLE;
 	bool arms, lever, poker, lifter; // Varaibles to display where their respective parts are
 	bool sensor;
+
+	enum climbStates {
+		CIDLE,
+		RAISE_WINCH,
+		GRABBED,
+		RAISE_ROBOT,
+		HOLD
+	};
 
 	void RobotInit()
 	{
