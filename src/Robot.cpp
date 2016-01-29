@@ -198,7 +198,9 @@ private:
 		t = Trig * 100;
 
 		// Creates parabolic throttle curve with equation of y=0.000001x^4
-		Tcurve =0.000001 * pow(t, 4);
+		//Tcurve = 0.000001 * pow(t, 4);
+		// Creates linear throttle curve
+		Tcurve = abs(t);
 
 		SmartDashboard::PutNumber("Edited", Tcurve);
 
