@@ -73,55 +73,6 @@ enum states { // States for the auto load sequence
 	bool arms, lever, poker, lifter; // Varaibles to display where their respective parts are
 	bool sensor;
 
-
-	RobotDrive *drive; // Pointer to a drive
-	JoystickButton *buttonA; // All the button pointers
-	JoystickButton *buttonB;
-	JoystickButton *buttonX;
-	JoystickButton *buttonY;
-	JoystickButton *buttonLB;
-	JoystickButton *buttonRB;
-	JoystickButton *buttonBack;
-	JoystickButton *buttonStart;
-	JoystickButton *buttonLS;
-	JoystickButton *buttonRS; // End button pointers
-
-	Encoder *LEnc;		// Pointer to left encoder
-	Encoder *REnc;		// Pointer to right encoder
-	Encoder *ArmEnc;	// Pointer to Arm encoder
-
-	VictorSP *winchmot; // PROPERLY NAMED pointer to winch motor
-
-	Compressor *compress; // Pointer to compressor
-
-
-	bool bA, bB, bX, bY, bLB, bRB, bBack, bStart, bLS, bRS; // Booleans on the states of each button
-
-	// Trigger variable values
-	float RTrig;
-	float LTrig;
-	float Trig;
-
-	// Declaring variables for joystick axes
-	double LaxisX, LaxisY;
-	double RaxisX, RaxisY;
-
-	// Not sure, ask Doug
-	// float count;
-	// float current;
-
-	/*
-	enum states {
-		IDLE,
-		MV_TO_CAP,
-		WT_FOR_BALL,
-		HOLD_BALL,
-	};
-	int currentState;
-	int success;
-	int start;
-	*/
-
 	void RobotInit()
 	{
 
@@ -158,21 +109,6 @@ enum states { // States for the auto load sequence
 		PhoSen = new DigitalInput(6);
 
 
-		// Declare new drive on PWM's 0 and 1
-		drive = new RobotDrive(0, 1);
-
-		// Declate buttons based on what button they literally are
-		buttonA = new JoystickButton(stick, 1),
-		buttonB = new JoystickButton(stick, 2),
-		buttonX = new JoystickButton(stick, 3),
-		buttonY = new JoystickButton(stick, 4),
-		buttonLB = new JoystickButton(stick, 5),
-		buttonRB = new JoystickButton(stick, 6),
-		buttonBack = new JoystickButton(stick, 7),
-		buttonStart = new JoystickButton(stick, 8),
-		buttonLS = new JoystickButton(stick, 9),
-		buttonRS = new JoystickButton(stick, 10);
-
 		// Built-in something stuff
 		chooser = new SendableChooser();
 		chooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
@@ -191,17 +127,8 @@ enum states { // States for the auto load sequence
 		// Declare compressor
 		compress = new Compressor(0);
 
-		// Declare winch motor
-		winchmot = new VictorSP(0);
 
-		// Declare compressor
-		compress = new Compressor(0);
-
-		// currentState = IDLE;
-		// success = 0;
-		// start = 0;
-
-		// Just ask Doug
+		//Starts the compressor
 		compress->SetClosedLoopControl(true);
 		compress->Start();
 	}
@@ -291,20 +218,7 @@ enum states { // States for the auto load sequence
 
 		// Apply joystick values to motors 0 and 1
 		drive->ArcadeDrive(LaxisY, RaxisX);
-		
-		// Prints button inputs to logs [Removed]
 
-		// Get trigger values
-		// Get left joystick values
-		LaxisX = stick->GetX();
-		LaxisY = stick->GetY();
-
-		// Get right joystick values
-		RaxisX = stick->GetRawAxis(4);
-		RaxisY = stick->GetRawAxis(5);
-
-		// Apply joystick values to motors 0 and 1
-		drive->ArcadeDrive(LaxisY, RaxisX);
 
 		// Prints button inputs to logs [Removed]
 
@@ -485,18 +399,6 @@ enum states { // States for the auto load sequence
 		// Tell winch motor to do things based on value of Trig
 		winchmot->Set(Tcurve/100);
 
-		/*
-		switch (currentState) {
-		case IDLE:
-			break;
-		case MV_TO_CAP:
-			break;
-		case WT_FOR_BALL:
-			break;
-		case HOLD_BALL:
-			break;
-		}
-		*/
 	}
 
 	void TestPeriodic()
