@@ -25,7 +25,7 @@ private:
 	Encoder *LEnc; //Pointer to left encoder
 	Encoder *REnc; //Pointer to right encoder
 	Encoder *ArmEnc; //Pointer to Arm encoder
-
+	AnalogInput *PreSen;
 	DigitalInput *PhoSen;
 
 	VictorSP *winchmot; //PROPERLY NAMED pointer to winch motor
@@ -87,7 +87,6 @@ private:
 		buttonLS = new JoystickButton(stick, 9),
 		buttonRS = new JoystickButton(stick, 10);
 
-		PhoSen = new DigitalInput(2);
 
 		
 		//SmartDashboard thing of sorts
@@ -97,6 +96,9 @@ private:
 		ArmEnc = new Encoder(2, 6, false, Encoder::EncodingType::k4X); // New encoder instance (Winch)
 		REnc = new Encoder(1, 7, false, Encoder::EncodingType::k4X); // New encoder instance (Right Drive)
 		
+		PreSen = new AnalogInput(0);
+		PhoSen = new DigitalInput(2);
+
 		//Declare winch motor
 		winchmot = new VictorSP(0);
 		
@@ -167,6 +169,10 @@ private:
 
 	void TeleopPeriodic()
 	{
+		int Vout = PreSen->GetVoltage();
+		int Pres = 250*(Vout/5)-25;
+		int printf(Pres);
+
 		//Run function to check button values
 		checkbuttons();
 
