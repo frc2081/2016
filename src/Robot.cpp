@@ -48,6 +48,7 @@ private:
 	//Declaring variables for joystick axes
 	double LaxisX, LaxisY;
 	double RaxisX, RaxisY;
+	double ducksperpulse = 0.08707563025;
 	
 	bool yn;
 
@@ -96,7 +97,11 @@ private:
 		LEnc = new Encoder(0, 5, false, Encoder::EncodingType::k4X); // New encoder instance (Left drive)
 		ArmEnc = new Encoder(2, 6, false, Encoder::EncodingType::k4X); // New encoder instance (Winch)
 		REnc = new Encoder(1, 7, false, Encoder::EncodingType::k4X); // New encoder instance (Right Drive)
-		
+
+		ArmEnc->SetDistancePerPulse(ducksperpulse); //Sets distance per pulse IN INCHES
+		LEnc->SetDistancePerPulse(ducksperpulse);
+		REnc->SetDistancePerPulse(ducksperpulse);
+
 		//Declare winch motor
 		winchmot = new VictorSP(0);
 		
@@ -125,10 +130,8 @@ private:
 	void AutonomousInit()
 
 	{
-		//Weird built-in thing for auto modes
-		autoSelected = *((std::string*)chooser->GetSelected());
-		//std::string autoSelected = SmartDashboard::GetString("Auto Selector", autoNameDefault);
-		std::cout << "Auto selected: " << autoSelected << std::endl;
+		LEnc->Reset(); //~3.3, 5.95, 20/40,
+		REnc->Reset();
 
 		if(autoSelected == autoNameCustom) {
 			//Custom Auto goes here
