@@ -55,8 +55,10 @@ private:
 	// Declaring variables for joystick axes
 	double LaxisX, LaxisY;
 	double RaxisX, RaxisY;
+	double ducksperpulse = 0.08707563025;
 	
 	bool yn;
+
 	DoubleSolenoid *sArm = new DoubleSolenoid(0, 1);	// Solenoid for the opening and closing of the arms
 	DoubleSolenoid *sLifter = new DoubleSolenoid(6, 7);	// Solenoid for lifting up the robot
 	DoubleSolenoid *sPoker = new DoubleSolenoid(2, 3);	// Solenoid for the poker
@@ -108,7 +110,6 @@ enum states { // States for the auto load sequence
 
 		PhoSen = new DigitalInput(6);
 
-
 		// Built-in something stuff
 		chooser = new SendableChooser();
 		chooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
@@ -121,6 +122,10 @@ enum states { // States for the auto load sequence
 		ArmEnc = new Encoder(2, 6, false, Encoder::EncodingType::k4X);	// New encoder instance (Winch)
 		REnc = new Encoder(1, 7, false, Encoder::EncodingType::k4X);	// New encoder instance (Right Drive)
 		
+		ArmEnc->SetDistancePerPulse(ducksperpulse); //Sets distance per pulse IN INCHES
+		LEnc->SetDistancePerPulse(ducksperpulse);
+		REnc->SetDistancePerPulse(ducksperpulse);
+
 		// Declare winch motor
 		winchmot = new VictorSP(0);
 		
@@ -131,6 +136,7 @@ enum states { // States for the auto load sequence
 		//Starts the compressor
 		compress->SetClosedLoopControl(true);
 		compress->Start();
+
 	}
 
 
