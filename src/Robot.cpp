@@ -183,7 +183,7 @@ void Robot::TeleopPeriodic()
 		//When X button held, extend lifter. Otherwise, retract it
 		if (bX2 == true) { lifter = true;}
 		else { lifter = false; }
-
+		currentState = IDLE;
 	}
 	// Creates two integers: t and Tcurve
 	//int t, Tcurve;
