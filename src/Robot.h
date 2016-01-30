@@ -66,6 +66,7 @@ private:
 	bool arms, lever, poker, lifter; // Variables to display where their respective parts are
 	bool sensor;
 	int currentState;
+	float setWinch, winchHold;
 
 	enum states {
 		IDLE,

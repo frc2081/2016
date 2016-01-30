@@ -3,6 +3,7 @@
 void Robot::RobotInit()
 {
 	currentState = IDLE;
+	winchHold = .1;
 	// Declare new Joystick from (USB port?) 0
 	stick = new Joystick(0);
 	stick2 = new Joystick(1);
@@ -91,7 +92,7 @@ void Robot::TeleopPeriodic()
 	LTrig *= -1;
 	Trig = LTrig + RTrig;
 	SmartDashboard::PutNumber("Winch", Trig);
-	float setWinch
+
 	//When Y button is pressed, keep a minimum hold power applied to the winch. Otherwise, run winch like normal
 	if (bY != true) //If Y button is not pressed
 	{
