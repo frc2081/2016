@@ -173,7 +173,7 @@ void Robot::TeleopPeriodic()
 	//TODO: Change manual mode so that it does not change the state of any outputs when it is activated
 	if (bLS2 == true)
 	{	//When left bumper is pressed, raise the arms
-		if (bRB2 == true) { lever = false; }
+		if (bRB2 == true) { lever = false;}
 		//When right bumper is pressed, lower the arms
 		if (bLB2 == true) { lever = true;}
 		//When A button held, open arms. Otherwise, close them
@@ -185,7 +185,7 @@ void Robot::TeleopPeriodic()
 		//When X button held, extend lifter. Otherwise, retract it
 		if (bX2 == true) { lifter = true;}
 		else { lifter = false; }
-
+		currentState = IDLE;
 	}
 	// Creates two integers: t and Tcurve
 	int t, Tcurve;
