@@ -48,13 +48,16 @@ void Robot::RobotInit()
 	LEnc->SetDistancePerPulse(ducksperpulse);
 	REnc->SetDistancePerPulse(ducksperpulse);
 
+	RaFin = new  Ultrasonic(7, 7);
+		RaFin->SetAutomaticMode(true);
+	PhoSen = new DigitalInput(6);
+
 	winchmot = new VictorSP(0);
 
 	compress = new Compressor(0);
 	compress->SetClosedLoopControl(true);
 	compress->Start();
 
-	PhoSen = new DigitalInput(6);
 	winchHold = 0.05;
 
 }
@@ -73,8 +76,11 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
+	int range = RaFin->GetRangeInches();
+	SmartDashboard::PutNumber("Ultrasonic", range);
+
 	//Update all joystick buttons
-	checkbuttons();
+	;checkbuttons();
 
 	// Get joystick values
 	LaxisX = stick->GetX();

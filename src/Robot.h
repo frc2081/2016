@@ -51,6 +51,8 @@ private:
 
 	DigitalInput *PhoSen;
 
+	Ultrasonic *RaFin;
+
 	VictorSP *winchmot; // PROPERLY NAMED pointer to winch motor
 
 	Compressor *compress; // Pointer to compressor
