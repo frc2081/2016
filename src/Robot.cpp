@@ -34,17 +34,23 @@ void Robot::RobotInit()
 	buttonLS2 = new JoystickButton(stick2, 9),
 	buttonRS2 = new JoystickButton(stick2, 10);
 
-	//Solenoids
+	// Camera
+	CameraServer::GetInstance()->SetQuality(50);
+	CameraServer::GetInstance()->StartAutomaticCapture("cam0");		// Stream frames from cam0 to SmartDashboard.  You can check interface name at roboRIO-2081-frc.local.
+	// As of right now Camera is over exposed.
+
+
+	// Solenoids
 	sArm = new DoubleSolenoid(0, 1);	// Solenoid for the opening and closing of the arms
 	sLifter = new DoubleSolenoid(6, 7);	// Solenoid for lifting up the robot
 	sPoker = new DoubleSolenoid(2, 3);	// Solenoid for the poker
 	sLever = new DoubleSolenoid(4, 5);	// Solenoid to raise and lower the arms
 
-	//Encoders
+	// Encoders
 	LEnc = new Encoder(0, 1, false, Encoder::EncodingType::k4X);	// New encoder instance (Left drive)
 	ArmEnc = new Encoder(2, 3, false, Encoder::EncodingType::k4X);	// New encoder instance (Winch)
 	REnc = new Encoder(4, 5, false, Encoder::EncodingType::k4X);	// New encoder instance (Right Drive)
-	ArmEnc->SetDistancePerPulse(ducksperpulse); //Sets distance per pulse IN INCHES
+	ArmEnc->SetDistancePerPulse(ducksperpulse); // Sets distance per pulse IN INCHES
 	LEnc->SetDistancePerPulse(ducksperpulse);
 	REnc->SetDistancePerPulse(ducksperpulse);
 
@@ -60,6 +66,7 @@ void Robot::RobotInit()
 
 void Robot::AutonomousInit()
 {
+
 }
 
 void Robot::AutonomousPeriodic()
@@ -69,11 +76,12 @@ void Robot::AutonomousPeriodic()
 
 void Robot::TeleopInit()
 {
+
 }
 
 void Robot::TeleopPeriodic()
 {
-	//Update all joystick buttons
+	// Update all joystick buttons
 	checkbuttons();
 
 	// Get joystick values
@@ -84,54 +92,54 @@ void Robot::TeleopPeriodic()
 	RTrig = stick->GetRawAxis(3);
 	LTrig = stick->GetRawAxis(2);
 
-	//Get sensor inputs
+	// Get sensor inputs
 	phoSensorVal = PhoSen->Get();
 
-	//Math for winch thing
-	//Combines both triggers into a single command for the winch motors
+	// Math for winch thing
+	// Combines both triggers into a single command for the winch motors
 	LTrig *= -1;
 	Trig = LTrig + RTrig;
 
 	SmartDashboard::PutNumber("Winch", Trig);
 
-	//When Y button is pressed, keep a minimum hold power applied to the winch. Otherwise, run winch like normal
-	if (bY == false) //If Y button is not pressed
+	// When Y button is pressed, keep a minimum hold power applied to the winch. Otherwise, run winch like normal
+	if (bY == false) // If Y button is not pressed
 	{
-		setWinch = Trig; //Set winch power to the trigger value
+		setWinch = Trig; // Set winch power to the trigger value
 	}
 	else
 	{
-		if (Trig > winchHold) //If the trigger value is greater then 0.05, the winch hold value, set the winch power to the triggers
+		if (Trig > winchHold) // If the trigger value is greater then 0.05, the winch hold value, set the winch power to the triggers
 		{
-			setWinch = Trig; //Set the value of the winch power to the value of the triggers
+			setWinch = Trig; // Set the value of the winch power to the value of the triggers
 		}
-		else //If the trigger value is less than the hold value, 0.05, set it to 0.05
+		else // If the trigger value is less than the hold value, 0.05, set it to 0.05
 		{setWinch = winchHold;}
 	}
 
-	//Start  of the state machine that manages the auto load sequence
+	// Start  of the state machine that manages the auto load sequence
 	switch (currentState)
 	{
-		case IDLE: //Idle state, nothing happens
+		case IDLE: // Idle state, nothing happens
 			arms = false;
 			lever = false;
 			poker = false;
 			lifter = false;
 
-			//If the A button is pressed, change state to MV_TO_CAP
+			// If the A button is pressed, change state to MV_TO_CAP
 			if (bA2 == true) { currentState = MV_TO_CAP; }
 			break;
 
-		case MV_TO_CAP: //Moves arms into position and opens them
+		case MV_TO_CAP: // Moves arms into position and opens them
 			arms = false;
 			lever = true;
 			lifter = false;
 			poker = false;
-			currentState = WT_FOR_BALL; //Sets state to WT_FOR_BALL
+			currentState = WT_FOR_BALL; // Sets state to WT_FOR_BALL
 			break;
 
-		case WT_FOR_BALL: //Waiting for the ball to trip the photo sensor
-			//If photo sensor is tripped, close the arms and change state to HOLD_BALL
+		case WT_FOR_BALL: // Waiting for the ball to trip the photo sensor
+			// If photo sensor is tripped, close the arms and change state to HOLD_BALL
 			if (phoSensorVal == true)
 			{
 				arms = true;
@@ -140,19 +148,19 @@ void Robot::TeleopPeriodic()
 				lifter = false;
 				currentState = HOLD_BALL;
 			}
-			//If start button is pressed, change to idle state
+			// If start button is pressed, change to idle state
 			if (bStart2 == true) { currentState = IDLE; }
 			break;
 
-		case HOLD_BALL: //Holds the ball in front of the robot
+		case HOLD_BALL: // Holds the ball in front of the robot
 			arms = true;
 			lever = true;
 			poker = false;
 			lifter = false;
 
-			//If the A button is pressed, open and arms move them inside the robot, and go back to IDLE
+			// If the A button is pressed, open and arms move them inside the robot, and go back to IDLE
 			if (bA2 == true) { currentState = UNLOAD; }
-			//If start button is pressed, move to idle state
+			// If start button is pressed, move to idle state
 			if (bStart2 == true) { currentState = IDLE; }
 			break;
 
@@ -162,37 +170,37 @@ void Robot::TeleopPeriodic()
 			poker = false;
 			lifter = false;
 
-			//If the photo sensor is not tripped, set state to IDLE
+			// If the photo sensor is not tripped, set state to IDLE
 			if (phoSensorVal != true) { currentState = IDLE; }
 			break;
 	}
 
-	//Manual mode controls engaged when left stick is held down
-	//TODO: Change manual mode so that it does not change the state of any outputs when it is activated
+	// Manual mode controls engaged when left stick is held down
+	// TODO: Change manual mode so that it does not change the state of any outputs when it is activated
 	if (bLS2 == true)
-	{	//When left bumper is pressed, raise the arms
+	{	// When left bumper is pressed, raise the arms
 		if (bRB2 == true) { lever = false; }
-		//When right bumper is pressed, lower the arms
+		// When right bumper is pressed, lower the arms
 		if (bLB2 == true) { lever = true;}
-		//When A button held, open arms. Otherwise, close them
+		// When A button held, open arms. Otherwise, close them
 		if (bA2 == true) { arms = true;}
 		else { arms = false; }
-		//When B button held, extend poker. Otherwise, retract it
+		// When B button held, extend poker. Otherwise, retract it
 		if (bB2 == true) { poker = true;}
 		else { poker = false; }
-		//When X button held, extend lifter. Otherwise, retract it
+		// When X button held, extend lifter. Otherwise, retract it
 		if (bX2 == true) { lifter = true;}
 		else { lifter = false; }
 		currentState = IDLE;
 	}
 	// Creates two integers: t and Tcurve
-	//int t, Tcurve;
+	// int t, Tcurve;
 	// Multiplies trigger value by 100 to get percent
-	//t = Trig * 100;
+	// t = Trig * 100;
 	// Creates parabolic throttle curve with equation of y=0.000001x^4
-	//Tcurve = 0.000001 * pow(t, 4);
+	// Tcurve = 0.000001 * pow(t, 4);
 	// Creates linear throttle curve
-	//Tcurve = abs(t);
+	// Tcurve = abs(t);
 
 	SmartDashboard::PutNumber("Winch", setWinch);
 	//SmartDashboard::PutNumber("Edited", Tcurve);
@@ -201,8 +209,8 @@ void Robot::TeleopPeriodic()
 	SmartDashboard::PutBoolean("Poker: \n", poker);
 	SmartDashboard::PutBoolean("Lifter: \n", lifter);
 
-	//Set all outputs
-	//winchmot->Set(Tcurve/100);
+	// Set all outputs
+	// winchmot->Set(Tcurve/100);
 	drive->ArcadeDrive(LaxisY, RaxisX);
 	winchmot->Set(setWinch);
 
@@ -218,6 +226,7 @@ void Robot::TeleopPeriodic()
 
 void Robot::TestPeriodic()
 {
+
 }
 
 void Robot::checkbuttons() {
@@ -244,5 +253,5 @@ void Robot::checkbuttons() {
 	bLS2 = stick2->GetRawButton(9);
 	bRS2 = stick2->GetRawButton(10);
 }
-//Start robot
+// Start robot
 START_ROBOT_CLASS(Robot)
