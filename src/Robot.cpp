@@ -41,9 +41,9 @@ void Robot::RobotInit()
 	sLever = new DoubleSolenoid(4, 5);	// Solenoid to raise and lower the arms
 
 	//Encoders
-	LEnc = new Encoder(0, 5, false, Encoder::EncodingType::k4X);	// New encoder instance (Left drive)
-	ArmEnc = new Encoder(2, 6, false, Encoder::EncodingType::k4X);	// New encoder instance (Winch)
-	REnc = new Encoder(1, 7, false, Encoder::EncodingType::k4X);	// New encoder instance (Right Drive)
+	LEnc = new Encoder(0, 1, false, Encoder::EncodingType::k4X);	// New encoder instance (Left drive)
+	ArmEnc = new Encoder(2, 3, false, Encoder::EncodingType::k4X);	// New encoder instance (Winch)
+	REnc = new Encoder(4, 5, false, Encoder::EncodingType::k4X);	// New encoder instance (Right Drive)
 	ArmEnc->SetDistancePerPulse(ducksperpulse); //Sets distance per pulse IN INCHES
 	LEnc->SetDistancePerPulse(ducksperpulse);
 	REnc->SetDistancePerPulse(ducksperpulse);
@@ -56,6 +56,7 @@ void Robot::RobotInit()
 
 	PhoSen = new DigitalInput(6);
 	winchHold = 0.05;
+
 }
 
 void Robot::AutonomousInit()
