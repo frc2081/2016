@@ -3,7 +3,7 @@
 void Robot::RobotInit()
 {
 	currentState = IDLE;
-	// Declare new Joystick from (USB port?) 0
+	// Declare new Joysticks
 	stick = new Joystick(0);
 	stick2 = new Joystick(1);
 
@@ -70,7 +70,7 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
-	// Run function to check button values
+	//Update all joystick buttons
 	checkbuttons();
 
 	// Get joystick values
@@ -82,158 +82,88 @@ void Robot::TeleopPeriodic()
 	LTrig = stick->GetRawAxis(2);
 
 	//Get sensor inputs
-	yn = PhoSen->Get();
+	phoSensorVal = PhoSen->Get();
 
-	// Apply joystick values to motors 0 and 1
-	drive->ArcadeDrive(LaxisY, RaxisX);
-
-	// Math for trigger/winch thing
+	//Math for winch thing
+	//Combines both triggers into a single command for the winch motors
 	LTrig *= -1;
 	Trig = LTrig + RTrig;
-	SmartDashboard::PutNumber("Winch", Trig);
 
-	float currentStateP = currentState;
 	//Start  of the state machine that manages the auto load sequence
-	SmartDashboard::PutNumber("Current State: ", currentStateP);
-	sensor = PhoSen->Get();
-	SmartDashboard::PutBoolean("Switch: \n", sensor);
-	if (bLS2 != true) { //If the Y button is pressed, go to manual control
-		switch (currentState) {
+	switch (currentState)
+	{
 		case IDLE: //Idle state, nothing happens
-			sLever->Set(DoubleSolenoid::kReverse); //Keeps arms in the robot
-			sArm->Set(DoubleSolenoid::kReverse); //Closes arms
-			sPoker->Set(DoubleSolenoid::kReverse); //Keeps poker in robot
-			sLifter->Set(DoubleSolenoid::kReverse); //Keeps lifter in the robot
-			yn = false;
 			arms = false;
 			lever = false;
 			poker = false;
 			lifter = false;
-			//Displays where the parts are on the robot
-			SmartDashboard::PutBoolean("Arms: \n", arms);
-			SmartDashboard::PutBoolean("Lever: \n", lever);
-			SmartDashboard::PutBoolean("Lifter: \n", lifter);
-			SmartDashboard::PutBoolean("Poker: \n", poker);
-			yn = bA2; //Gets the value of the A button
-			if (yn == true) { //If the A button is pressed, change state to MV_TO_CAP
-				currentState = MV_TO_CAP;
-			}
+
+			//If the A button is pressed, change state to MV_TO_CAP
+			if (bA2 == true) { currentState = MV_TO_CAP; }
 			break;
-		case MV_TO_CAP: //Moves arms into posistion and opens them
-			sLever->Set(DoubleSolenoid::kForward); //Lowers the arms
-			sArm->Set(DoubleSolenoid::kReverse); //Opens the arms
+
+		case MV_TO_CAP: //Moves arms into position and opens them
 			arms = false;
 			lever = true;
 			lifter = false;
 			poker = false;
-			//Displays where the parts are on the robot
-			SmartDashboard::PutBoolean("Arms: \n", arms);
-			SmartDashboard::PutBoolean("Lever: \n", lever);
-			SmartDashboard::PutBoolean("Poker: \n", poker);
-			SmartDashboard::PutBoolean("Lifter: \n", lifter);
 			currentState = WT_FOR_BALL; //Sets state to WT_FOR_BALL
 			break;
+
 		case WT_FOR_BALL: //Waiting for the ball to trip the photo sensor
-			yn = PhoSen->Get(); //Gets value of the photo sensor
-			if (yn == true) { //If photo sensor is tripped, close the arms and change state to HOLD_BALL
-				sArm->Set(DoubleSolenoid::kForward); //Keeps arms open
-				sLever->Set(DoubleSolenoid::kForward); //Keeps arms down
+			//If photo sensor is tripped, close the arms and change state to HOLD_BALL
+			if (phoSensorVal == true)
+			{
 				arms = true;
 				lever = true;
 				poker = false;
 				lifter = false;
-				//Displays where the parts are on the robot
-				SmartDashboard::PutBoolean("Arms: \n", arms);
-				SmartDashboard::PutBoolean("Lever: \n", lever);
-				SmartDashboard::PutBoolean("Poker: \n", poker);
-				SmartDashboard::PutBoolean("Lifter: \n", lifter);
 				currentState = HOLD_BALL;
 			}
-			if (bStart2 == true) { //If start button is pressed, change to idle state
-				currentState = IDLE;
-				yn = false;
-			}
+			//If start button is pressed, change to idle state
+			if (bStart2 == true) { currentState = IDLE; }
 			break;
+
 		case HOLD_BALL: //Holds the ball in front of the robot
-			yn = bA2; //Checks if the A button is pressed
-			if (yn == true) { //If the A button is pressed, open and arms move them inside the robot, and go back to IDLE
-				currentState = UNLOAD;
-			}
-			if (bStart2 == true) { //If start button is pressed, move to idle state
-				currentState = IDLE;
-				yn = false;
-			}
-			sArm->Set(DoubleSolenoid::kReverse); //Keeps arms closed
-			sLever->Set(DoubleSolenoid::kForward); //Keeps arms down
+
 			arms = true;
 			lever = true;
 			poker = false;
 			lifter = false;
-			//Displays where the parts are on the robot
-			SmartDashboard::PutBoolean("Arms: \n", arms);
-			SmartDashboard::PutBoolean("Lever: \n", lever);
-			SmartDashboard::PutBoolean("Poker: \n", poker);
-			SmartDashboard::PutBoolean("Lifter: \n", lifter);
+
+			//If the A button is pressed, open and arms move them inside the robot, and go back to IDLE
+			if (bA2 == true) { currentState = UNLOAD; }
+			//If start button is pressed, move to idle state
+			if (bStart2 == true) { currentState = IDLE; }
 			break;
+
 		case UNLOAD:
-			sArm->Set(DoubleSolenoid::kForward); //Opens arms
-			//sPoker->Set(DoubleSolenoid::kForward); //Extends poker
-			sLever->Set(DoubleSolenoid::kForward); //Keeps arms down
 			arms = true;
 			lever = true;
 			poker = false;
 			lifter = false;
-			//Displays where the parts are on the robot
-			SmartDashboard::PutBoolean("Arms: \n", arms);
-			SmartDashboard::PutBoolean("Lever: \n", lever);
-			SmartDashboard::PutBoolean("Poker: \n", poker);
-			SmartDashboard::PutBoolean("Lifter: \n", lifter);
-			yn = PhoSen->Get(); //Checks if the photo sensor has been tripped
-			if (yn != true) { //If the photo sensor is not tripped, set state to IDLE
-				currentState = IDLE;
-				yn = false;
-			}
+			//If the photo sensor is not tripped, set state to IDLE
+			if (phoSensorVal != true) { currentState = IDLE; }
 			break;
-		}
-	} else { //Manual control
-		if (bRB2 == true) { //When left bumper is pressed, raise the arms
-			sLever->Set(DoubleSolenoid::kReverse);
-			lever = false;
-			SmartDashboard::PutBoolean("Lever: \n", lever);
-			}
-		if (bLB2 == true) { //When right bumper is pressed, lower the arms
-			sLever->Set(DoubleSolenoid::kForward);
-			lever = true;
-			SmartDashboard::PutBoolean("Lever: \n", lever);
-		}
-		if (bA2 != false) { //When A button held, open arms. Otherwise, close them
-			sArm->Set(DoubleSolenoid::kForward);
-			arms = true;
-			SmartDashboard::PutBoolean("Arms: \n", arms);
-		} else {
-			sArm->Set(DoubleSolenoid::kReverse);
-			arms = false;
-			SmartDashboard::PutBoolean("Arms: \n", arms);
-		}
-		if (bB2 != false) { //When B button held, extend poker. Otherwise, retract it
-			sPoker->Set(DoubleSolenoid::kForward);
-			poker = true;
-			SmartDashboard::PutBoolean("Poker: \n", poker);
-		} else {
-			sPoker->Set(DoubleSolenoid::kReverse);
-			poker = false;
-			SmartDashboard::PutBoolean("Poker: \n", poker);
-		}
-		if (bX2 != false) { //When X button held, extend lifter. Otherwise, retract it
-			sLifter->Set(DoubleSolenoid::kForward);
-			lifter = true;
-			SmartDashboard::PutBoolean("Lifter: \n", lifter);
-		} else {
-			sLifter->Set(DoubleSolenoid::kReverse);
-			lifter = false;
-			SmartDashboard::PutBoolean("Lifter: \n", lifter);
-		}
-		currentState = IDLE;
+	}
+
+	//Manual mode controls engaged when left stick is held down
+
+	//TODO: Change manual mode so that it does not change the state of any outputs when it is activated
+	if (bLS2 == true)
+	{	//When left bumper is pressed, raise the arms
+		if (bRB2 == true) { lever = false; }
+		//When right bumper is pressed, lower the arms
+		if (bLB2 == true) { lever = true;}
+		//When A button held, open arms. Otherwise, close them
+		if (bA2 == true) { arms = true;}
+		else { arms = false; }
+		//When B button held, extend poker. Otherwise, retract it
+		if (bB2 == true) { poker = true;}
+		else { poker = false; }
+		//When X button held, extend lifter. Otherwise, retract it
+		if (bX2 == true) { lifter = true;}
+		else { lifter = false; }
 	}
 
 	// Creates two integers: t and Tcurve
@@ -247,9 +177,26 @@ void Robot::TeleopPeriodic()
 	// Creates linear throttle curve
 	Tcurve = abs(t);
 
+	SmartDashboard::PutNumber("Winch", Trig);
+	SmartDashboard::PutBoolean("Switch: \n", sensor);
 	SmartDashboard::PutNumber("Edited", Tcurve);
-	// Tell winch motor to do things based on value of Trig
+	SmartDashboard::PutBoolean("Arms: \n", arms);
+	SmartDashboard::PutBoolean("Lever: \n", lever);
+	SmartDashboard::PutBoolean("Poker: \n", poker);
+	SmartDashboard::PutBoolean("Lifter: \n", lifter);
+
+	//Set all outputs
 	winchmot->Set(Tcurve/100);
+	drive->ArcadeDrive(LaxisY, RaxisX);
+
+	if(lifter == true) {sLifter->Set(DoubleSolenoid::kForward);}
+	else {sLifter->Set(DoubleSolenoid::kReverse);}
+	if(arms == true) {sArm->Set(DoubleSolenoid::kForward);}
+	else {sArm->Set(DoubleSolenoid::kReverse);}
+	if(lever == true) {sLever->Set(DoubleSolenoid::kForward);}
+	else {sLever->Set(DoubleSolenoid::kReverse);}
+	if(poker == true) {sPoker->Set(DoubleSolenoid::kForward);}
+	else {sPoker->Set(DoubleSolenoid::kReverse);}
 }
 
 void Robot::TestPeriodic()

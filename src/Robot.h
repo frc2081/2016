@@ -63,7 +63,7 @@ private:
 	double RaxisX, RaxisY;
 
 	bool yn; // Boolean for state machine
-	bool arms, lever, poker, lifter; // Variables to display where their respective parts are
+	bool arms, lever, poker, lifter, phoSensorVal; // Variables to display where their respective parts are
 	bool sensor;
 	int currentState;
 
