@@ -9,7 +9,7 @@ void Robot::RobotInit()
 	stick2 = new Joystick(1);
 
 	// Declare new drive on PWM's 0 and 1
-	drive = new RobotDrive(0, 1);
+	drive = new RobotDrive(2, 1);
 
 	// Declate buttons based on what button they literally are
 	buttonA = new JoystickButton(stick, 1),
@@ -48,14 +48,14 @@ void Robot::RobotInit()
 	LEnc->SetDistancePerPulse(ducksperpulse);
 	REnc->SetDistancePerPulse(ducksperpulse);
 
-	winchmot = new VictorSP(0);
+	winchmot = new VictorSP(3);
 
 	compress = new Compressor(0);
 	compress->SetClosedLoopControl(true);
 	compress->Start();
 
 	PhoSen = new DigitalInput(6);
-	winchHold = 0.05;
+	winchHold = 0.12;
 }
 
 void Robot::AutonomousInit()
@@ -94,7 +94,7 @@ void Robot::TeleopPeriodic()
 	SmartDashboard::PutNumber("Winch", Trig);
 
 	//When Y button is pressed, keep a minimum hold power applied to the winch. Otherwise, run winch like normal
-	if (bY != true) //If Y button is not pressed
+	if (bY == false) //If Y button is not pressed
 	{
 		setWinch = Trig; //Set winch power to the trigger value
 	}
@@ -107,8 +107,6 @@ void Robot::TeleopPeriodic()
 		else //If the trigger value is less than the hold value, 0.05, set it to 0.05
 		{setWinch = winchHold;}
 	}
-		
-	float currentStateP = currentState;
 
 	//Start  of the state machine that manages the auto load sequence
 	switch (currentState)
@@ -187,24 +185,25 @@ void Robot::TeleopPeriodic()
 
 	}
 	// Creates two integers: t and Tcurve
-	int t, Tcurve;
+	//int t, Tcurve;
 	// Multiplies trigger value by 100 to get percent
-	t = Trig * 100;
+	//t = Trig * 100;
 	// Creates parabolic throttle curve with equation of y=0.000001x^4
 	//Tcurve = 0.000001 * pow(t, 4);
 	// Creates linear throttle curve
-	Tcurve = abs(t);
+	//Tcurve = abs(t);
 
-	SmartDashboard::PutNumber("Winch", Trig);
-	SmartDashboard::PutNumber("Edited", Tcurve);
+	SmartDashboard::PutNumber("Winch", setWinch);
+	//SmartDashboard::PutNumber("Edited", Tcurve);
 	SmartDashboard::PutBoolean("Arms: \n", arms);
 	SmartDashboard::PutBoolean("Lever: \n", lever);
 	SmartDashboard::PutBoolean("Poker: \n", poker);
 	SmartDashboard::PutBoolean("Lifter: \n", lifter);
 
 	//Set all outputs
-	winchmot->Set(Tcurve/100);
+	//winchmot->Set(Tcurve/100);
 	drive->ArcadeDrive(LaxisY, RaxisX);
+	winchmot->Set(setWinch);
 
 	if(lifter == true) {sLifter->Set(DoubleSolenoid::kForward);}
 	else {sLifter->Set(DoubleSolenoid::kReverse);}
