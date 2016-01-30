@@ -64,7 +64,7 @@ void Robot::AutonomousInit()
 
 void Robot::AutonomousPeriodic()
 {
-	drive->Drive(0.5, 0);
+	//drive->Drive(0.5, 0);
 }
 
 void Robot::TeleopInit()
@@ -77,10 +77,12 @@ void Robot::TeleopPeriodic()
 	checkbuttons();
 
 	// Get joystick values
-	LaxisX = stick->GetX();
-	LaxisY = stick->GetY();
-	RaxisX = stick->GetRawAxis(4);
-	RaxisY = stick->GetRawAxis(5);
+	//Axes are swapped on xbox controllers....seems weird....
+	//Hopefully this is correct?????
+	RaxisY = stick->GetX();
+	RaxisX = stick->GetY();
+	LaxisY = stick->GetRawAxis(4);
+	LaxisX = stick->GetRawAxis(5);
 	RTrig = stick->GetRawAxis(3);
 	LTrig = stick->GetRawAxis(2);
 
