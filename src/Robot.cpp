@@ -38,7 +38,7 @@ private:
 	Encoder *REnc;		// Pointer to right encoder
 	Encoder *ArmEnc;	// Pointer to Arm encoder
 
-	DigitalInput *PhoSen;
+	DigitalInput *PhoSen; //Photo sensor to capture balls with
 
 	VictorSP *winchmot; // PROPERLY NAMED pointer to winch motor
 	
@@ -56,7 +56,7 @@ private:
 	double LaxisX, LaxisY;
 	double RaxisX, RaxisY;
 	
-	bool yn;
+	bool Armyn; //Used in the arm state machine to check things
 	DoubleSolenoid *sArm = new DoubleSolenoid(0, 1);	// Solenoid for the opening and closing of the arms
 	DoubleSolenoid *sLifter = new DoubleSolenoid(6, 7);	// Solenoid for lifting up the robot
 	DoubleSolenoid *sPoker = new DoubleSolenoid(2, 3);	// Solenoid for the poker
@@ -69,23 +69,20 @@ private:
 		HOLD_BALL,
 		UNLOAD
 	};
-	int currentState  = IDLE;
+	int currentState  = IDLE; //Current state of the state machine
 	bool arms, lever, poker, lifter; // Varaibles to display where their respective parts are
-	bool sensor;
+	bool sensor; //Displays to the smartbashboard the value of the photo sensor
 
-	enum climbStates {
-		CIDLE,
-		RAISE_WINCH,
-		GRABBED,
-		RAISE_ROBOT,
-		HOLD
-	};
+	float winchHold;
+	float winchmotd;
+	float setWinch;
 
 	void RobotInit()
 	{
 
-		// Declare new Joystick from (USB port?) 0
+		// Declare new Joystick as the first one plugged in
 		stick = new Joystick(0);
+		//Declare new Joystick as the second one plugged in
 		stick2 = new Joystick(1);
 		
 		// Declare new drive on PWM's 0 and 1
@@ -114,7 +111,7 @@ private:
 		buttonLS2 = new JoystickButton(stick2, 9),
 		buttonRS2 = new JoystickButton(stick2, 10);
 
-		PhoSen = new DigitalInput(6);
+		PhoSen = new DigitalInput(6); //Declares the photo sensor into DIO port 6
 
 
 		// Built-in something stuff
@@ -131,7 +128,10 @@ private:
 		
 		// Declare winch motor
 		winchmot = new VictorSP(0);
-		
+
+		//Minimum power to the winch to keep the robot stationary
+		winchHold = 0.05; //Subject to change with robot calibration
+
 		// Declare compressor
 		compress = new Compressor(0);
 
@@ -210,12 +210,6 @@ private:
 		// Run function to check button values
 		checkbuttons();
 
-		yn = PhoSen->Get();
-		if(yn == TRUE) {
-			printf("Hello World!");
-			// SmartDashboard::PutBoolean("Limit switch: ", yn);
-		};
-
 		// Get left joystick values
 		LaxisX = stick->GetX();
 		LaxisY = stick->GetY();
@@ -244,10 +238,29 @@ private:
 		//printf("Right Trig: %.2f \n", RTrig);
 		//printf("Left Trig: %.2f \n", LTrig);
 
-		SmartDashboard::PutNumber("Winch", Trig);
+		//SmartDashboard::PutNumber("Winch", Trig);
 		//Tell winch motor to do things based on value of Trig
-		winchmot->Set(Trig);
-		
+
+
+		//When Y button is pressed, keep a minimum hold power applied to the winch. Otherwise, run winch like normal
+		if (bY != true) //If Y button is not pressed
+		{
+			setWinch = Trig; //Set winch power to the trigger value
+		}
+		else
+		{
+			if (Trig > winchHold) //If the trigger value is greater then 0.05, the winch hold value, set the winch power to the triggers
+			{
+				setWinch = Trig; //Set the value of the winch power to the value of the triggers
+			}
+			else //If the trigger value is less than the hold value, 0.05, set it to 0.05
+			{setWinch = winchHold;}
+		}
+
+
+
+		//Displays what state the machine is in based on a number.
+		//0 = IDLE, 1 = MV_TO_CAP, 2 = WT_FOR_BALL, 3 = HOLD_BALL, 4 = UNLOAD
 		float currentStateP = currentState;
 		//Start  of the state machine that manages the auto load sequence
 		SmartDashboard::PutNumber("Current State: ", currentStateP);
@@ -260,7 +273,7 @@ private:
 				sArm->Set(DoubleSolenoid::kReverse); //Closes arms
 				sPoker->Set(DoubleSolenoid::kReverse); //Keeps poker in robot
 				sLifter->Set(DoubleSolenoid::kReverse); //Keeps lifter in the robot
-				yn = false;
+				Armyn = false;
 				arms = false;
 				lever = false;
 				poker = false;
@@ -270,8 +283,8 @@ private:
 				SmartDashboard::PutBoolean("Lever: \n", lever);
 				SmartDashboard::PutBoolean("Lifter: \n", lifter);
 				SmartDashboard::PutBoolean("Poker: \n", poker);
-				yn = bA2; //Gets the value of the A button
-				if (yn == true) { //If the A button is pressed, change state to MV_TO_CAP
+				Armyn = bA2; //Gets the value of the A button
+				if (Armyn == true) { //If the A button is pressed, change state to MV_TO_CAP
 					currentState = MV_TO_CAP;
 				}
 				break;
@@ -290,8 +303,8 @@ private:
 				currentState = WT_FOR_BALL; //Sets state to WT_FOR_BALL
 				break;
 			case WT_FOR_BALL: //Waiting for the ball to trip the photo sensor
-				yn = PhoSen->Get(); //Gets value of the photo sensor
-				if (yn == true) { //If photo sensor is tripped, close the arms and change state to HOLD_BALL
+				Armyn = PhoSen->Get(); //Gets value of the photo sensor
+				if (Armyn == true) { //If photo sensor is tripped, close the arms and change state to HOLD_BALL
 					sArm->Set(DoubleSolenoid::kForward); //Keeps arms open
 					sLever->Set(DoubleSolenoid::kForward); //Keeps arms down
 					arms = true;
@@ -307,17 +320,17 @@ private:
 				}
 				if (bStart2 == true) { //If start button is pressed, change to idle state
 					currentState = IDLE;
-					yn = false;
+					Armyn = false;
 				}
 				break;
 			case HOLD_BALL: //Holds the ball in front of the robot
-				yn = bA2; //Checks if the A button is pressed
-				if (yn == true) { //If the A button is pressed, open and arms move them inside the robot, and go back to IDLE
+				Armyn = bA2; //Checks if the A button is pressed
+				if (Armyn == true) { //If the A button is pressed, open and arms move them inside the robot, and go back to IDLE
 					currentState = UNLOAD;
 				}
 				if (bStart2 == true) { //If start button is pressed, move to idle state
 					currentState = IDLE;
-					yn = false;
+					Armyn = false;
 				}
 				sArm->Set(DoubleSolenoid::kReverse); //Keeps arms closed
 				sLever->Set(DoubleSolenoid::kForward); //Keeps arms down
@@ -344,10 +357,10 @@ private:
 				SmartDashboard::PutBoolean("Lever: \n", lever);
 				SmartDashboard::PutBoolean("Poker: \n", poker);
 				SmartDashboard::PutBoolean("Lifter: \n", lifter);
-				yn = PhoSen->Get(); //Checks if the photo sensor has been tripped
-				if (yn != true) { //If the photo sensor is not tripped, set state to IDLE
+				Armyn = PhoSen->Get(); //Checks if the photo sensor has been tripped
+				if (Armyn != true) { //If the photo sensor is not tripped, set state to IDLE
 					currentState = IDLE;
-					yn = false;
+					Armyn = false;
 				}
 				break;
 			}
@@ -389,24 +402,9 @@ private:
 				lifter = false;
 				SmartDashboard::PutBoolean("Lifter: \n", lifter);
 			}
-			currentState = IDLE;
+			currentState = IDLE; //Sets the current state to IDLE after manual mode has been left
 		}
-		// Creates two integers: t and Tcurve
-		int t, Tcurve;
-
-		// Multiplies trigger value by 100 to get percent
-		t = Trig * 100;
-
-		// Creates parabolic throttle curve with equation of y=0.000001x^4
-		//Tcurve = 0.000001 * pow(t, 4);
-		// Creates linear throttle curve
-		Tcurve = abs(t);
-
-		SmartDashboard::PutNumber("Edited", Tcurve);
-
-		// Tell winch motor to do things based on value of Trig
-		winchmot->Set(Tcurve/100);
-
+		winchmot->Set(setWinch);
 	}
 
 	void TestPeriodic()
@@ -414,8 +412,6 @@ private:
 
 	}
 };
-
-//Start robot 
 
 //Start robot
 START_ROBOT_CLASS(Robot)
