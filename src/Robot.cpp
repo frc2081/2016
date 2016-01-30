@@ -56,6 +56,30 @@ void Robot::RobotInit()
 
 	PhoSen = new DigitalInput(6);
 	winchHold = 0.12;
+
+	averageGyro = 0;
+	gyroCalibrate = 0;
+	gyro = new ADXRS450_Gyro();
+	gyro->Reset();
+
+	while (gyroCalibrate < 5){
+		while (averageGyro >= 1) {
+			gyro->Calibrate();
+			gyroAngle = gyro->GetAngle();
+			wait(100);
+			gyroAngle2 = gyro->GetAngle();
+			wait(100);
+			gyroAngle3 = gyro->GetAngle();
+			wait(100);
+			gyroAngle4 = gyro->GetAngle();
+			averageGyro = (gyroAngle + gyroAngle2 + gyroAngle3 + gyroAngle4) / 4;
+			gyroCalibrate += 1;
+			SmartDashboard::PutNumber("Gyro Calibration: \n", gyroCalibrate);
+		}
+		if (averageGyro < 0.5) {
+			break;
+		}
+	}
 }
 
 void Robot::AutonomousInit()
@@ -76,6 +100,7 @@ void Robot::TeleopPeriodic()
 	//Update all joystick buttons
 	checkbuttons();
 
+	gyroAngle = gyro->GetAngle();
 	// Get joystick values
 	LaxisX = stick->GetX();
 	LaxisY = stick->GetY();
@@ -200,6 +225,7 @@ void Robot::TeleopPeriodic()
 	SmartDashboard::PutBoolean("Lever: \n", lever);
 	SmartDashboard::PutBoolean("Poker: \n", poker);
 	SmartDashboard::PutBoolean("Lifter: \n", lifter);
+	SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
 
 	//Set all outputs
 	//winchmot->Set(Tcurve/100);
