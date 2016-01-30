@@ -54,6 +54,7 @@ void Robot::RobotInit()
 	compress->Start();
 
 	PhoSen = new DigitalInput(6);
+	winchHold = 0.05;
 }
 
 void Robot::AutonomousInit()
@@ -91,7 +92,6 @@ void Robot::TeleopPeriodic()
 	LTrig *= -1;
 	Trig = LTrig + RTrig;
 	SmartDashboard::PutNumber("Winch", Trig);
-	float setWinch
 	//When Y button is pressed, keep a minimum hold power applied to the winch. Otherwise, run winch like normal
 	if (bY != true) //If Y button is not pressed
 	{
