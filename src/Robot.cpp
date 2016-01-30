@@ -64,6 +64,7 @@ void Robot::AutonomousInit()
 
 void Robot::AutonomousPeriodic()
 {
+	drive->Drive(0.5, 0);
 }
 
 void Robot::TeleopInit()
