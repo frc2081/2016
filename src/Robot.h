@@ -76,9 +76,6 @@ private:
 		UNLOAD
 	};
 
-	float setWinch;
-	float winchHold;
-
 	void RobotInit(); // Scopes/initialization for robot functions
 	void AutonomousInit();
 	void AutonomousPeriodic();
