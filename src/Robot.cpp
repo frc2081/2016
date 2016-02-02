@@ -48,8 +48,8 @@ void Robot::RobotInit()
 	LEnc->SetDistancePerPulse(ducksperpulse);
 	REnc->SetDistancePerPulse(ducksperpulse);
 
-	RaFin = new  Ultrasonic(7, 7);
-		//RaFin->SetAutomaticMode(true);
+	RaFin = new  AnalogInput (7);
+
 	PhoSen = new DigitalInput(6);
 
 	winchmot = new VictorSP(0);
