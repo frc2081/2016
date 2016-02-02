@@ -56,6 +56,29 @@ void Robot::RobotInit()
 
 	PhoSen = new DigitalInput(6);
 	winchHold = 0.12;
+
+	averageGyro = 1.5;
+	gyroCalibrate = 0;
+	gyro = new ADXRS450_Gyro();
+	gyro->Reset();
+
+	while (gyroCalibrate < 5){
+		while (averageGyro >= 1) {
+			gyro->Calibrate();
+			gyroAngle = gyro->GetAngle();
+			Wait(100);
+			gyroAngle2 = gyro->GetAngle();
+			Wait(100);
+			gyroAngle3 = gyro->GetAngle();
+			Wait(100);
+			gyroAngle4 = gyro->GetAngle();
+			averageGyro = (gyroAngle + gyroAngle2 + gyroAngle3 + gyroAngle4) / 4;
+			gyroCalibrate += 1;
+		}
+		if (averageGyro < 0.5) {
+			break;
+		}
+	}
 }
 
 void Robot::AutonomousInit()
@@ -75,7 +98,8 @@ void Robot::TeleopPeriodic()
 {
 	//Update all joystick buttons
 	checkbuttons();
-
+	SmartDashboard::PutNumber("Gyro Calibration: ", gyroCalibrate);
+	gyroAngle = gyro->GetAngle();
 	// Get joystick values
 	//Axes are swapped on xbox controllers....seems weird....
 	//Hopefully this is correct?????
@@ -94,7 +118,7 @@ void Robot::TeleopPeriodic()
 	LTrig *= -1;
 	Trig = LTrig + RTrig;
 
-	SmartDashboard::PutNumber("Winch", Trig);
+	//SmartDashboard::PutNumber("Winch", Trig);
 
 	//When Y button is pressed, keep a minimum hold power applied to the winch. Otherwise, run winch like normal
 	if (bY == false) //If Y button is not pressed
@@ -202,6 +226,7 @@ void Robot::TeleopPeriodic()
 	SmartDashboard::PutBoolean("Lever: \n", lever);
 	SmartDashboard::PutBoolean("Poker: \n", poker);
 	SmartDashboard::PutBoolean("Lifter: \n", lifter);
+	SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
 
 	//Set all outputs
 	//winchmot->Set(Tcurve/100);

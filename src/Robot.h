@@ -55,6 +55,14 @@ private:
 
 	Compressor *compress; // Pointer to compressor
 
+	ADXRS450_Gyro *gyro;
+	float gyroAngle;
+	float gyroAngle2;
+	float gyroAngle3;
+	float gyroAngle4;
+	float averageGyro;
+	float gyroCalibrate;
+
 	bool bA, bB, bX, bY, bLB, bRB, bBack, bStart, bLS, bRS, bA2, bB2, bX2, bY2, bLB2, bRB2, bBack2, bStart2, bLS2, bRS2; // Booleans on the states of each button
 
 	float RTrig, LTrig, Trig; // Trigger variable values
