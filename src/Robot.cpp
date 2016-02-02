@@ -2,7 +2,7 @@
 
 void Robot::RobotInit()
 {
-	currentState = IDLE;
+	currentState = ENTER;
 
 	// Declare new Joysticks
 	stick = new Joystick(0);
