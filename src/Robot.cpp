@@ -40,6 +40,8 @@ private:
 
 	bool bA, bB, bX, bY, bLB, bRB, bBack, bStart, bLS, bRS; //Booleans on the states of each button
 	
+	bool pressGood;
+
 	//Trigger variable values
 	float RTrig;
 	float LTrig;
@@ -170,10 +172,16 @@ private:
 
 	void TeleopPeriodic()
 	{
-		int Vout = PreSen->GetVoltage();
-		int Pres = 50*(Vout)-25;
 
-		SmartDashboard::PutNumber("Pressure", Pres);
+		int Vout = PreSen->GetVoltage();
+		int Pres = 50*(Vout)-25;			// Vout is voltage and Pres is in terms of PSI
+
+		if(Pres>=45) {
+			pressGood = true;
+			SmartDashboard::PutBoolean("Pressure is Good!", pressGood);
+		}
+		// 45 psi is good
+		SmartDashboard::PutNumber("Pressure: ", Pres);
 
 		//Run function to check button values
 		checkbuttons();
