@@ -169,9 +169,12 @@ void Robot::TeleopPeriodic()
 	if (bLS2 == false) {
 		switch (currentState)
 		{
+			case ENTER: //Entry state, nothing is commanded. Hit A to continue
+				if (bA2 == true) {currentState = IDLE;}
+				break;
 			case IDLE: //Idle state, nothing happens
-				arms = false; //Arms closed
-				lever = false; //Arms in robot
+				arms = true; //Arms open
+				lever = true; //Arms out of robot
 				poker = false; //Poker retracted
 				lifter = false; //Lifter retracted
 
@@ -248,7 +251,7 @@ void Robot::TeleopPeriodic()
 			{
 				lifter = !lifter;
 			}
-			currentState = IDLE;
+			currentState = ENTER;
 	}
 	// Creates two integers: t and Tcurve
 	//int t, Tcurve;
