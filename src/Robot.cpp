@@ -34,6 +34,7 @@ void Robot::RobotInit()
 	buttonLS2 = new JoystickButton(stick2, 9),
 	buttonRS2 = new JoystickButton(stick2, 10);
 
+
 	//Solenoids
 	sArm = new DoubleSolenoid(0, 1);	// Solenoid for the opening and closing of the arms
 	sLifter = new DoubleSolenoid(6, 7);	// Solenoid for lifting up the robot
@@ -110,6 +111,13 @@ void Robot::TeleopPeriodic()
 	RTrig = stick->GetRawAxis(3);
 	LTrig = stick->GetRawAxis(2);
 
+	if (bStart == true && bStartHold == false)
+	{
+		LaxisX *= -1;
+		LaxisY *= -1;
+		RaxisX *= -1;
+		RaxisY *= -1;
+	}
 	//Get sensor inputs
 	phoSensorVal = PhoSen->Get();
 
@@ -136,80 +144,89 @@ void Robot::TeleopPeriodic()
 	}
 
 	//Start  of the state machine that manages the auto load sequence
-	switch (currentState)
-	{
-		case IDLE: //Idle state, nothing happens
-			arms = false;
-			lever = false;
-			poker = false;
-			lifter = false;
+	if (bLS2 == false) {
+		switch (currentState)
+		{
+			case IDLE: //Idle state, nothing happens
+				arms = false;
+				lever = false;
+				poker = false;
+				lifter = false;
 
-			//If the A button is pressed, change state to MV_TO_CAP
-			if (bA2 == true) { currentState = MV_TO_CAP; }
-			break;
+				//If the A button is pressed, change state to MV_TO_CAP
+				if (bA2 == true) { currentState = MV_TO_CAP; }
+				break;
 
-		case MV_TO_CAP: //Moves arms into position and opens them
-			arms = false;
-			lever = true;
-			lifter = false;
-			poker = false;
-			currentState = WT_FOR_BALL; //Sets state to WT_FOR_BALL
-			break;
+			case MV_TO_CAP: //Moves arms into position and opens them
+				arms = false;
+				lever = true;
+				lifter = false;
+				poker = false;
+				currentState = WT_FOR_BALL; //Sets state to WT_FOR_BALL
+				break;
 
-		case WT_FOR_BALL: //Waiting for the ball to trip the photo sensor
-			//If photo sensor is tripped, close the arms and change state to HOLD_BALL
-			if (phoSensorVal == true)
-			{
+			case WT_FOR_BALL: //Waiting for the ball to trip the photo sensor
+				//If photo sensor is tripped, close the arms and change state to HOLD_BALL
+				if (phoSensorVal == true)
+				{
+					arms = true;
+					lever = true;
+					poker = false;
+					lifter = false;
+					currentState = HOLD_BALL;
+				}
+				//If start button is pressed, change to idle state
+				if (bStart2 == true) { currentState = IDLE; }
+				break;
+
+			case HOLD_BALL: //Holds the ball in front of the robot
 				arms = true;
 				lever = true;
 				poker = false;
 				lifter = false;
-				currentState = HOLD_BALL;
-			}
-			//If start button is pressed, change to idle state
-			if (bStart2 == true) { currentState = IDLE; }
-			break;
 
-		case HOLD_BALL: //Holds the ball in front of the robot
-			arms = true;
-			lever = true;
-			poker = false;
-			lifter = false;
+				//If the A button is pressed, open and arms move them inside the robot, and go back to IDLE
+				if (bA2 == true) { currentState = UNLOAD; }
+				//If start button is pressed, move to idle state
+				if (bStart2 == true) { currentState = IDLE; }
+				break;
 
-			//If the A button is pressed, open and arms move them inside the robot, and go back to IDLE
-			if (bA2 == true) { currentState = UNLOAD; }
-			//If start button is pressed, move to idle state
-			if (bStart2 == true) { currentState = IDLE; }
-			break;
+			case UNLOAD:
+				arms = true;
+				lever = true;
+				poker = false;
+				lifter = false;
 
-		case UNLOAD:
-			arms = true;
-			lever = true;
-			poker = false;
-			lifter = false;
-
-			//If the photo sensor is not tripped, set state to IDLE
-			if (phoSensorVal != true) { currentState = IDLE; }
-			break;
+				//If the photo sensor is not tripped, set state to IDLE
+				if (phoSensorVal != true) { currentState = IDLE; }
+				break;
+		}
 	}
 
 	//Manual mode controls engaged when left stick is held down
 	//TODO: Change manual mode so that it does not change the state of any outputs when it is activated
 	if (bLS2 == true)
-	{	//When left bumper is pressed, raise the arms
-		if (bRB2 == true) { lever = false; }
-		//When right bumper is pressed, lower the arms
-		if (bLB2 == true) { lever = true;}
-		//When A button held, open arms. Otherwise, close them
-		if (bA2 == true) { arms = true;}
-		else { arms = false; }
-		//When B button held, extend poker. Otherwise, retract it
-		if (bB2 == true) { poker = true;}
-		else { poker = false; }
-		//When X button held, extend lifter. Otherwise, retract it
-		if (bX2 == true) { lifter = true;}
-		else { lifter = false; }
-		currentState = IDLE;
+	{
+			if (bY2 == true && bY2Hold == false)
+			{
+				lever = !lever;
+			}
+			//When A button is tapped, toggle the arms
+			if (bA2 == true && bA2Hold == false)
+			{
+				arms = !arms;
+			}
+			//When B button is tapped, toggle the poker
+			if (bB2 == true && bB2Hold == false)
+			{
+				poker = !poker;
+			}
+			//When X button is tapped, toggle the lifter
+			if (bX2 == true && bX2Hold == false)
+			{
+				lifter = !lifter;
+			}
+			currentState = IDLE;
 	}
 	// Creates two integers: t and Tcurve
 	//int t, Tcurve;
@@ -227,6 +244,8 @@ void Robot::TeleopPeriodic()
 	SmartDashboard::PutBoolean("Poker: \n", poker);
 	SmartDashboard::PutBoolean("Lifter: \n", lifter);
 	SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
+	SmartDashboard::PutNumber("Current State: ", currentState);
+
 
 	//Set all outputs
 	//winchmot->Set(Tcurve/100);
@@ -248,6 +267,29 @@ void Robot::TestPeriodic()
 }
 
 void Robot::checkbuttons() {
+	//Saves the previous value of the button
+	bAHold = bA;
+	bBHold = bB;
+	bXHold = bX;
+	bYHold = bY;
+	bLBHold = bLB;
+	bRBHold = bRB;
+	bBackHold = bBack;
+	bStartHold = bStart;
+	bLSHold = bLS;
+	bRSHold = bRS;
+
+	bA2Hold = bA2;
+	bB2Hold = bB2;
+	bX2Hold = bX2;
+	bY2Hold = bY2;
+	bLB2Hold = bLB2;
+	bRB2Hold = bRB2;
+	bBack2Hold = bBack2;
+	bStart2Hold = bStart2;
+	bLS2Hold = bLS2;
+	bRS2Hold = bRS2;
+
 	// Check the states of all buttons (updates each loop of TeleopPeriodic)
 	bA = stick->GetRawButton(1);
 	bB = stick->GetRawButton(2);
@@ -270,6 +312,7 @@ void Robot::checkbuttons() {
 	bStart2 = stick2->GetRawButton(8);
 	bLS2 = stick2->GetRawButton(9);
 	bRS2 = stick2->GetRawButton(10);
+
 }
 //Start robot
 START_ROBOT_CLASS(Robot)
