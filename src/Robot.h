@@ -56,6 +56,8 @@ private:
 	Compressor *compress; // Pointer to compressor
 
 	bool bA, bB, bX, bY, bLB, bRB, bBack, bStart, bLS, bRS, bA2, bB2, bX2, bY2, bLB2, bRB2, bBack2, bStart2, bLS2, bRS2; // Booleans on the states of each button
+	bool bAHold, bBHold, bXHold, bYHold, bLBHold, bRBHold, bStartHold, bBackHold, bLSHold, bRSHold;
+	bool bA2Hold, bB2Hold, bX2Hold, bY2Hold, bLB2Hold, bRB2Hold, bBack2Hold, bStart2Hold, bLS2Hold, bRS2Hold;
 
 	float RTrig, LTrig, Trig; // Trigger variable values
 
