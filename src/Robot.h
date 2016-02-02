@@ -79,6 +79,7 @@ private:
 	float setWinch, winchHold;
 
 	enum states {
+		ENTER,
 		IDLE,
 		MV_TO_CAP,
 		WT_FOR_BALL,
