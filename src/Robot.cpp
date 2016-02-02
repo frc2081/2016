@@ -171,8 +171,8 @@ private:
 	void TeleopPeriodic()
 	{
 		int Vout = PreSen->GetVoltage();
-		int Pres = 250*(Vout/5)-25;
-		printf (Pres);
+		int Pres = 50*(Vout)-25;
+
 		SmartDashboard::PutNumber("Pressure", Pres);
 
 		//Run function to check button values
@@ -180,7 +180,6 @@ private:
 
 		yn = PhoSen->Get();
 		if(yn == TRUE) {
-			//printf("Hello World!");
 			//SmartDashboar`d::PutBoolean("Limit switch: ", yn);
 		};
 
