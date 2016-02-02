@@ -143,25 +143,47 @@ void Robot::TeleopPeriodic()
 		{setWinch = winchHold;}
 	}
 
-	//Start  of the state machine that manages the auto load sequence
+	/*
+	arms = part of the robot that grabs the ball
+	lever = part of robot that moves the arms inside and outside the robot
+	poker = part of robot on front that extends outward
+	lifter = part of robot that will extend beneath the robot to life it up
+
+	ARMS
+		true = open
+		false = closed
+	LEVER
+		true = out of robot
+		false = in robot
+	POKER
+		true = extended
+		false = retracted
+	LIFTER
+		true = extended
+		false = retracted
+
+	DOUBLE SOLENOID CLASS
+		kForward = true
+		kReverse = false
+	*/
 	if (bLS2 == false) {
 		switch (currentState)
 		{
 			case IDLE: //Idle state, nothing happens
-				arms = false;
-				lever = false;
-				poker = false;
-				lifter = false;
+				arms = false; //Arms closed
+				lever = false; //Arms in robot
+				poker = false; //Poker retracted
+				lifter = false; //Lifter retracted
 
 				//If the A button is pressed, change state to MV_TO_CAP
 				if (bA2 == true) { currentState = MV_TO_CAP; }
 				break;
 
 			case MV_TO_CAP: //Moves arms into position and opens them
-				arms = false;
-				lever = true;
-				lifter = false;
-				poker = false;
+				arms = true; //Arms open
+				lever = true; //Arms out of robot
+				lifter = false; //Lifter retracted
+				poker = false; //Poker retracted
 				currentState = WT_FOR_BALL; //Sets state to WT_FOR_BALL
 				break;
 
@@ -169,10 +191,10 @@ void Robot::TeleopPeriodic()
 				//If photo sensor is tripped, close the arms and change state to HOLD_BALL
 				if (phoSensorVal == true)
 				{
-					arms = true;
-					lever = true;
-					poker = false;
-					lifter = false;
+					arms = false; //Arms closed
+					lever = true; //Arms out
+					poker = false; //Poker retracted
+					lifter = false; //Lifter retracted
 					currentState = HOLD_BALL;
 				}
 				//If start button is pressed, change to idle state
@@ -180,10 +202,10 @@ void Robot::TeleopPeriodic()
 				break;
 
 			case HOLD_BALL: //Holds the ball in front of the robot
-				arms = true;
-				lever = true;
-				poker = false;
-				lifter = false;
+				arms = false; //Arms closed
+				lever = true; //Arms out
+				poker = false; //Poker retracted
+				lifter = false; //Lifter retracted
 
 				//If the A button is pressed, open and arms move them inside the robot, and go back to IDLE
 				if (bA2 == true) { currentState = UNLOAD; }
@@ -192,10 +214,10 @@ void Robot::TeleopPeriodic()
 				break;
 
 			case UNLOAD:
-				arms = true;
-				lever = true;
-				poker = false;
-				lifter = false;
+				arms = true; //Arms open
+				lever = true; //Arms out
+				poker = false; //Poker retracted
+				lifter = false; //Lifter retracted
 
 				//If the photo sensor is not tripped, set state to IDLE
 				if (phoSensorVal != true) { currentState = IDLE; }
