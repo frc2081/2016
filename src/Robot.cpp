@@ -111,6 +111,8 @@ void Robot::TeleopPeriodic()
 	RTrig = stick->GetRawAxis(3);
 	LTrig = stick->GetRawAxis(2);
 
+
+	//TODO: Fix this so it sticks for more than the loop it triggers in
 	if (bStart == true && bStartHold == false)
 	{
 		LaxisX *= -1;
@@ -166,12 +168,14 @@ void Robot::TeleopPeriodic()
 		kForward = true
 		kReverse = false
 	*/
-	if (bLS2 == false) {
+	if (bLS2 == false)
+	{
 		switch (currentState)
 		{
 			case ENTER: //Entry state, nothing is commanded. Hit A to continue
 				if (bA2 == true) {currentState = IDLE;}
 				break;
+
 			case IDLE: //Idle state, nothing happens
 				arms = true; //Arms open
 				lever = true; //Arms out of robot
@@ -181,7 +185,7 @@ void Robot::TeleopPeriodic()
 				//If the A button is pressed, change state to MV_TO_CAP
 				if (bA2 == true) { currentState = MV_TO_CAP; }
 				break;
-
+//TODO: remove case that does nothing
 			case MV_TO_CAP: //Moves arms into position and opens them
 				arms = true; //Arms open
 				lever = true; //Arms out of robot
@@ -189,7 +193,7 @@ void Robot::TeleopPeriodic()
 				poker = false; //Poker retracted
 				currentState = WT_FOR_BALL; //Sets state to WT_FOR_BALL
 				break;
-
+//TODO: Update this so that Wait for ball is active only while A is held
 			case WT_FOR_BALL: //Waiting for the ball to trip the photo sensor
 				//If photo sensor is tripped, close the arms and change state to HOLD_BALL
 				if (phoSensorVal == true)
