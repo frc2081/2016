@@ -63,6 +63,7 @@ void Robot::RobotInit()
 	gyroCalibrate = 0;
 	gyro = new ADXRS450_Gyro();
 	gyro->Reset();
+	gyro->Calibrate();
 
 	/*while (gyroCalibrate < 5){
 		while (averageGyro >= 1) {
@@ -85,6 +86,7 @@ void Robot::RobotInit()
 
 void Robot::AutonomousInit()
 {
+	gyro->Reset();
 }
 
 void Robot::AutonomousPeriodic()
