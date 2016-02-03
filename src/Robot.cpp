@@ -57,6 +57,7 @@ void Robot::RobotInit()
 
 	PhoSen = new DigitalInput(6);
 	winchHold = 0.12;
+	direction = true;
 
 	averageGyro = 1.5;
 	gyroCalibrate = 0;
@@ -111,9 +112,12 @@ void Robot::TeleopPeriodic()
 	RTrig = stick->GetRawAxis(3);
 	LTrig = stick->GetRawAxis(2);
 
-
-	//TODO: Fix this so it sticks for more than the loop it triggers in
 	if (bStart == true && bStartHold == false)
+	{
+		direction = !direction;
+	}
+
+	if(direction == false)
 	{
 		LaxisX *= -1;
 		LaxisY *= -1;
@@ -173,7 +177,9 @@ void Robot::TeleopPeriodic()
 		switch (currentState)
 		{
 			case ENTER: //Entry state, nothing is commanded. Hit A to continue
-				if (bA2 == true) {currentState = IDLE;}
+				//Changed ENTER state to not advance to IDLE until a new button press of A is detected to ensure that
+				//operator really intended to enter ball capture mode
+				if (bA2 == true && bA2Hold == false) {currentState = IDLE;}
 				break;
 
 			case IDLE: //Idle state, nothing happens
@@ -185,16 +191,18 @@ void Robot::TeleopPeriodic()
 				//If the A button is pressed, change state to MV_TO_CAP
 				if (bA2 == true) { currentState = MV_TO_CAP; }
 				break;
-//TODO: remove case that does nothing
+
 			case MV_TO_CAP: //Moves arms into position and opens them
 				arms = true; //Arms open
 				lever = true; //Arms out of robot
 				lifter = false; //Lifter retracted
 				poker = false; //Poker retracted
-				currentState = WT_FOR_BALL; //Sets state to WT_FOR_BALL
+				if (bA2 == true) { currentState = WT_FOR_BALL; } //Sets state to WT_FOR_BALL
 				break;
-//TODO: Update this so that Wait for ball is active only while A is held
+
 			case WT_FOR_BALL: //Waiting for the ball to trip the photo sensor
+				//Added new exit path to allow operator to stop trying to capture a ball by releasing the A button
+				if (bA2 == false) { currentState = MV_TO_CAP; }
 				//If photo sensor is tripped, close the arms and change state to HOLD_BALL
 				if (phoSensorVal == true)
 				{
@@ -233,7 +241,6 @@ void Robot::TeleopPeriodic()
 	}
 
 	//Manual mode controls engaged when left stick is held down
-	//TODO: Change manual mode so that it does not change the state of any outputs when it is activated
 	if (bLS2 == true)
 	{
 			if (bY2 == true && bY2Hold == false)
