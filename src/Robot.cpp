@@ -173,8 +173,8 @@ private:
 	void TeleopPeriodic()
 	{
 
-		int Vout = PreSen->GetVoltage();
-		int Pres = 50*(Vout)-25;			// Vout is voltage and Pres is in terms of PSI
+		int Pres = PreSen->GetVoltage();
+		//int Pres = 50*(Vout)-25;			// Vout is voltage and Pres is in terms of PSI (commented until tested)
 
 		if(Pres>=45) {
 			pressGood = true;
