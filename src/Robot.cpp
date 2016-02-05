@@ -196,13 +196,25 @@ private:
 
 		// Multiplies trigger value by 100 to get percent
 		t = Trig * 100;
+		// (0,0) (x,y) (100,100)
+		// set x and y equal to cordinates which you want the trottle curve to pass through
+		float x;
+		float x0;
+		float y;
+		float y0;
+		float c;
+		float a;
+		float yy;
+		float xx;
+		xx = t;
 
-		// Creates parabolic throttle curve with equation of y=0.000001x^4
-		//Tcurve = 0.000001 * pow(t, 4);
-		// Creates linear throttle curve
-		Tcurve = abs(t);
+		c=(0-y)/(y-100);
+		x0=(pow(-0,2)+pow(x,2)+c*(pow(x,2)- pow(100,2)))/(2.0*(-0+x+c*x-c*100));
+		a=(0-y)/(pow((0-x0),2)-pow((x-x0),2));
+		y0=0-a*pow((0-x0),2);
+		yy-y0=a*pow((xx-x0),2);
 
-		SmartDashboard::PutNumber("Edited", Tcurve);
+		SmartDashboard::PutNumber("Edited", yy);
 
 		// Tell winch motor to do things based on value of Trig
 		winchmot->Set(Tcurve/100);
