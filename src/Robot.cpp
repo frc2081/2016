@@ -2,7 +2,7 @@
 
 void Robot::RobotInit()
 {
-	currentState = ENTER;
+	currentState = IDLE;
 
 	// Declare new Joysticks
 	stick = new Joystick(0);
@@ -48,6 +48,7 @@ void Robot::RobotInit()
 	ArmEnc->SetDistancePerPulse(ducksperpulse); //Sets distance per pulse IN INCHES
 	LEnc->SetDistancePerPulse(ducksperpulse);
 	REnc->SetDistancePerPulse(ducksperpulse);
+
 
 	winchmot = new VictorSP(3);
 
@@ -102,6 +103,7 @@ void Robot::TeleopPeriodic()
 {
 	//Update all joystick buttons
 	checkbuttons();
+	ArmEncValue = ArmEnc->Get();
 	SmartDashboard::PutNumber("Gyro Calibration: ", gyroCalibrate);
 	gyroAngle = gyro->GetAngle();
 	// Get joystick values
@@ -136,19 +138,28 @@ void Robot::TeleopPeriodic()
 
 	//SmartDashboard::PutNumber("Winch", Trig);
 
-	//When Y button is pressed, keep a minimum hold power applied to the winch. Otherwise, run winch like normal
-	if (bY == false) //If Y button is not pressed
+	//Automatic winch control
+	if (bLB == true) //If left bumper on drive controller is held
 	{
-		setWinch = Trig; //Set winch power to the trigger value
-	}
-	else
-	{
-		if (Trig > winchHold) //If the trigger value is greater then 0.05, the winch hold value, set the winch power to the triggers
+		setWinch = 0.5; //Set winch to extend at a certain power
+		if (ArmEncValue >= 5000)
 		{
-			setWinch = Trig; //Set the value of the winch power to the value of the triggers
+			setWinch = 0; //When the winch hits the proper height, turn it off
 		}
-		else //If the trigger value is less than the hold value, 0.05, set it to 0.05
-		{setWinch = winchHold;}
+	}
+
+	if (bRB == true) //If the right bumper on drive controller is held
+	{
+		setWinch = -0.5; //Set winch to retract at a certain power
+		if (ArmEncValue <= 200)
+		{
+			setWinch = winchHold; //If the winch has raised the robot to a certian value, set the winch to the winch hold value and turn off the treads
+			drive->Drive(0, 0);
+		}
+		if (ArmEncValue <= 500) //If the winch has raised the robot to a certian value, turn on the treads
+		{
+			drive->Drive(0.5, 0);
+		}
 	}
 
 	/*
@@ -264,7 +275,25 @@ void Robot::TeleopPeriodic()
 			{
 				lifter = !lifter;
 			}
+
 			currentState = ENTER;
+	}
+	if (bY == true)
+	{
+		//When Y button is pressed, keep a minimum hold power applied to the winch. Otherwise, run winch like normal
+		if (bRB == false) //If Y button is not pressed
+		{
+			setWinch = Trig; //Set winch power to the trigger value
+		}
+		else
+		{
+			if (Trig > winchHold) //If the trigger value is greater then 0.05, the winch hold value, set the winch power to the triggers
+			{
+				setWinch = Trig; //Set the value of the winch power to the value of the triggers
+			}
+			else //If the trigger value is less than the hold value, 0.05, set it to 0.05
+			{setWinch = winchHold;}
+		}
 	}
 	// Creates two integers: t and Tcurve
 	//int t, Tcurve;
@@ -283,6 +312,7 @@ void Robot::TeleopPeriodic()
 	SmartDashboard::PutBoolean("Lifter: \n", lifter);
 	SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
 	SmartDashboard::PutNumber("Current State: ", currentState);
+	SmartDashboard::PutNumber("Arm Encoder: ", ArmEncValue);
 
 
 	//Set all outputs
