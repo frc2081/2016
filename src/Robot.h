@@ -49,6 +49,8 @@ private:
 	DoubleSolenoid *sPoker;
 	DoubleSolenoid *sLever;
 
+	AnalogInput*RaFin
+
 	DigitalInput *PhoSen;
 
 	VictorSP *winchmot; // PROPERLY NAMED pointer to winch motor

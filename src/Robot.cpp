@@ -51,10 +51,11 @@ void Robot::RobotInit()
 
 
 	winchmot = new VictorSP(3);
-
+	RaFin = AnalogInput (3);
 	compress = new Compressor(0);
 	compress->SetClosedLoopControl(true);
 	compress->Start();
+
 
 	PhoSen = new DigitalInput(6);
 	winchHold = 0.12;
@@ -101,6 +102,11 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
+	//Range Finder Math
+	float Vm = RaFin->GetVoltage();
+	float range = (Vm*1000)*((5/4.88)*.03937);
+	SmartDashboard::PutNumber("Ultrasonic", range);
+
 	//Update all joystick buttons
 	checkbuttons();
 	ArmEncValue = ArmEnc->Get();
