@@ -50,7 +50,7 @@ void Robot::RobotInit()
 	winchmot = new VictorSP(3);
 	lmotor = new VictorSP(0);
 	rmotor = new VictorSP(1);
-	
+	PreSen = new AnalogInput(0);
 	RaFin =  new AnalogInput (3);
 	compress = new Compressor(0);
 	compress->SetClosedLoopControl(true);
@@ -106,7 +106,7 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
-	//Pressure Snsor Code
+	//Pressure Sensor Code
 	int Pres = PreSen->GetVoltage();
 
 	//Range Finder Math
