@@ -85,6 +85,7 @@ private:
 	bool direction; //Holds current "front" direction of robot. False = ball grabber is front, true = track angle is front
 
 	float setWinch, winchHold, ArmEncValue;
+	double lmotspeed, rmotspeed, lmotread, rmotread;
 
 	enum states {
 		ENTER,

@@ -163,12 +163,16 @@ void Robot::TeleopPeriodic()
 		if (ArmEncValue <= 200)
 		{
 			setWinch = winchHold; //If the winch has raised the robot to a certian value, set the winch to the winch hold value and turn off the treads
-			drive->Drive(0, 0);
+			//drive->Drive(0, 0);
+			lmotspeed = 0;
+			rmotspeed = 0;
 		}
 		if (ArmEncValue <= 500) //If the winch has raised the robot to a certian value, turn on the treads
 		{
-			drive->Drive(0.5, 0);
-		}
+			//drive->Drive(0.5, 0);
+			lmotspeed = 0.5;
+			rmotspeed = 0.5;
+		} else {lmotspeed = 0; rmotspeed = 0;}
 	}
 
 	/*
@@ -341,6 +345,14 @@ void Robot::TeleopPeriodic()
 	drive->ArcadeDrive(LaxisY, RaxisX);
 	winchmot->Set(setWinch);
 
+	if (bRB == true) {
+	lmotor->Set(lmotspeed);
+	rmotor->Set(rmotspeed);
+	}
+	lmotread = lmotor->Get();
+	rmotread = rmotor->Get();
+	SmartDashboard::PutNumber("Left Motor: ", lmotread);
+	SmartDashboard::PutNumber("Right Motor: ", rmotread);
 	if(tryingtofixmotor == 1) {
 		double tempMotorVal = lmotor->Get();
 		tempMotorVal *= motorCorrectionValue;
