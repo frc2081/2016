@@ -109,6 +109,13 @@ void Robot::TeleopPeriodic()
 	//Pressure Sensor Code
 	int Pres = PreSen->GetVoltage();
 
+	if(Pres>=45) {
+			pressGood = true;
+			SmartDashboard::PutBoolean("Pressure is Good!", pressGood);
+		}
+		// 45 psi is good
+		SmartDashboard::PutNumber("Pressure: ", Pres);
+
 	//Range Finder Math
 	float Vm = RaFin->GetVoltage();
 	float range = (Vm*1000)*((5/4.88)*.03937);
