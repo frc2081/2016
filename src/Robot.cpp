@@ -150,40 +150,43 @@ void Robot::TeleopPeriodic()
 	//SmartDashboard::PutNumber("Winch", Trig);
 
 	//Automatic winch control
-	if (bLB == true) //If left bumper on drive controller is held
+	if (bY != true)
 	{
-		winchSol = true;
-		setWinch = 0.5; //Set winch to extend at a certain power
-		if (ArmEncValue >= 5000)
+		if (bLB == true) //If left bumper on drive controller is held
 		{
-			setWinch = 0; //When the winch hits the proper height, turn it off
+			winchSol = true;
+			setWinch = 0.5; //Set winch to extend at a certain power
+			if (ArmEncValue >= 5000)
+			{
+				setWinch = 0; //When the winch hits the proper height, turn it off
+			}
 		}
-	}
 
-	if (bRB == true) //If the right bumper on drive controller is held
-	{
-		winchSol = false;
-		setWinch = -0.5; //Set winch to retract at a certain power
-		if (ArmEncValue <= 200)
+		if (bRB == true) //If the right bumper on drive controller is held
 		{
-			setWinch = winchHold; //If the winch has raised the robot to a certian value, set the winch to the winch hold value and turn off the treads
-			//drive->Drive(0, 0);
-			lmotspeed = 0;
-			rmotspeed = 0;
+			winchSol = false;
+			setWinch = -0.5; //Set winch to retract at a certain power
+			if (ArmEncValue <= 200)
+			{
+				setWinch = winchHold; //If the winch has raised the robot to a certian value, set the winch to the winch hold value and turn off the treads
+				//drive->Drive(0, 0);
+				lmotspeed = 0;
+				rmotspeed = 0;
+			}
+			if (ArmEncValue <= 500) //If the winch has raised the robot to a certian value, turn on the treads
+			{
+				//drive->Drive(0.5, 0);
+				lmotspeed = 0.5;
+				rmotspeed = 0.5;
+			} else {lmotspeed = 0; rmotspeed = 0;}
 		}
-		if (ArmEncValue <= 500) //If the winch has raised the robot to a certian value, turn on the treads
-		{
-			//drive->Drive(0.5, 0);
-			lmotspeed = 0.5;
-			rmotspeed = 0.5;
-		} else {lmotspeed = 0; rmotspeed = 0;}
 	}
 
 	/*
 	arms = part of the robot that grabs the ball
 	lever = part of robot that moves the arms inside and outside the robot
 	poker = part of robot on front that extends outward
-	lifter = part of robot that will extend beneath the robot to life it up
+	lifter = part of robot that will extend beneath the robot to lift it up
 
 	ARMS
 		true = open
@@ -314,6 +317,8 @@ void Robot::TeleopPeriodic()
 		if (bRB == true && bRBHold == false)
 		{
 			winchSol = !winchSol;
+			lmotspeed = 0;
+			rmotspeed = 0;
 		}
 	}
 	// Creates two integers: t and Tcurve
