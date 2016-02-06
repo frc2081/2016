@@ -57,6 +57,8 @@ private:
 	DigitalInput *PhoSen;
 
 	VictorSP *winchmot; // PROPERLY NAMED pointer to winch motor
+	VictorSP *lmotor; //New fancy motor thing for that really annoying drift thing because the motors are different slightly
+	VictorSP  *rmotor;
 
 	Compressor *compress; // Pointer to compressor
 
