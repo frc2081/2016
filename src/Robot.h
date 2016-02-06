@@ -67,6 +67,7 @@ private:
 	//Variables for autonomous
 	int autoPosition;
 	int autoDefense;
+	bool atDefense, crossedDefense;
 
 	float gyroAngle;
 	float gyroAngle2;

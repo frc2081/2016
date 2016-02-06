@@ -67,6 +67,9 @@ void Robot::RobotInit()
 	gyro->Reset();
 	gyro->Calibrate();
 
+	atDefense = FALSE;
+	crossedDefense = FALSE;
+
 	/*while (gyroCalibrate < 5){
 		while (averageGyro >= 1) {
 			gyro->Calibrate();
@@ -101,54 +104,64 @@ void Robot::AutonomousPeriodic()
 	if(autoPosition == 1) {
 		if((LEnc->Get() < 850) && (REnc->Get() < 850)) {
 			drive->Drive(1, 0);
+		} else {
+			atDefense= TRUE;
 		}
 	}
 	if(autoPosition == 2) {
 		if((LEnc->Get() < 850) && (REnc->Get() < 850)) {
 			drive->Drive(1, 0);
+		} else {
+			atDefense= TRUE;
 		}
 	}
 	if(autoPosition == 3) {
 		if((LEnc->Get() < 850) && (REnc->Get() < 850)) {
 			drive->Drive(1, 0);
+		} else {
+			atDefense= TRUE;
 		}
 	}
 	if(autoPosition == 4) {
 		if((LEnc->Get() < 850) && (REnc->Get() < 850)) {
 			drive->Drive(1, 0);
+		} else {
+			atDefense= TRUE;
 		}
 	}
 	if(autoPosition == 5) {
 		if((LEnc->Get() < 850) && (REnc->Get() < 850)) {
 			drive->Drive(1, 0);
+		} else {
+			atDefense= TRUE;
 		}
 	}
 	//Autonomous code for defenses
-	if(autoDefense == PORTCULLIS) {
+	if(autoDefense == PORTCULLIS && atDefense == TRUE) {
 
 	}
-	if(autoDefense == FRENCHTHING) {
+	if(autoDefense == FRENCHTHING && atDefense == TRUE) {
 
 	}
-	if(autoDefense == MOAT) {
+	if(autoDefense == MOAT && atDefense == TRUE) {
 		drive->Drive(1, 0);
 	}
-	if(autoDefense == RAMPART) {
+	if(autoDefense == RAMPART && atDefense == TRUE) {
 		drive->Drive(1, 0);
 	}
-	if(autoDefense == DRAWBRIDGE) {
+	if(autoDefense == DRAWBRIDGE && atDefense == TRUE) {
 
 	}
-	if(autoDefense == SALLYPORT) {
+	if(autoDefense == SALLYPORT && atDefense == TRUE) {
 
 	}
-	if(autoDefense == ROCKWALL) {
+	if(autoDefense == ROCKWALL && atDefense == TRUE) {
 		drive->Drive(1, 0);
 	}
-	if(autoDefense == ROUGHT) {
+	if(autoDefense == ROUGHT && atDefense == TRUE) {
 		drive->Drive(1, 0);
 	}
-	if(autoDefense == LOWBAR) {
+	if(autoDefense == LOWBAR && atDefense == TRUE) {
 		drive->Drive(1, 0);
 	}
 	drive->ArcadeDrive(autoLeftMot, autoRightMot);
