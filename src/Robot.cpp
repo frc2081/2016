@@ -8,9 +8,6 @@ void Robot::RobotInit()
 	stick = new Joystick(0);
 	stick2 = new Joystick(1);
 
-	// Declare new drive on PWM's 0 and 1
-	drive = new RobotDrive(0, 1);
-
 	// Declate buttons based on what button they literally are
 	buttonA = new JoystickButton(stick, 1),
 	buttonB = new JoystickButton(stick, 2),
@@ -84,6 +81,8 @@ void Robot::RobotInit()
 			break;
 		}
 	}*/
+	// Declare new drive on PWM's 0 and 1
+	drive = new RobotDrive(lmotor, rmotor);
 }
 
 void Robot::AutonomousInit()
