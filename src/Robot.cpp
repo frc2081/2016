@@ -109,12 +109,10 @@ void Robot::TeleopPeriodic()
 	//Range Finder Math
 	float Vm = RaFin->GetVoltage();
 	float range = (Vm*1000)*((5/4.88)*.03937);
-	SmartDashboard::PutNumber("Ultrasonic", range);
 
 	//Update all joystick buttons
 	checkbuttons();
 	ArmEncValue = ArmEnc->Get();
-	SmartDashboard::PutNumber("Gyro Calibration: ", gyroCalibrate);
 	gyroAngle = gyro->GetAngle();
 	// Get joystick values
 	//Axes are swapped on xbox controllers....seems weird....
@@ -140,11 +138,6 @@ void Robot::TeleopPeriodic()
 		RaxisY *= -1;
 	}
 
-	SmartDashboard::PutBoolean("Direction: ", direction);
-	SmartDashboard::PutNumber("LaxisX: ", LaxisX);
-	SmartDashboard::PutNumber("LaxisY: ", LaxisY);
-	SmartDashboard::PutNumber("RaxisX: ", RaxisX);
-	SmartDashboard::PutNumber("RaxisY: ", RaxisY);
 	//Get sensor inputs
 	phoSensorVal = PhoSen->Get();
 
@@ -152,8 +145,6 @@ void Robot::TeleopPeriodic()
 	//Combines both triggers into a single command for the winch motors
 	LTrig *= -1;
 	Trig = LTrig + RTrig;
-
-	//SmartDashboard::PutNumber("Winch", Trig);
 
 	//Automatic winch control
 	if (bY == false)
@@ -327,31 +318,17 @@ void Robot::TeleopPeriodic()
 			//rmotspeed = 0;
 		}
 	}
-	// Creates two integers: t and Tcurve
-	//int t, Tcurve;
-	// Multiplies trigger value by 100 to get percent
-	//t = Trig * 100;
-	// Creates parabolic throttle curve with equation of y=0.000001x^4
-	//Tcurve = 0.000001 * pow(t, 4);
-	// Creates linear throttle curve
-	//Tcurve = abs(t);
 
-	SmartDashboard::PutNumber("Winch", setWinch);
-	//SmartDashboard::PutNumber("Edited", Tcurve);
-	SmartDashboard::PutBoolean("Arms: \n", arms);
-	SmartDashboard::PutBoolean("Lever: \n", lever);
-	SmartDashboard::PutBoolean("Poker: \n", poker);
-	SmartDashboard::PutBoolean("Lifter: \n", lifter);
-	SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
-	SmartDashboard::PutNumber("Current State: ", currentState);
-	SmartDashboard::PutNumber("Arm Encoder: ", ArmEncValue);
-	SmartDashboard::PutBoolean("Winch Solenoid: ", winchSol);
-	if(tryingtofixmotor == 1) {
-		double LEncval = LEnc->Get();
-		double REncval = REnc->Get();
-		SmartDashboard::PutNumber("Left motor encoder: \n", LEncval);
-		SmartDashboard::PutNumber("Right motor encoder: \n", REncval);
-	}
+	/*
+	//Creates two integers: t and Tcurve
+	int t, Tcurve;
+	 Multiplies trigger value by 100 to get percent
+	t = Trig * 100;
+	 Creates parabolic throttle curve with equation of y=0.000001x^4
+	Tcurve = 0.000001 * pow(t, 4);
+	 Creates linear throttle curve
+	Tcurve = abs(t);
+	*/
 
 	if(lifter == true) {sLifter->Set(DoubleSolenoid::kForward);}
 	else {sLifter->Set(DoubleSolenoid::kReverse);}
@@ -369,22 +346,27 @@ void Robot::TeleopPeriodic()
 	drive->ArcadeDrive(RaxisX, LaxisY);
 	winchmot->Set(setWinch);
 
-	if (bRB == true && bY == false) {
-	lmotor->Set(lmotspeed);
-	rmotor->Set(rmotspeed);
-	}
-	lmotread = lmotor->Get();
-	rmotread = rmotor->Get();
-	SmartDashboard::PutNumber("Left Motor: ", lmotread);
-	SmartDashboard::PutNumber("Right Motor: ", rmotread);
-	if(tryingtofixmotor == 1) {
-		double tempMotorVal = lmotor->Get();
-		tempMotorVal *= motorCorrectionValue;
-		lmotor->Set(tempMotorVal);
+	if (bRB == true && bY == false)
+	{
+		lmotor->Set(lmotspeed);
+		rmotor->Set(rmotspeed);
 	}
 
-	SmartDashboard::PutNumber("L Motor Command: ", lmotor->Get());
-	SmartDashboard::PutNumber("R Motor Command: ", rmotor->Get());
+	//Apply drive train mechanical compensation coeffcient
+	lmotor->Set(lmotor->Get() * motorCorrectionValue);
+
+	SmartDashboard::PutNumber("Left Motor Final Command: ", lmotor->Get());
+	SmartDashboard::PutNumber("Right Motor Final Command: ", rmotor->Get());
+	SmartDashboard::PutNumber("Winch", setWinch);
+	SmartDashboard::PutBoolean("Arms: \n", arms);
+	SmartDashboard::PutBoolean("Lever: \n", lever);
+	SmartDashboard::PutBoolean("Poker: \n", poker);
+	SmartDashboard::PutBoolean("Lifter: \n", lifter);
+	SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
+	SmartDashboard::PutNumber("Current State: ", currentState);
+	SmartDashboard::PutNumber("Arm Encoder: ", ArmEncValue);
+	SmartDashboard::PutBoolean("Winch Solenoid: ", winchSol);
+	SmartDashboard::PutNumber("Ultrasonic", range);
 }
 
 void Robot::TestPeriodic()
