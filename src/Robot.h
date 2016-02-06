@@ -60,7 +60,7 @@ private:
 	VictorSP *winchmot; // PROPERLY NAMED pointer to winch motor
 	VictorSP *lmotor; //New fancy motor thing for that really annoying drift thing because the motors are different slightly
 	VictorSP  *rmotor;
-
+	AnalogInput *PreSen;
 	Compressor *compress; // Pointer to compressor
 
 	ADXRS450_Gyro *gyro;
