@@ -31,7 +31,6 @@ void Robot::RobotInit()
 	buttonLS2 = new JoystickButton(stick2, 9),
 	buttonRS2 = new JoystickButton(stick2, 10);
 
-
 	//Solenoids
 	sArm = new DoubleSolenoid(0, 1);	// Solenoid for the opening and closing of the arms
 	sLifter = new DoubleSolenoid(6, 7);	// Solenoid for lifting up the robot
@@ -46,18 +45,19 @@ void Robot::RobotInit()
 	LEnc->SetDistancePerPulse(ducksperpulse);
 	REnc->SetDistancePerPulse(ducksperpulse);
 
-
-	winchmot = new VictorSP(3);
 	lmotor = new VictorSP(0);
 	rmotor = new VictorSP(1);
-	
+	winchmot = new VictorSP(3);
+
+	//Inputs
 	RaFin = new AnalogInput (3);
+	PhoSen = new DigitalInput(6);
+
+	//Compressor
 	compress = new Compressor(0);
 	compress->SetClosedLoopControl(true);
 	compress->Start();
 
-
-	PhoSen = new DigitalInput(6);
 	winchHold = 0.12;
 	direction = true;
 
@@ -91,11 +91,60 @@ void Robot::RobotInit()
 void Robot::AutonomousInit()
 {
 	gyro->Reset();
+
 }
 
 void Robot::AutonomousPeriodic()
 {
-	//drive->Drive(0.5, 0);
+	//Autonomous code for positioning
+	//Number can be 1-5
+	if(autoPosition == 1) {
+
+	}
+	if(autoPosition == 2) {
+
+	}
+	if(autoPosition == 3) {
+
+	}
+	if(autoPosition == 4) {
+
+	}
+	if(autoPosition == 5) {
+
+	}
+	//Autonomous code for defenses
+	if(autoDefense == PORTCULLIS) {
+
+	}
+	if(autoDefense == FRENCHTHING) {
+
+	}
+	if(autoDefense == MOAT) {
+		if((LEnc->Get() < 850) && (REnc->Get() < 850)) {
+			drive->Drive(1, 0);
+		}
+	}
+	if(autoDefense == RAMPART) {
+		drive->Drive(1, 0);
+	}
+	if(autoDefense == DRAWBRIDGE) {
+
+	}
+	if(autoDefense == SALLYPORT) {
+
+	}
+	if(autoDefense == ROCKWALL) {
+		drive->Drive(1, 0);
+	}
+	if(autoDefense == ROUGHT) {
+		drive->Drive(1, 0);
+	}
+	if(autoDefense == LOWBAR) {
+		drive->Drive(1, 0);
+	}
+	drive->ArcadeDrive(autoLeftMot, autoRightMot);
+	lmotor->Set(lmotor->Get() * motorCorrectionValue);
 }
 
 void Robot::TeleopInit()
@@ -114,15 +163,16 @@ void Robot::TeleopPeriodic()
 	ArmEncValue = ArmEnc->Get();
 	SmartDashboard::PutNumber("Gyro Calibration: ", gyroCalibrate);
 	gyroAngle = gyro->GetAngle();
+
 	// Get joystick values
 	//Axes are swapped on xbox controllers....seems weird....
 	//Hopefully this is correct?????
 	RaxisY = stick->GetX();
 	RaxisX = stick->GetY();
+	LTrig = stick->GetRawAxis(2);
+	RTrig = stick->GetRawAxis(3);
 	LaxisY = stick->GetRawAxis(4);
 	LaxisX = stick->GetRawAxis(5);
-	RTrig = stick->GetRawAxis(3);
-	LTrig = stick->GetRawAxis(2);
 
 	if (bStart == true && bStartHold == false)
 	{

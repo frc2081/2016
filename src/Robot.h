@@ -63,6 +63,11 @@ private:
 	Compressor *compress; // Pointer to compressor
 
 	ADXRS450_Gyro *gyro;
+
+	//Variables for autonomous
+	int autoPosition;
+	int autoDefense;
+
 	float gyroAngle;
 	float gyroAngle2;
 	float gyroAngle3;
@@ -70,21 +75,22 @@ private:
 	float averageGyro;
 	float gyroCalibrate;
 
+	float RTrig, LTrig, Trig; // Trigger variable values
+
+	float setWinch, winchHold, ArmEncValue;
+
 	bool bA, bB, bX, bY, bLB, bRB, bBack, bStart, bLS, bRS, bA2, bB2, bX2, bY2, bLB2, bRB2, bBack2, bStart2, bLS2, bRS2; // Booleans on the states of each button
 	bool bAHold, bBHold, bXHold, bYHold, bLBHold, bRBHold, bStartHold, bBackHold, bLSHold, bRSHold;
 	bool bA2Hold, bB2Hold, bX2Hold, bY2Hold, bLB2Hold, bRB2Hold, bBack2Hold, bStart2Hold, bLS2Hold, bRS2Hold;
-
-	float RTrig, LTrig, Trig; // Trigger variable values
-
-	double LaxisX, LaxisY; // Declaring variables for joystick axes
-	double RaxisX, RaxisY;
 
 	bool yn; // Boolean for state machine
 	bool arms, lever, poker, lifter, phoSensorVal; // Variables to display where their respective parts are
 	bool sensor;
 	bool direction; //Holds current "front" direction of robot. False = ball grabber is front, true = track angle is front
 
-	float setWinch, winchHold, ArmEncValue;
+	double LaxisX, LaxisY; // Declaring variables for joystick axes
+	double RaxisX, RaxisY;
+	double autoLeftMot, autoRightMot;
 
 	enum states {
 		ENTER,
@@ -94,6 +100,19 @@ private:
 		HOLD_BALL,
 		UNLOAD
 	};
+
+	enum defenses {
+		PORTCULLIS,
+		FRENCHTHING,
+		MOAT,
+		RAMPART,
+		DRAWBRIDGE,
+		SALLYPORT,
+		ROCKWALL,
+		ROUGHT,
+		LOWBAR
+	};
+
 	states currentState;
 	void RobotInit(); // Scopes/initialization for robot functions
 	void AutonomousInit();
