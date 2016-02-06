@@ -51,6 +51,7 @@ private:
 	DoubleSolenoid *sLifter;
 	DoubleSolenoid *sPoker;
 	DoubleSolenoid *sLever;
+	DoubleSolenoid *sWinch;
 
 	AnalogInput *RaFin;
 
@@ -80,7 +81,7 @@ private:
 	double RaxisX, RaxisY;
 
 	bool yn; // Boolean for state machine
-	bool arms, lever, poker, lifter, phoSensorVal; // Variables to display where their respective parts are
+	bool arms, lever, poker, lifter, phoSensorVal, winchSol; // Variables to display where their respective parts are
 	bool sensor;
 	bool direction; //Holds current "front" direction of robot. False = ball grabber is front, true = track angle is front
 
