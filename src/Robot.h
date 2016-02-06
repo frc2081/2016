@@ -49,7 +49,7 @@ private:
 	DoubleSolenoid *sPoker;
 	DoubleSolenoid *sLever;
 
-	AnalogInput*RaFin
+	AnalogInput *RaFin;
 
 	DigitalInput *PhoSen;
 
