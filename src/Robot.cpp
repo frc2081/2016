@@ -8,9 +8,6 @@ void Robot::RobotInit()
 	stick = new Joystick(0);
 	stick2 = new Joystick(1);
 
-	// Declare new drive on PWM's 0 and 1
-	drive = new RobotDrive(0, 1);
-
 	// Declate buttons based on what button they literally are
 	buttonA = new JoystickButton(stick, 1),
 	buttonB = new JoystickButton(stick, 2),
@@ -84,6 +81,8 @@ void Robot::RobotInit()
 			break;
 		}
 	}*/
+	// Declare new drive on PWM's 0 and 1
+	drive = new RobotDrive(lmotor, rmotor);
 }
 
 void Robot::AutonomousInit()
@@ -319,12 +318,12 @@ void Robot::TeleopPeriodic()
 	SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
 	SmartDashboard::PutNumber("Current State: ", currentState);
 	SmartDashboard::PutNumber("Arm Encoder: ", ArmEncValue);
-
-
-	//Set all outputs
-	//winchmot->Set(Tcurve/100);
-	drive->ArcadeDrive(LaxisY, RaxisX);
-	winchmot->Set(setWinch);
+	if(tryingtofixmotor == 1) {
+		double LEncval = LEnc->Get();
+		double REncval = REnc->Get();
+		SmartDashboard::PutNumber("Left motor encoder: \n", LEncval);
+		SmartDashboard::PutNumber("Right motor encoder: \n", REncval);
+	}
 
 	if(lifter == true) {sLifter->Set(DoubleSolenoid::kForward);}
 	else {sLifter->Set(DoubleSolenoid::kReverse);}
@@ -334,6 +333,15 @@ void Robot::TeleopPeriodic()
 	else {sLever->Set(DoubleSolenoid::kReverse);}
 	if(poker == true) {sPoker->Set(DoubleSolenoid::kForward);}
 	else {sPoker->Set(DoubleSolenoid::kReverse);}
+	
+	drive->ArcadeDrive(LaxisY, RaxisX);
+	winchmot->Set(setWinch);
+
+	if(tryingtofixmotor == 1) {
+		double tempMotorVal = lmotor->Get();
+		tempMotorVal *= motorCorrectionValue;
+		lmotor->Set(tempMotorVal);
+	}
 }
 
 void Robot::TestPeriodic()

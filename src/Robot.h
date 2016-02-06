@@ -8,6 +8,9 @@
 #ifndef INIT_H_
 #define INIT_H_
 #define ducksperpulse 0.08707563025
+#define ducksinawinch 0.08707563025
+#define tryingtofixmotor 1 //(Dis)enables the motor correction code- 1 means it will run the correction code
+#define motorCorrectionValue 0.99 //Value the left motor will be mu
 #include "WPILib.h"
 #include <string>
 #include <iostream>
