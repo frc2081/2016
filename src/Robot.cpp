@@ -106,6 +106,22 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
+	//ArcadeDrive method documentation LIES.
+	//Turn value is first argument, move value is 2nd argument
+	drive->ArcadeDrive(RaxisX, LaxisY);
+	lmotspeed = lmotor->Get();
+	rmotspeed = rmotor->Get();
+
+	if (bY == true)
+	{
+		winchMan = true;
+	} else {winchMan = false;}
+
+	if (bLS2 == true)
+	{
+		stateMan = true;
+	} else {stateMan = false;}
+
 	//Pressure Sensor Code
 	int Pres = PreSen->GetVoltage();
 
@@ -150,9 +166,9 @@ void Robot::TeleopPeriodic()
 	Trig = LTrig + RTrig;
 
 	//Automatic winch control
-	if (bY == false)
+	if (winchMan == false)
 	{
-		if (bLB == true) //If left bumper on drive controller is held
+		if (bRB == true) //If winch is commanded to auto-extend
 		{
 			winchSol = true;
 			setWinch = 0.5; //Set winch to extend at a certain power
@@ -162,7 +178,7 @@ void Robot::TeleopPeriodic()
 			}
 		}
 
-		if (bRB == true) //If the right bumper on drive controller is held
+		if (bLB == true) //If winch is commanded to auto-retract
 		{
 			winchSol = false;
 			setWinch = -0.5; //Set winch to retract at a certain power
@@ -205,7 +221,7 @@ void Robot::TeleopPeriodic()
 		kForward = true
 		kReverse = false
 	*/
-	if (bLS2 == false)
+	if (stateMan == false)
 	{
 		switch (currentState)
 		{
@@ -274,7 +290,7 @@ void Robot::TeleopPeriodic()
 	}
 
 	//Manual mode controls engaged when left stick is held down
-	if (bLS2 == true)
+	if (stateMan == true)
 	{
 			if (bY2 == true && bY2Hold == false)
 			{
@@ -298,7 +314,7 @@ void Robot::TeleopPeriodic()
 
 			currentState = ENTER;
 	}
-	if (bY == true)
+	if (winchMan == true)
 	{
 		//When X button is pressed, keep a minimum hold power applied to the winch. Otherwise, run winch like normal
 		if (bX == false) //If X button is not pressed
@@ -317,8 +333,6 @@ void Robot::TeleopPeriodic()
 		if (bRB == true && bRBHold == false)
 		{
 			winchSol = !winchSol;
-			//lmotspeed = 0;
-			//rmotspeed = 0;
 		}
 	}
 
@@ -344,19 +358,12 @@ void Robot::TeleopPeriodic()
 	if (winchSol == true) {sWinch->Set(DoubleSolenoid::kForward);}
 	else {sWinch->Set(DoubleSolenoid::kReverse);}
 	
-	//ArcadeDrive method documentation LIES.
-	//Turn value is first argument, move value is 2nd argument
-	drive->ArcadeDrive(RaxisX, LaxisY);
-	winchmot->Set(setWinch);
-
-	if (bRB == true && bY == false)
-	{
-		lmotor->Set(lmotspeed);
-		rmotor->Set(rmotspeed);
-	}
 
 	//Apply drive train mechanical compensation coeffcient
-	lmotor->Set(lmotor->Get() * motorCorrectionValue);
+	lmotspeed *= motorCorrectionValue;
+	winchmot->Set(setWinch);
+	lmotor->Set(lmotspeed);
+	rmotor->Set(rmotspeed);
 
 	SmartDashboard::PutNumber("Left Motor Final Command: ", lmotor->Get());
 	SmartDashboard::PutNumber("Right Motor Final Command: ", rmotor->Get());
@@ -370,6 +377,7 @@ void Robot::TeleopPeriodic()
 	SmartDashboard::PutNumber("Arm Encoder: ", ArmEncValue);
 	SmartDashboard::PutBoolean("Winch Solenoid: ", winchSol);
 	SmartDashboard::PutNumber("Ultrasonic", range);
+	SmartDashboard::PutBoolean("dirChange: ", dirChange);
 }
 
 void Robot::TestPeriodic()
