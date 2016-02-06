@@ -79,6 +79,7 @@ void Robot::TeleopPeriodic()
 	int range = RaFin->GetRangeInches();
 	SmartDashboard::PutNumber("Ultrasonic", range);
 
+
 	//Update all joystick buttons
 	;checkbuttons();
 
