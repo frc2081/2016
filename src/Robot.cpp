@@ -46,7 +46,6 @@ void Robot::RobotInit()
 	LEnc->SetDistancePerPulse(ducksperpulse);
 	REnc->SetDistancePerPulse(ducksperpulse);
 
-
 	winchmot = new VictorSP(3);
 	lmotor = new VictorSP(0);
 	rmotor = new VictorSP(1);
@@ -55,7 +54,6 @@ void Robot::RobotInit()
 	compress = new Compressor(0);
 	compress->SetClosedLoopControl(true);
 	compress->Start();
-
 
 	PhoSen = new DigitalInput(6);
 	winchHold = 0.12;
@@ -85,6 +83,8 @@ void Robot::RobotInit()
 		}
 	}*/
 	// Declare new drive on PWM's 0 and 1
+
+
 	drive = new RobotDrive(lmotor, rmotor);
 }
 
@@ -117,10 +117,10 @@ void Robot::TeleopPeriodic()
 	// Get joystick values
 	//Axes are swapped on xbox controllers....seems weird....
 	//Hopefully this is correct?????
-	RaxisY = stick->GetX();
-	RaxisX = stick->GetY();
-	LaxisY = stick->GetRawAxis(4);
-	LaxisX = stick->GetRawAxis(5);
+	LaxisX = stick->GetX();
+	LaxisY = stick->GetY();
+	RaxisX = stick->GetRawAxis(4);
+	RaxisY = stick->GetRawAxis(5);
 	RTrig = stick->GetRawAxis(3);
 	LTrig = stick->GetRawAxis(2);
 
@@ -128,7 +128,7 @@ void Robot::TeleopPeriodic()
 	{
 		direction = !direction;
 	}
-	SmartDashboard::PutBoolean("Direction: ", direction);
+
 
 	if(direction == false)
 	{
@@ -137,6 +137,12 @@ void Robot::TeleopPeriodic()
 		RaxisX *= -1;
 		RaxisY *= -1;
 	}
+
+	SmartDashboard::PutBoolean("Direction: ", direction);
+	SmartDashboard::PutNumber("LaxisX: ", LaxisX);
+	SmartDashboard::PutNumber("LaxisY: ", LaxisY);
+	SmartDashboard::PutNumber("RaxisX: ", RaxisX);
+	SmartDashboard::PutNumber("RaxisY: ", RaxisY);
 	//Get sensor inputs
 	phoSensorVal = PhoSen->Get();
 
@@ -342,7 +348,9 @@ void Robot::TeleopPeriodic()
 	if(poker == true) {sPoker->Set(DoubleSolenoid::kForward);}
 	else {sPoker->Set(DoubleSolenoid::kReverse);}
 	
-	drive->ArcadeDrive(LaxisY, RaxisX);
+	//ArcadeDrive method documentation LIES.
+	//Turn value is first argument, move value is 2nd argument
+	drive->ArcadeDrive(RaxisX, LaxisY);
 	winchmot->Set(setWinch);
 
 	if (bRB == true) {
@@ -358,6 +366,9 @@ void Robot::TeleopPeriodic()
 		tempMotorVal *= motorCorrectionValue;
 		lmotor->Set(tempMotorVal);
 	}
+
+	SmartDashboard::PutNumber("L Motor Command: ", lmotor->Get());
+	SmartDashboard::PutNumber("R Motor Command: ", rmotor->Get());
 }
 
 void Robot::TestPeriodic()
