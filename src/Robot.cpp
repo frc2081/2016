@@ -99,19 +99,29 @@ void Robot::AutonomousPeriodic()
 	//Autonomous code for positioning
 	//Number can be 1-5
 	if(autoPosition == 1) {
-
+		if((LEnc->Get() < 850) && (REnc->Get() < 850)) {
+			drive->Drive(1, 0);
+		}
 	}
 	if(autoPosition == 2) {
-
+		if((LEnc->Get() < 850) && (REnc->Get() < 850)) {
+			drive->Drive(1, 0);
+		}
 	}
 	if(autoPosition == 3) {
-
+		if((LEnc->Get() < 850) && (REnc->Get() < 850)) {
+			drive->Drive(1, 0);
+		}
 	}
 	if(autoPosition == 4) {
-
+		if((LEnc->Get() < 850) && (REnc->Get() < 850)) {
+			drive->Drive(1, 0);
+		}
 	}
 	if(autoPosition == 5) {
-
+		if((LEnc->Get() < 850) && (REnc->Get() < 850)) {
+			drive->Drive(1, 0);
+		}
 	}
 	//Autonomous code for defenses
 	if(autoDefense == PORTCULLIS) {
@@ -121,9 +131,7 @@ void Robot::AutonomousPeriodic()
 
 	}
 	if(autoDefense == MOAT) {
-		if((LEnc->Get() < 850) && (REnc->Get() < 850)) {
-			drive->Drive(1, 0);
-		}
+		drive->Drive(1, 0);
 	}
 	if(autoDefense == RAMPART) {
 		drive->Drive(1, 0);
