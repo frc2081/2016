@@ -48,6 +48,9 @@ void Robot::RobotInit()
 
 
 	winchmot = new VictorSP(3);
+	lmotor = new VictorSP(0);
+	rmotor = new VictorSP(1);
+	
 	RaFin = AnalogInput (3);
 	compress = new Compressor(0);
 	compress->SetClosedLoopControl(true);
