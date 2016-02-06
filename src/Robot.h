@@ -10,7 +10,7 @@
 #define ducksperpulse 0.08707563025
 #define ducksinawinch 0.08707563025
 #define tryingtofixmotor 1 //(Dis)enables the motor correction code- 1 means it will run the correction code
-#define motorCorrectionValue 0.99 //Value the left motor will be mu
+#define motorCorrectionValue 1 //Value the left motor will be mu
 #include "WPILib.h"
 #include <string>
 #include <iostream>
@@ -51,12 +51,15 @@ private:
 	DoubleSolenoid *sLifter;
 	DoubleSolenoid *sPoker;
 	DoubleSolenoid *sLever;
+	DoubleSolenoid *sWinch;
 
-	AnalogInput*RaFin
+	AnalogInput *RaFin;
 
 	DigitalInput *PhoSen;
 
 	VictorSP *winchmot; // PROPERLY NAMED pointer to winch motor
+	VictorSP *lmotor; //New fancy motor thing for that really annoying drift thing because the motors are different slightly
+	VictorSP  *rmotor;
 
 	Compressor *compress; // Pointer to compressor
 
@@ -78,11 +81,12 @@ private:
 	double RaxisX, RaxisY;
 
 	bool yn; // Boolean for state machine
-	bool arms, lever, poker, lifter, phoSensorVal; // Variables to display where their respective parts are
+	bool arms, lever, poker, lifter, phoSensorVal, winchSol; // Variables to display where their respective parts are
 	bool sensor;
 	bool direction; //Holds current "front" direction of robot. False = ball grabber is front, true = track angle is front
 
 	float setWinch, winchHold, ArmEncValue;
+	double lmotspeed, rmotspeed, lmotread, rmotread;
 
 	enum states {
 		ENTER,

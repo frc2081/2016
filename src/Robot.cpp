@@ -37,6 +37,7 @@ void Robot::RobotInit()
 	sLifter = new DoubleSolenoid(6, 7);	// Solenoid for lifting up the robot
 	sPoker = new DoubleSolenoid(2, 3);	// Solenoid for the poker
 	sLever = new DoubleSolenoid(4, 5);	// Solenoid to raise and lower the arms
+	sWinch = new DoubleSolenoid(6, 7); // Solenoid to raise the winch
 
 	//Encoders
 	LEnc = new Encoder(0, 1, false, Encoder::EncodingType::k4X);	// New encoder instance (Left drive)
@@ -46,17 +47,19 @@ void Robot::RobotInit()
 	LEnc->SetDistancePerPulse(ducksperpulse);
 	REnc->SetDistancePerPulse(ducksperpulse);
 
-
 	winchmot = new VictorSP(3);
-	RaFin = AnalogInput (3);
+	lmotor = new VictorSP(0);
+	rmotor = new VictorSP(1);
+	
+	RaFin =  new AnalogInput (3);
 	compress = new Compressor(0);
 	compress->SetClosedLoopControl(true);
 	compress->Start();
 
-
 	PhoSen = new DigitalInput(6);
 	winchHold = 0.12;
 	direction = true;
+	winchSol = false;
 
 	averageGyro = 1.5;
 	gyroCalibrate = 0;
@@ -82,6 +85,8 @@ void Robot::RobotInit()
 		}
 	}*/
 	// Declare new drive on PWM's 0 and 1
+
+
 	drive = new RobotDrive(lmotor, rmotor);
 }
 
@@ -117,10 +122,10 @@ void Robot::TeleopPeriodic()
 	// Get joystick values
 	//Axes are swapped on xbox controllers....seems weird....
 	//Hopefully this is correct?????
-	RaxisY = stick->GetX();
-	RaxisX = stick->GetY();
-	LaxisY = stick->GetRawAxis(4);
-	LaxisX = stick->GetRawAxis(5);
+	LaxisX = stick->GetX();
+	LaxisY = stick->GetY();
+	RaxisX = stick->GetRawAxis(4);
+	RaxisY = stick->GetRawAxis(5);
 	RTrig = stick->GetRawAxis(3);
 	LTrig = stick->GetRawAxis(2);
 
@@ -129,6 +134,7 @@ void Robot::TeleopPeriodic()
 		direction = !direction;
 	}
 
+
 	if(direction == false)
 	{
 		LaxisX *= -1;
@@ -136,6 +142,12 @@ void Robot::TeleopPeriodic()
 		RaxisX *= -1;
 		RaxisY *= -1;
 	}
+
+	SmartDashboard::PutBoolean("Direction: ", direction);
+	SmartDashboard::PutNumber("LaxisX: ", LaxisX);
+	SmartDashboard::PutNumber("LaxisY: ", LaxisY);
+	SmartDashboard::PutNumber("RaxisX: ", RaxisX);
+	SmartDashboard::PutNumber("RaxisY: ", RaxisY);
 	//Get sensor inputs
 	phoSensorVal = PhoSen->Get();
 
@@ -147,26 +159,35 @@ void Robot::TeleopPeriodic()
 	//SmartDashboard::PutNumber("Winch", Trig);
 
 	//Automatic winch control
-	if (bLB == true) //If left bumper on drive controller is held
+	if (bY == false)
 	{
-		setWinch = 0.5; //Set winch to extend at a certain power
-		if (ArmEncValue >= 5000)
+		if (bLB == true) //If left bumper on drive controller is held
 		{
-			setWinch = 0; //When the winch hits the proper height, turn it off
+			winchSol = true;
+			setWinch = 0.5; //Set winch to extend at a certain power
+			if (ArmEncValue >= 5000)
+			{
+				setWinch = 0; //When the winch hits the proper height, turn it off
+			}
 		}
-	}
 
-	if (bRB == true) //If the right bumper on drive controller is held
-	{
-		setWinch = -0.5; //Set winch to retract at a certain power
-		if (ArmEncValue <= 200)
+		if (bRB == true) //If the right bumper on drive controller is held
 		{
-			setWinch = winchHold; //If the winch has raised the robot to a certian value, set the winch to the winch hold value and turn off the treads
-			drive->Drive(0, 0);
-		}
-		if (ArmEncValue <= 500) //If the winch has raised the robot to a certian value, turn on the treads
-		{
-			drive->Drive(0.5, 0);
+			winchSol = false;
+			setWinch = -0.5; //Set winch to retract at a certain power
+			if (ArmEncValue <= 200)
+			{
+				setWinch = winchHold; //If the winch has raised the robot to a certian value, set the winch to the winch hold value and turn off the treads
+				//drive->Drive(0, 0);
+				lmotspeed = 0;
+				rmotspeed = 0;
+			}
+			if (ArmEncValue <= 500) //If the winch has raised the robot to a certian value, turn on the treads
+			{
+				//drive->Drive(0.5, 0);
+				lmotspeed = 0.5;
+				rmotspeed = 0.5;
+			} else {lmotspeed = 0; rmotspeed = 0;}
 		}
 	}
 
@@ -174,7 +195,7 @@ void Robot::TeleopPeriodic()
 	arms = part of the robot that grabs the ball
 	lever = part of robot that moves the arms inside and outside the robot
 	poker = part of robot on front that extends outward
-	lifter = part of robot that will extend beneath the robot to life it up
+	lifter = part of robot that will extend beneath the robot to lift it up
 
 	ARMS
 		true = open
@@ -288,8 +309,8 @@ void Robot::TeleopPeriodic()
 	}
 	if (bY == true)
 	{
-		//When Y button is pressed, keep a minimum hold power applied to the winch. Otherwise, run winch like normal
-		if (bRB == false) //If Y button is not pressed
+		//When X button is pressed, keep a minimum hold power applied to the winch. Otherwise, run winch like normal
+		if (bX == false) //If X button is not pressed
 		{
 			setWinch = Trig; //Set winch power to the trigger value
 		}
@@ -301,6 +322,12 @@ void Robot::TeleopPeriodic()
 			}
 			else //If the trigger value is less than the hold value, 0.05, set it to 0.05
 			{setWinch = winchHold;}
+		}
+		if (bRB == true && bRBHold == false)
+		{
+			winchSol = !winchSol;
+			//lmotspeed = 0;
+			//rmotspeed = 0;
 		}
 	}
 	// Creates two integers: t and Tcurve
@@ -321,6 +348,7 @@ void Robot::TeleopPeriodic()
 	SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
 	SmartDashboard::PutNumber("Current State: ", currentState);
 	SmartDashboard::PutNumber("Arm Encoder: ", ArmEncValue);
+	SmartDashboard::PutBoolean("Winch Solenoid: ", winchSol);
 	if(tryingtofixmotor == 1) {
 		double LEncval = LEnc->Get();
 		double REncval = REnc->Get();
@@ -336,15 +364,30 @@ void Robot::TeleopPeriodic()
 	else {sLever->Set(DoubleSolenoid::kReverse);}
 	if(poker == true) {sPoker->Set(DoubleSolenoid::kForward);}
 	else {sPoker->Set(DoubleSolenoid::kReverse);}
+	if (winchSol == true) {sWinch->Set(DoubleSolenoid::kForward);}
+	else {sWinch->Set(DoubleSolenoid::kReverse);}
 	
-	drive->ArcadeDrive(LaxisY, RaxisX);
+	//ArcadeDrive method documentation LIES.
+	//Turn value is first argument, move value is 2nd argument
+	drive->ArcadeDrive(RaxisX, LaxisY);
 	winchmot->Set(setWinch);
 
+	if (bRB == true && bY == false) {
+	lmotor->Set(lmotspeed);
+	rmotor->Set(rmotspeed);
+	}
+	lmotread = lmotor->Get();
+	rmotread = rmotor->Get();
+	SmartDashboard::PutNumber("Left Motor: ", lmotread);
+	SmartDashboard::PutNumber("Right Motor: ", rmotread);
 	if(tryingtofixmotor == 1) {
 		double tempMotorVal = lmotor->Get();
 		tempMotorVal *= motorCorrectionValue;
 		lmotor->Set(tempMotorVal);
 	}
+
+	SmartDashboard::PutNumber("L Motor Command: ", lmotor->Get());
+	SmartDashboard::PutNumber("R Motor Command: ", rmotor->Get());
 }
 
 void Robot::TestPeriodic()
