@@ -48,7 +48,7 @@ void Robot::RobotInit()
 
 
 	winchmot = new VictorSP(3);
-	RaFin = AnalogInput (3);
+	RaFin = new AnalogInput (3);
 	compress = new Compressor(0);
 	compress->SetClosedLoopControl(true);
 	compress->Start();
@@ -82,7 +82,7 @@ void Robot::RobotInit()
 		}
 	}*/
 	// Declare new drive on PWM's 0 and 1
-	drive = new RobotDrive(lmotor, rmotor);
+	drive = new RobotDrive(/*lmotor*/0, /*rmotor*/1);
 }
 
 void Robot::AutonomousInit()
@@ -159,11 +159,13 @@ void Robot::TeleopPeriodic()
 		if (ArmEncValue <= 200)
 		{
 			setWinch = winchHold; //If the winch has raised the robot to a certian value, set the winch to the winch hold value and turn off the treads
-			drive->Drive(0, 0);
+			//lmotspeed = 0;
+			//rmotspeed = 0;
 		}
 		if (ArmEncValue <= 500) //If the winch has raised the robot to a certian value, turn on the treads
 		{
-			drive->Drive(0.5, 0);
+			//lmotspeed = 0.5;
+			//rmotspeed = 0.5;
 		}
 	}
 
@@ -336,6 +338,13 @@ void Robot::TeleopPeriodic()
 	
 	drive->ArcadeDrive(LaxisY, RaxisX);
 	winchmot->Set(setWinch);
+	//lmotor->Set(lmotspeed);
+	//rmotor->Set(rmotspeed);
+
+	//lmotread = lmotor->Get();
+	//rmotread = rmotor->Get();
+	//SmartDashboard::PutNumber("Left motor: ", lmotread);
+	//SmartDashboard::PutNumber("Right motor; ", rmotread);
 
 	if(tryingtofixmotor == 1) {
 		double tempMotorVal = lmotor->Get();

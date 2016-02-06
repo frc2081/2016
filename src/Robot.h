@@ -86,6 +86,8 @@ private:
 
 	float setWinch, winchHold, ArmEncValue;
 
+	//float lmotspeed, rmotspeed, lmotread, rmotread;
+
 	enum states {
 		ENTER,
 		IDLE,
