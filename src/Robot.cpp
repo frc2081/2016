@@ -150,7 +150,7 @@ void Robot::TeleopPeriodic()
 	//SmartDashboard::PutNumber("Winch", Trig);
 
 	//Automatic winch control
-	if (bY != true)
+	if (bY == false)
 	{
 		if (bLB == true) //If left bumper on drive controller is held
 		{
@@ -317,8 +317,8 @@ void Robot::TeleopPeriodic()
 		if (bRB == true && bRBHold == false)
 		{
 			winchSol = !winchSol;
-			lmotspeed = 0;
-			rmotspeed = 0;
+			//lmotspeed = 0;
+			//rmotspeed = 0;
 		}
 	}
 	// Creates two integers: t and Tcurve
@@ -361,7 +361,7 @@ void Robot::TeleopPeriodic()
 	drive->ArcadeDrive(LaxisY, RaxisX);
 	winchmot->Set(setWinch);
 
-	if (bRB == true) {
+	if (bRB == true && bY == false) {
 	lmotor->Set(lmotspeed);
 	rmotor->Set(rmotspeed);
 	}
