@@ -84,7 +84,7 @@ void Robot::RobotInit()
 	}*/
 	// Declare new drive on PWM's 0 and 1
 
-	tryingtofixmotor = 0;
+
 	drive = new RobotDrive(lmotor, rmotor);
 }
 
@@ -117,10 +117,10 @@ void Robot::TeleopPeriodic()
 	// Get joystick values
 	//Axes are swapped on xbox controllers....seems weird....
 	//Hopefully this is correct?????
-	LaxisY = stick->GetX();
-	LaxisX = stick->GetY();
-	RaxisY = stick->GetRawAxis(4);
-	RaxisX = stick->GetRawAxis(5);
+	LaxisX = stick->GetX();
+	LaxisY = stick->GetY();
+	RaxisX = stick->GetRawAxis(4);
+	RaxisY = stick->GetRawAxis(5);
 	RTrig = stick->GetRawAxis(3);
 	LTrig = stick->GetRawAxis(2);
 
@@ -344,7 +344,9 @@ void Robot::TeleopPeriodic()
 	if(poker == true) {sPoker->Set(DoubleSolenoid::kForward);}
 	else {sPoker->Set(DoubleSolenoid::kReverse);}
 	
-	drive->ArcadeDrive(LaxisY, RaxisX);
+	//ArcadeDrive method documentation LIES.
+	//Turn value is first argument, move value is 2nd argument
+	drive->ArcadeDrive(RaxisX, LaxisY);
 	winchmot->Set(setWinch);
 
 	if(tryingtofixmotor == 1) {
