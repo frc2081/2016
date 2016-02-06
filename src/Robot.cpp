@@ -319,12 +319,12 @@ void Robot::TeleopPeriodic()
 	SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
 	SmartDashboard::PutNumber("Current State: ", currentState);
 	SmartDashboard::PutNumber("Arm Encoder: ", ArmEncValue);
-
-
-	//Set all outputs
-	//winchmot->Set(Tcurve/100);
-	drive->ArcadeDrive(LaxisY, RaxisX);
-	winchmot->Set(setWinch);
+	if(tryingtofixmotor == 1) {
+		double LEncval = LEnc->Get();
+		double REncval = REnc->Get();
+		SmartDashboard::PutNumber("Left motor encoder: \n", LEncval);
+		SmartDashboard::PutNumber("Right motor encoder: \n", REncval);
+	}
 
 	if(lifter == true) {sLifter->Set(DoubleSolenoid::kForward);}
 	else {sLifter->Set(DoubleSolenoid::kReverse);}
@@ -334,6 +334,15 @@ void Robot::TeleopPeriodic()
 	else {sLever->Set(DoubleSolenoid::kReverse);}
 	if(poker == true) {sPoker->Set(DoubleSolenoid::kForward);}
 	else {sPoker->Set(DoubleSolenoid::kReverse);}
+	
+	drive->ArcadeDrive(LaxisY, RaxisX);
+	winchmot->Set(setWinch);
+
+	if(tryingtofixmotor == 1) {
+		double tempMotorVal = lmotor->Get();
+		tempMotorVal *= motorCorrectionValue;
+		lmotor->Set(tempMotorVal);
+	}
 }
 
 void Robot::TestPeriodic()
