@@ -101,6 +101,9 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
+	//Pressure Snsor Code
+	int Pres = PreSen->GetVoltage();
+
 	//Range Finder Math
 	float Vm = RaFin->GetVoltage();
 	float range = (Vm*1000)*((5/4.88)*.03937);
