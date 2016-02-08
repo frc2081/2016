@@ -93,62 +93,120 @@ void Robot::RobotInit()
 
 void Robot::AutonomousInit()
 {
+	autoState = INIT;
+	//TODO: Must replace this with some code to detect when crossing is actually complete
+	autoState = CROSSINGCOMPLETE;
+
+
 	gyro->Reset();
 
+	autoLeftMot = 0;
+	autoRightMot = 0;
+	towerAngle = 45;
+
+	startXPos = 0;
+	if(autoPosition == 1) {
+		startYPos = -50;
+	}else if(autoPosition == 2) {
+		startYPos = -25;
+	}else if(autoPosition == 3) {
+		startYPos = 0;
+	}else if(autoPosition == 4) {
+		startYPos = -25;
+	}else if(autoPosition == 5) {
+		startYPos =  50;
+	}
 }
 
 void Robot::AutonomousPeriodic()
 {
 	//Autonomous code for positioning
 	//Number can be 1-5
-	if((LEnc->Get() < 850) && (REnc->Get() < 850)) {
-		drive->Drive(1, 0);
-	} else {
-		atDefense= TRUE;
-	}
-	if(autoPosition == 1) {
+	gyroAngle = gyro->GetAngle();
+	range = (RaFin->GetVoltage()*1000)*((5/4.88)*.03937);
+	distanceTravelled = (REnc->GetDistance() + LEnc->GetDistance())/2;
 
-	}
-	if(autoPosition == 2) {
+	if(range > 50)
+	{
+		if(autoState == CROSSINGCOMPLETE)
+		{
+			xPos = distanceTravelled;
 
-	}
-	if(autoPosition == 3) {
+			if(yPos < targetYPos) {turnDirection = 1;}
+			else {turnDirection = -1;}
 
-	}
-	if(autoPosition == 4) {
+			autoState = FIRSTTURN;
+		}
+		else if(autoState == FIRSTTURN)
+		{
+			autoLeftMot = .5 * turnDirection;
+			autoRightMot = -.5 * turnDirection;
 
-	}
-	if(autoPosition == 5) {
+			//TODO: Might need to stop turning before 90 degrees sue to inertia
+			if(gyroAngle < (90*turnDirection) + 1 && gyroAngle > (90*turnDirection) -1)
+			{
+				autoState = DRIVETOTARGETY;
+				autoLeftMot = 0;
+				autoRightMot = 0;
+			}
+		}
+		else if(autoState == DRIVETOTARGETY)
+		{
+			autoLeftMot = 1;
+			autoRightMot = 1;
+			if(yPos > targetYPos - 1 && yPos < targetYPos + 1)
+			{
+				autoState = SECONDTURN;
+				autoLeftMot = 0;
+				autoRightMot = 0;
+				//Always need to turn the opposite of the direction we turned before
+				turnDirection *= -1;
+			}
+		}
+		else if(autoState == SECONDTURN)
+		{
+			autoLeftMot = .5 * turnDirection;
+			autoRightMot = -.5 * turnDirection;
 
-	}
-	//Autonomous code for defenses
-	if(autoDefense == PORTCULLIS && atDefense == TRUE) {
+			//TODO: Might need to stop turning before 90 degrees sue to inertia
+			if(gyroAngle < 1 && gyroAngle > -1)
+			{
+				autoState = DRIVETOTARGETX;
+				autoLeftMot = 0;
+				autoRightMot = 0;
+			}
+		}
+		else if(autoState == DRIVETOTARGETX)
+		{
+			autoLeftMot = 1;
+			autoRightMot = 1;
+			if(xPos > targetXPos - 1 )
+			{
+				autoState = THIRDTURN;
+				autoLeftMot = 0;
+				autoRightMot = 0;
+			}
+		}
+		else if(autoState == THIRDTURN)
+		{
+			autoLeftMot = .5 * turnDirection;
+			autoRightMot = -.5 * turnDirection;
 
+			//TODO: Might need to stop turning before 90 degrees sue to inertia
+			if(gyroAngle < towerAngle*turnDirection + 1 && gyroAngle > towerAngle*turnDirection -1)
+			{
+				autoState = APPROACHINGTOWER;
+				autoLeftMot = 0;
+				autoRightMot = 0;
+			}
+		}
 	}
-	if(autoDefense == FRENCHTHING && atDefense == TRUE) {
+	else //Stop if the path is not clear - don't hit another robot
+	{
+		autoLeftMot = 0;
+		autoRightMot = 0;
+	}
 
-	}
-	if(autoDefense == MOAT && atDefense == TRUE) {
-		drive->Drive(1, 0);
-	}
-	if(autoDefense == RAMPART && atDefense == TRUE) {
-		drive->Drive(1, 0);
-	}
-	if(autoDefense == DRAWBRIDGE && atDefense == TRUE) {
-
-	}
-	if(autoDefense == SALLYPORT && atDefense == TRUE) {
-
-	}
-	if(autoDefense == ROCKWALL && atDefense == TRUE) {
-		drive->Drive(1, 0);
-	}
-	if(autoDefense == ROUGHT && atDefense == TRUE) {
-		drive->Drive(1, 0);
-	}
-	if(autoDefense == LOWBAR && atDefense == TRUE) {
-		drive->Drive(1, 0);
-	}
 	drive->ArcadeDrive(autoLeftMot, autoRightMot);
 	lmotor->Set(lmotor->Get() * motorCorrectionValue);
 }
@@ -160,8 +218,7 @@ void Robot::TeleopInit()
 void Robot::TeleopPeriodic()
 {
 	//Range Finder Math
-	float Vm = RaFin->GetVoltage();
-	float range = (Vm*1000)*((5/4.88)*.03937);
+	range = (RaFin->GetVoltage()*1000)*((5/4.88)*.03937);
 	SmartDashboard::PutNumber("Ultrasonic", range);
 
 	//Update all joystick buttons

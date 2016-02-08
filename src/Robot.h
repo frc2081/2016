@@ -114,7 +114,33 @@ private:
 		LOWBAR
 	};
 
+	enum autoStates {
+			INIT,
+			CROSSINGDEFENSE,
+			CROSSINGCOMPLETE,
+			FIRSTTURN,
+			DRIVETOTARGETY,
+			SECONDTURN,
+			DRIVETOTARGETX,
+			THIRDTURN,
+			NAVIGATIONCOMPLETE,
+			APPROACHINGTOWER,
+			SHOOTING,
+		};
+
 	states currentState;
+
+	double startXPos, startYPos;
+	double targetXPos, targetYPos;
+	double xPos, yPos;
+	autoStates autoState;
+	double distanceTravelled;
+	double lEncoderDist, rEncoderDist;
+	double range;
+	double targetAngle;
+	double turnDirection;
+	double towerAngle;
+
 	void RobotInit(); // Scopes/initialization for robot functions
 	void AutonomousInit();
 	void AutonomousPeriodic();
