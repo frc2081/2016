@@ -124,15 +124,15 @@ void Robot::TeleopPeriodic()
 
 	//Pressure Sensor Code
 	int Pres = PreSen->GetVoltage();
-
 	if(Pres>=45)
 	{
 		pressGood = true;
-		SmartDashboard::PutBoolean("Pressure is Good!", pressGood);
 	}
-	else{ pressGood = false;}
-		// 45 psi is good
-		SmartDashboard::PutNumber("Pressure: ", Pres);
+	else
+	{
+		pressGood = false;
+	}
+
 
 	//Range Finder Math
 	float Vm = RaFin->GetVoltage();
@@ -387,6 +387,8 @@ void Robot::TeleopPeriodic()
 	SmartDashboard::PutBoolean("Winch Solenoid: ", winchSol);
 	SmartDashboard::PutNumber("Ultrasonic", range);
 	SmartDashboard::PutBoolean("dirChange: ", dirChange);
+	SmartDashboard::PutBoolean("Pressure is Good!", pressGood);
+	SmartDashboard::PutNumber("Pressure: ", Pres);
 }
 
 void Robot::TestPeriodic()
