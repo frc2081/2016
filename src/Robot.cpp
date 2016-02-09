@@ -33,11 +33,11 @@ void Robot::RobotInit()
 
 
 	//Solenoids
-	sArm = new DoubleSolenoid(0, 1);	// Solenoid for the opening and closing of the arms
-	sLifter = new DoubleSolenoid(6, 7);	// Solenoid for lifting up the robot
-	sPoker = new DoubleSolenoid(2, 3);	// Solenoid for the poker
-	sLever = new DoubleSolenoid(4, 5);	// Solenoid to raise and lower the arms
-	sWinch = new DoubleSolenoid(6, 7); // Solenoid to raise the winch
+	sArm = new DoubleSolenoid(0, 0, 1);	// Solenoid for the opening and closing of the arms
+	sLifter = new DoubleSolenoid(0, 6, 7);	// Solenoid for lifting up the robot
+	sPoker = new DoubleSolenoid(0, 2, 3);	// Solenoid for the poker
+	sLever = new DoubleSolenoid(0, 4, 5);	// Solenoid to raise and lower the arms
+	sWinch = new DoubleSolenoid(1, 0, 1); // Solenoid to raise the winch
 
 	//Encoders
 	LEnc = new Encoder(0, 1, false, Encoder::EncodingType::k4X);	// New encoder instance (Left drive)
@@ -125,10 +125,12 @@ void Robot::TeleopPeriodic()
 	//Pressure Sensor Code
 	int Pres = PreSen->GetVoltage();
 
-	if(Pres>=45) {
-			pressGood = true;
-			SmartDashboard::PutBoolean("Pressure is Good!", pressGood);
-		}
+	if(Pres>=45)
+	{
+		pressGood = true;
+		SmartDashboard::PutBoolean("Pressure is Good!", pressGood);
+	}
+	else{ pressGood = false;}
 		// 45 psi is good
 		SmartDashboard::PutNumber("Pressure: ", Pres);
 
