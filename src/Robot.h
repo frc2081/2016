@@ -93,6 +93,11 @@ private:
 	double RaxisX, RaxisY;
 	double autoLeftMot, autoRightMot;
 
+	int LEncAuto, REncAuto;
+
+	float autoGyro, autoGyroComp;
+	bool autoStep1, autoStep2, autoStep3;
+
 	enum states {
 		ENTER,
 		IDLE,

@@ -69,9 +69,10 @@ void Robot::RobotInit()
 
 	atDefense = FALSE;
 	crossedDefense = FALSE;
+	autoPosition = 1;
 
 	/*while (gyroCalibrate < 5){
-		while (averageGyro >= 1) {
+		while (averageGyro >= 0.5) {
 			gyro->Calibrate();
 			gyroAngle = gyro->GetAngle();
 			Wait(100);
@@ -83,7 +84,7 @@ void Robot::RobotInit()
 			averageGyro = (gyroAngle + gyroAngle2 + gyroAngle3 + gyroAngle4) / 4;
 			gyroCalibrate += 1;
 		}
-		if (averageGyro < 0.5) {
+		if (averageGyro <= 0.5) {
 			break;
 		}
 	}*/
@@ -99,29 +100,13 @@ void Robot::AutonomousInit()
 
 void Robot::AutonomousPeriodic()
 {
-	//Autonomous code for positioning
-	//Number can be 1-5
+	/*
+	//Autonomous code for defenses
 	if((LEnc->Get() < 850) && (REnc->Get() < 850)) {
 		drive->Drive(1, 0);
 	} else {
 		atDefense= TRUE;
 	}
-	if(autoPosition == 1) {
-
-	}
-	if(autoPosition == 2) {
-
-	}
-	if(autoPosition == 3) {
-
-	}
-	if(autoPosition == 4) {
-
-	}
-	if(autoPosition == 5) {
-
-	}
-	//Autonomous code for defenses
 	if(autoDefense == PORTCULLIS && atDefense == TRUE) {
 
 	}
@@ -151,6 +136,56 @@ void Robot::AutonomousPeriodic()
 	}
 	drive->ArcadeDrive(autoLeftMot, autoRightMot);
 	lmotor->Set(lmotor->Get() * motorCorrectionValue);
+*/
+	LEncAuto = LEnc->Get();
+	REncAuto = REnc->Get();
+	LEnc->Reset();
+	REnc->Reset();
+	//Autonomous code for positioning
+	//Number can be 1-5
+	if (autoPosition == 1) {
+		if (LEnc->Get() <= 1000/* && REnc->Get() <= 1000*/) {
+			drive->Drive(1, 0);
+		} else {autoStep1 = true; autoGyro = gyro->GetAngle(); drive->Drive(0, 0);}
+
+		if (autoStep1 == true) {
+			autoGyroComp = gyro->GetAngle();
+			drive->Drive(0, 1);
+			if (autoGyroComp >= (90 + autoGyro)) {
+				autoStep2 = true;
+				drive->Drive(0, 0);
+			}
+		}
+		if (autoStep2 == true) {
+			if (LEnc->Get() >= 1200/* && REnc->Get() >= 1200*/) {
+				drive->Drive(1, 0);
+			} else {autoStep3 = true;}
+		}
+		if (autoStep3 == true) {
+			sLever->Set(DoubleSolenoid::kForward);
+			sArm->Set(DoubleSolenoid::kForward);
+			sPoker->Set(DoubleSolenoid::kForward);
+			autoStep3 = false;
+		}
+	}
+	if(autoPosition == 2) {
+
+	}
+	if(autoPosition == 3) {
+
+	}
+	if(autoPosition == 4) {
+
+	}
+	if(autoPosition == 5) {
+
+	}
+	SmartDashboard::PutBoolean("Step 1: ", autoStep1);
+	SmartDashboard::PutBoolean("Step 2: ", autoStep2);
+	SmartDashboard::PutBoolean("Step 3: ", autoStep3);
+	SmartDashboard::PutNumber("Gyro comp: ", autoGyroComp);
+	SmartDashboard::PutNumber("Gyro: ", autoGyro);
+	SmartDashboard::PutNumber("Left Encoder: ", LEnc->Get());
 }
 
 void Robot::TeleopInit()
