@@ -106,6 +106,22 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
+	//ArcadeDrive method documentation LIES.
+	//Turn value is first argument, move value is 2nd argument
+	drive->ArcadeDrive(RaxisX, LaxisY);
+	lmotspeed = lmotor->Get();
+	rmotspeed = rmotor->Get();
+
+	if (bY == true)
+	{
+		winchMan = true;
+	} else {winchMan = false;}
+
+	if (bLS2 == true)
+	{
+		stateMan = true;
+	} else {stateMan = false;}
+
 	//Pressure Sensor Code
 	int Pres = PreSen->GetVoltage();
 
@@ -119,12 +135,10 @@ void Robot::TeleopPeriodic()
 	//Range Finder Math
 	float Vm = RaFin->GetVoltage();
 	float range = (Vm*1000)*((5/4.88)*.03937);
-	SmartDashboard::PutNumber("Ultrasonic", range);
 
 	//Update all joystick buttons
 	checkbuttons();
 	ArmEncValue = ArmEnc->Get();
-	SmartDashboard::PutNumber("Gyro Calibration: ", gyroCalibrate);
 	gyroAngle = gyro->GetAngle();
 	// Get joystick values
 	//Axes are swapped on xbox controllers....seems weird....
@@ -150,11 +164,6 @@ void Robot::TeleopPeriodic()
 		RaxisY *= -1;
 	}
 
-	SmartDashboard::PutBoolean("Direction: ", direction);
-	SmartDashboard::PutNumber("LaxisX: ", LaxisX);
-	SmartDashboard::PutNumber("LaxisY: ", LaxisY);
-	SmartDashboard::PutNumber("RaxisX: ", RaxisX);
-	SmartDashboard::PutNumber("RaxisY: ", RaxisY);
 	//Get sensor inputs
 	phoSensorVal = PhoSen->Get();
 
@@ -163,12 +172,10 @@ void Robot::TeleopPeriodic()
 	LTrig *= -1;
 	Trig = LTrig + RTrig;
 
-	//SmartDashboard::PutNumber("Winch", Trig);
-
 	//Automatic winch control
-	if (bY == false)
+	if (winchMan == false)
 	{
-		if (bLB == true) //If left bumper on drive controller is held
+		if (bRB == true) //If winch is commanded to auto-extend
 		{
 			winchSol = true;
 			setWinch = 0.5; //Set winch to extend at a certain power
@@ -178,7 +185,7 @@ void Robot::TeleopPeriodic()
 			}
 		}
 
-		if (bRB == true) //If the right bumper on drive controller is held
+		if (bLB == true) //If winch is commanded to auto-retract
 		{
 			winchSol = false;
 			setWinch = -0.5; //Set winch to retract at a certain power
@@ -221,7 +228,7 @@ void Robot::TeleopPeriodic()
 		kForward = true
 		kReverse = false
 	*/
-	if (bLS2 == false)
+	if (stateMan == false)
 	{
 		switch (currentState)
 		{
@@ -290,7 +297,7 @@ void Robot::TeleopPeriodic()
 	}
 
 	//Manual mode controls engaged when left stick is held down
-	if (bLS2 == true)
+	if (stateMan == true)
 	{
 			if (bY2 == true && bY2Hold == false)
 			{
@@ -314,7 +321,7 @@ void Robot::TeleopPeriodic()
 
 			currentState = ENTER;
 	}
-	if (bY == true)
+	if (winchMan == true)
 	{
 		//When X button is pressed, keep a minimum hold power applied to the winch. Otherwise, run winch like normal
 		if (bX == false) //If X button is not pressed
@@ -333,35 +340,19 @@ void Robot::TeleopPeriodic()
 		if (bRB == true && bRBHold == false)
 		{
 			winchSol = !winchSol;
-			//lmotspeed = 0;
-			//rmotspeed = 0;
 		}
 	}
-	// Creates two integers: t and Tcurve
-	//int t, Tcurve;
-	// Multiplies trigger value by 100 to get percent
-	//t = Trig * 100;
-	// Creates parabolic throttle curve with equation of y=0.000001x^4
-	//Tcurve = 0.000001 * pow(t, 4);
-	// Creates linear throttle curve
-	//Tcurve = abs(t);
 
-	SmartDashboard::PutNumber("Winch", setWinch);
-	//SmartDashboard::PutNumber("Edited", Tcurve);
-	SmartDashboard::PutBoolean("Arms: \n", arms);
-	SmartDashboard::PutBoolean("Lever: \n", lever);
-	SmartDashboard::PutBoolean("Poker: \n", poker);
-	SmartDashboard::PutBoolean("Lifter: \n", lifter);
-	SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
-	SmartDashboard::PutNumber("Current State: ", currentState);
-	SmartDashboard::PutNumber("Arm Encoder: ", ArmEncValue);
-	SmartDashboard::PutBoolean("Winch Solenoid: ", winchSol);
-	if(tryingtofixmotor == 1) {
-		double LEncval = LEnc->Get();
-		double REncval = REnc->Get();
-		SmartDashboard::PutNumber("Left motor encoder: \n", LEncval);
-		SmartDashboard::PutNumber("Right motor encoder: \n", REncval);
-	}
+	/*
+	//Creates two integers: t and Tcurve
+	int t, Tcurve;
+	 Multiplies trigger value by 100 to get percent
+	t = Trig * 100;
+	 Creates parabolic throttle curve with equation of y=0.000001x^4
+	Tcurve = 0.000001 * pow(t, 4);
+	 Creates linear throttle curve
+	Tcurve = abs(t);
+	*/
 
 	if(lifter == true) {sLifter->Set(DoubleSolenoid::kForward);}
 	else {sLifter->Set(DoubleSolenoid::kReverse);}
@@ -374,27 +365,26 @@ void Robot::TeleopPeriodic()
 	if (winchSol == true) {sWinch->Set(DoubleSolenoid::kForward);}
 	else {sWinch->Set(DoubleSolenoid::kReverse);}
 	
-	//ArcadeDrive method documentation LIES.
-	//Turn value is first argument, move value is 2nd argument
-	drive->ArcadeDrive(RaxisX, LaxisY);
-	winchmot->Set(setWinch);
 
-	if (bRB == true && bY == false) {
+	//Apply drive train mechanical compensation coeffcient
+	lmotspeed *= motorCorrectionValue;
+	winchmot->Set(setWinch);
 	lmotor->Set(lmotspeed);
 	rmotor->Set(rmotspeed);
-	}
-	lmotread = lmotor->Get();
-	rmotread = rmotor->Get();
-	SmartDashboard::PutNumber("Left Motor: ", lmotread);
-	SmartDashboard::PutNumber("Right Motor: ", rmotread);
-	if(tryingtofixmotor == 1) {
-		double tempMotorVal = lmotor->Get();
-		tempMotorVal *= motorCorrectionValue;
-		lmotor->Set(tempMotorVal);
-	}
 
-	SmartDashboard::PutNumber("L Motor Command: ", lmotor->Get());
-	SmartDashboard::PutNumber("R Motor Command: ", rmotor->Get());
+	SmartDashboard::PutNumber("Left Motor Final Command: ", lmotor->Get());
+	SmartDashboard::PutNumber("Right Motor Final Command: ", rmotor->Get());
+	SmartDashboard::PutNumber("Winch", setWinch);
+	SmartDashboard::PutBoolean("Arms: \n", arms);
+	SmartDashboard::PutBoolean("Lever: \n", lever);
+	SmartDashboard::PutBoolean("Poker: \n", poker);
+	SmartDashboard::PutBoolean("Lifter: \n", lifter);
+	SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
+	SmartDashboard::PutNumber("Current State: ", currentState);
+	SmartDashboard::PutNumber("Arm Encoder: ", ArmEncValue);
+	SmartDashboard::PutBoolean("Winch Solenoid: ", winchSol);
+	SmartDashboard::PutNumber("Ultrasonic", range);
+	SmartDashboard::PutBoolean("dirChange: ", dirChange);
 }
 
 void Robot::TestPeriodic()
