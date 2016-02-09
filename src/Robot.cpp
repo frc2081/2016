@@ -70,23 +70,6 @@ void Robot::RobotInit()
 	atDefense = FALSE;
 	crossedDefense = FALSE;
 
-	/*while (gyroCalibrate < 5){
-		while (averageGyro >= 1) {
-			gyro->Calibrate();
-			gyroAngle = gyro->GetAngle();
-			Wait(100);
-			gyroAngle2 = gyro->GetAngle();
-			Wait(100);
-			gyroAngle3 = gyro->GetAngle();
-			Wait(100);
-			gyroAngle4 = gyro->GetAngle();
-			averageGyro = (gyroAngle + gyroAngle2 + gyroAngle3 + gyroAngle4) / 4;
-			gyroCalibrate += 1;
-		}
-		if (averageGyro < 0.5) {
-			break;
-		}
-	}*/
 	// Declare new drive on PWM's 0 and 1
 	drive = new RobotDrive(lmotor, rmotor);
 }
@@ -94,60 +77,69 @@ void Robot::RobotInit()
 void Robot::AutonomousInit()
 {
 	gyro->Reset();
-
 }
 
 void Robot::AutonomousPeriodic()
 {
-	//Autonomous code for positioning
-	//Number can be 1-5
-	if((LEnc->Get() < 850) && (REnc->Get() < 850)) {
+	Ltest += 2.5;
+	Rtest += 2.4;
+	SmartDashboard::PutNumber("Ltest:", Ltest);
+	SmartDashboard::PutNumber("Rtest:", Rtest);
+	//if((LEnc->Get() < 850) && (REnc->Get() < 850)) {
+	if((Ltest < 850) && (Rtest < 850)) {
 		drive->Drive(1, 0);
 	} else {
 		atDefense= TRUE;
 	}
-	if(autoPosition == 1) {
-
-	}
-	if(autoPosition == 2) {
-
-	}
-	if(autoPosition == 3) {
-
-	}
-	if(autoPosition == 4) {
-
-	}
-	if(autoPosition == 5) {
-
-	}
 	//Autonomous code for defenses
 	if(autoDefense == PORTCULLIS && atDefense == TRUE) {
-
+		//???
 	}
 	if(autoDefense == FRENCHTHING && atDefense == TRUE) {
-
+		//Arms?
+	}
+	if(autoDefense == DRAWBRIDGE && atDefense == TRUE) {
+		//Can't do?
+	}
+	if(autoDefense == SALLYPORT && atDefense == TRUE) {
+		//???
 	}
 	if(autoDefense == MOAT && atDefense == TRUE) {
-		drive->Drive(1, 0);
+		if(LEnc->Get() && LEnc->Get()) {
+			drive->Drive(1, 0);
+		}
 	}
 	if(autoDefense == RAMPART && atDefense == TRUE) {
 		drive->Drive(1, 0);
-	}
-	if(autoDefense == DRAWBRIDGE && atDefense == TRUE) {
-
-	}
-	if(autoDefense == SALLYPORT && atDefense == TRUE) {
 
 	}
 	if(autoDefense == ROCKWALL && atDefense == TRUE) {
 		drive->Drive(1, 0);
+
 	}
 	if(autoDefense == ROUGHT && atDefense == TRUE) {
 		drive->Drive(1, 0);
+
 	}
 	if(autoDefense == LOWBAR && atDefense == TRUE) {
 		drive->Drive(1, 0);
+
+	}
+	//Autonomous code for positioning
+	if(autoPosition == 1 && crossedDefense == TRUE) {
+
+	}
+	if(autoPosition == 2 && crossedDefense == TRUE) {
+
+	}
+	if(autoPosition == 3 && crossedDefense == TRUE) {
+
+	}
+	if(autoPosition == 4 && crossedDefense == TRUE) {
+
+	}
+	if(autoPosition == 5 && crossedDefense == TRUE) {
+
 	}
 	drive->ArcadeDrive(autoLeftMot, autoRightMot);
 	lmotor->Set(lmotor->Get() * motorCorrectionValue);

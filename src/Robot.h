@@ -65,6 +65,7 @@ private:
 	ADXRS450_Gyro *gyro;
 
 	//Variables for autonomous
+	double Ltest, Rtest;
 	int autoPosition;
 	int autoDefense;
 	bool atDefense, crossedDefense;
