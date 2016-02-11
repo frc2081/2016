@@ -1,5 +1,4 @@
 # FIRST Robotics 2016 Code
----
 
 #### Controller Mapping
 * Controller 1
