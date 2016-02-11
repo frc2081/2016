@@ -67,9 +67,20 @@ void Robot::RobotInit()
 	gyro->Reset();
 	gyro->Calibrate();
 
-	atDefense = FALSE;
+	autoEncSaved = false;
+	gyroSaved = false;
+	autoStep1 = false;
+	autoStep2 = false;
+	autoStep3 = false;
+	autoStep1Comp = false;
+	autoStep2Comp = false;
+	autoStep3Comp = false;
+	//False is goal A, true is goal B
+	autoGoal = false;
+
+	atDefense = TRUE;
 	crossedDefense = FALSE;
-	autoPosition = 1;
+	autoPosition = 2 ;
 
 	/*while (gyroCalibrate < 5){
 		while (averageGyro >= 0.5) {
@@ -137,54 +148,264 @@ void Robot::AutonomousPeriodic()
 	drive->ArcadeDrive(autoLeftMot, autoRightMot);
 	lmotor->Set(lmotor->Get() * motorCorrectionValue);
 */
-	LEncAuto = LEnc->Get();
-	REncAuto = REnc->Get();
-	LEnc->Reset();
-	REnc->Reset();
+	if (autoEncSaved == false) {
+		LEncAuto = LEnc->Get();
+		REncAuto = REnc->Get();
+		LEnc->Reset();
+		REnc->Reset();
+		autoEncSaved = true;
+	}
 	//Autonomous code for positioning
 	//Number can be 1-5
-	if (autoPosition == 1) {
-		if (LEnc->Get() <= 1000/* && REnc->Get() <= 1000*/) {
-			drive->Drive(1, 0);
-		} else {autoStep1 = true; autoGyro = gyro->GetAngle(); drive->Drive(0, 0);}
+	if (autoPosition == 1 && atDefense == TRUE) {
+		if (autoGoal == false) {
+				if (LEnc->Get() <= 1000/* && REnc->Get() <= 1000*/) {
+					drive->Drive(1, 0);
+				} else {
+					if (autoStep1Comp == false) {
+						autoStep1 = true;
+						drive->Drive(0, 0);
+						autoStep1Comp = true;
+					}
+				}
+				if (gyroSaved == false) {
+					autoGyro = gyro->GetAngle();
+					gyroSaved = true;
+				}
 
-		if (autoStep1 == true) {
-			autoGyroComp = gyro->GetAngle();
-			drive->Drive(0, 1);
-			if (autoGyroComp >= (90 + autoGyro)) {
-				autoStep2 = true;
-				drive->Drive(0, 0);
+				if (autoStep1 == true) {
+					autoGyroComp = gyro->GetAngle();
+					drive->Drive(0, 1);
+					if (autoGyroComp >= (90 + autoGyro)) {
+						if (autoStep2Comp == false) {
+						autoStep2 = true;
+						autoStep1 = false;
+						drive->Drive(0, 0);
+						autoStep2Comp = true;
+						}
+					}
+				}
+				if (autoStep2 == true) {
+					if (LEnc->Get() <= 1200/* && REnc->Get() >= 1200*/) {
+						drive->Drive(1, 0);
+					} else {
+						if (autoStep3Comp == false) {
+							autoStep3 = true;
+							autoStep3Comp = true;
+						}
+					}
+				}
+				if (autoStep3 == true) {
+					sLever->Set(DoubleSolenoid::kForward);
+					sArm->Set(DoubleSolenoid::kForward);
+					sPoker->Set(DoubleSolenoid::kForward);
+					Wait(3);
+					autoStep3Save = true;
+					autoStep3 = false;
+				}
 			}
 		}
-		if (autoStep2 == true) {
-			if (LEnc->Get() >= 1200/* && REnc->Get() >= 1200*/) {
+		if(autoPosition == 2 && atDefense == TRUE) {
+			if (autoGoal == false) {
+				if (LEnc->Get() <= 1000/* && REnc->Get() <= 1000*/) {
+					drive->Drive(1, 0);
+				} else {
+					if (autoStep1Comp == false) {
+						autoStep1 = true;
+						drive->Drive(0, 0);
+						autoStep1Comp = true;
+					}
+				}
+				if (gyroSaved == false) {
+					autoGyro = gyro->GetAngle();
+					gyroSaved = true;
+				}
+
+				if (autoStep1 == true) {
+					autoGyroComp = gyro->GetAngle();
+					drive->Drive(0, 1);
+					if (autoGyroComp >= (90 + autoGyro)) {
+						if (autoStep2Comp == false) {
+						autoStep2 = true;
+						autoStep1 = false;
+						drive->Drive(0, 0);
+						autoStep2Comp = true;
+						}
+					}
+				}
+				if (autoStep2 == true) {
+					if (LEnc->Get() <= 1200/* && REnc->Get() >= 1200*/) {
+						drive->Drive(1, 0);
+					} else {
+						if (autoStep3Comp == false) {
+							autoStep3 = true;
+							autoStep3Comp = true;
+						}
+					}
+				}
+			}
+			if(autoPosition == 3 && atDefense == TRUE) {
+				if (autoGoal == false) {
+					if (LEnc->Get() <= 1000/* && REnc->Get() <= 1000*/) {
+						drive->Drive(1, 0);
+					} else {
+						if (autoStep1Comp == false) {
+							autoStep1 = true;
+							drive->Drive(0, 0);
+							autoStep1Comp = true;
+						}
+					}
+					if (gyroSaved == false) {
+						autoGyro = gyro->GetAngle();
+						gyroSaved = true;
+					}
+
+					if (autoStep1 == true) {
+						autoGyroComp = gyro->GetAngle();
+						drive->Drive(0, 1);
+						if (autoGyroComp >= (90 + autoGyro)) {
+							if (autoStep2Comp == false) {
+							autoStep2 = true;
+							autoStep1 = false;
+							drive->Drive(0, 0);
+							autoStep2Comp = true;
+							}
+						}
+					}
+					if (autoStep2 == true) {
+						if (LEnc->Get() <= 1200/* && REnc->Get() >= 1200*/) {
+							drive->Drive(1, 0);
+						} else {
+							if (autoStep3Comp == false) {
+								autoStep3 = true;
+								autoStep3Comp = true;
+							}
+						}
+					}
+				}
+			}
+		if(autoPosition == 4 && atDefense == TRUE) {
+			if (autoGoal == false) {
+				if (LEnc->Get() <= 1000/* && REnc->Get() <= 1000*/) {
+					drive->Drive(1, 0);
+				} else {
+					if (autoStep1Comp == false) {
+						autoStep1 = true;
+						drive->Drive(0, 0);
+						autoStep1Comp = true;
+					}
+				}
+				if (gyroSaved == false) {
+					autoGyro = gyro->GetAngle();
+					gyroSaved = true;
+				}
+
+				if (autoStep1 == true) {
+					autoGyroComp = gyro->GetAngle();
+					drive->Drive(0, 1);
+					if (autoGyroComp >= (90 + autoGyro)) {
+						if (autoStep2Comp == false) {
+						autoStep2 = true;
+						autoStep1 = false;
+						drive->Drive(0, 0);
+						autoStep2Comp = true;
+						}
+					}
+				}
+				if (autoStep2 == true) {
+					if (LEnc->Get() <= 1200/* && REnc->Get() >= 1200*/) {
+						drive->Drive(1, 0);
+					} else {
+						if (autoStep3Comp == false) {
+							autoStep3 = true;
+							autoStep3Comp = true;
+						}
+					}
+				}
+			}		if (LEnc->Get() <= 1000/* && REnc->Get() <= 1000*/) {
 				drive->Drive(1, 0);
-			} else {autoStep3 = true;}
+			} else {
+				if (autoStep1Comp == false) {
+					autoStep1 = true;
+					drive->Drive(0, 0);
+					autoStep1Comp = true;
+				}
+			}
+			if (gyroSaved == false) {
+				autoGyro = gyro->GetAngle();
+				gyroSaved = true;
+			}
+
+			if (autoStep1 == true) {
+				autoGyroComp = gyro->GetAngle();
+				drive->Drive(0, 1);
+				if (autoGyroComp >= (90 + autoGyro)) {
+					if (autoStep2Comp == false) {
+					autoStep2 = true;
+					autoStep1 = false;
+					drive->Drive(0, 0);
+					autoStep2Comp = true;
+					}
+				}
+			}
+			if (autoStep2 == true) {
+				if (LEnc->Get() <= 1200/* && REnc->Get() >= 1200*/) {
+					drive->Drive(1, 0);
+				} else {
+					if (autoStep3Comp == false) {
+						autoStep3 = true;
+						autoStep3Comp = true;
+					}
+				}
+			}
 		}
-		if (autoStep3 == true) {
-			sLever->Set(DoubleSolenoid::kForward);
-			sArm->Set(DoubleSolenoid::kForward);
-			sPoker->Set(DoubleSolenoid::kForward);
-			autoStep3 = false;
+	}
+	if(autoPosition == 5 && atDefense == TRUE) {
+		if (autoGoal == false) {
+			if (LEnc->Get() <= 1000/* && REnc->Get() <= 1000*/) {
+				drive->Drive(1, 0);
+			} else {
+				if (autoStep1Comp == false) {
+					autoStep1 = true;
+					drive->Drive(0, 0);
+					autoStep1Comp = true;
+				}
+			}
+			if (gyroSaved == false) {
+				autoGyro = gyro->GetAngle();
+				gyroSaved = true;
+			}
+
+			if (autoStep1 == true) {
+				autoGyroComp = gyro->GetAngle();
+				drive->Drive(0, 1);
+				if (autoGyroComp >= (90 + autoGyro)) {
+					if (autoStep2Comp == false) {
+					autoStep2 = true;
+					autoStep1 = false;
+					drive->Drive(0, 0);
+					autoStep2Comp = true;
+					}
+				}
+			}
+			if (autoStep2 == true) {
+				if (LEnc->Get() <= 1200/* && REnc->Get() >= 1200*/) {
+					drive->Drive(1, 0);
+				} else {
+					if (autoStep3Comp == false) {
+						autoStep3 = true;
+						autoStep3Comp = true;
+					}
+				}
+			}
 		}
-	}
-	if(autoPosition == 2) {
-
-	}
-	if(autoPosition == 3) {
-
-	}
-	if(autoPosition == 4) {
-
-	}
-	if(autoPosition == 5) {
-
 	}
 	SmartDashboard::PutBoolean("Step 1: ", autoStep1);
 	SmartDashboard::PutBoolean("Step 2: ", autoStep2);
 	SmartDashboard::PutBoolean("Step 3: ", autoStep3);
 	SmartDashboard::PutNumber("Gyro comp: ", autoGyroComp);
 	SmartDashboard::PutNumber("Gyro: ", autoGyro);
+	SmartDashboard::PutBoolean("Step 3 done? ", autoStep3Save);
 	SmartDashboard::PutNumber("Left Encoder: ", LEnc->Get());
 }
 

@@ -95,8 +95,9 @@ private:
 
 	int LEncAuto, REncAuto;
 
-	float autoGyro, autoGyroComp;
-	bool autoStep1, autoStep2, autoStep3;
+	float autoGyro, autoGyroComp, gyroSaved;
+	bool autoStep1, autoStep2, autoStep3, autoEncSaved, autoStep1Comp, autoStep2Comp, autoStep3Comp, autoStep3Save;
+	bool autoGoal;
 
 	enum states {
 		ENTER,
