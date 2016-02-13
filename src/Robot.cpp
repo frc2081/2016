@@ -92,17 +92,17 @@ void Robot::AutonomousPeriodic()
 		atDefense= TRUE;
 	}
 	//Autonomous code for defenses
-	if(autoDefense == PORTCULLIS && atDefense == TRUE) {
-		//???
-	}
 	if(autoDefense == FRENCHTHING && atDefense == TRUE) {
-		//Arms?
+		//Can't do
 	}
 	if(autoDefense == DRAWBRIDGE && atDefense == TRUE) {
-		//Can't do?
+		//Can't do
+	}
+	if(autoDefense == PORTCULLIS && atDefense == TRUE) {
+		//Not sure of motors needed
 	}
 	if(autoDefense == SALLYPORT && atDefense == TRUE) {
-		//???
+		//Not sure of motors needed
 	}
 	if(autoDefense == MOAT && atDefense == TRUE) {
 		if(LEnc->Get() < 310 && LEnc->Get() < 310) {
