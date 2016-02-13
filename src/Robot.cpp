@@ -105,30 +105,30 @@ void Robot::AutonomousPeriodic()
 		//???
 	}
 	if(autoDefense == MOAT && atDefense == TRUE) {
-		if(LEnc->Get() < 273 && LEnc->Get() < 273) {
+		if(LEnc->Get() < 310 && LEnc->Get() < 310) {
 			drive->Drive(0.9, 0);
 		}
 	}
 	if(autoDefense == RAMPART && atDefense == TRUE) {
-		if(LEnc->Get() < 273 && LEnc->Get() < 273) {
+		if(LEnc->Get() < 310 && LEnc->Get() < 310) {
 			drive->Drive(0.9, 0);
 		}
 
 	}
 	if(autoDefense == ROCKWALL && atDefense == TRUE) {
-		if(LEnc->Get() < 273 && LEnc->Get() < 273) {
+		if(LEnc->Get() < 310 && LEnc->Get() < 310) {
 			drive->Drive(0.9, 0);
 		}
 
 	}
 	if(autoDefense == ROUGHT && atDefense == TRUE) {
-		if(LEnc->Get() < 273 && LEnc->Get() < 273) {
+		if(LEnc->Get() < 310 && LEnc->Get() < 310) {
 			drive->Drive(0.9, 0);
 		}
 
 	}
 	if(autoDefense == LOWBAR && atDefense == TRUE) {
-		if(LEnc->Get() < 273 && LEnc->Get() < 273) {
+		if(LEnc->Get() < 310 && LEnc->Get() < 310) {
 			drive->Drive(0.9, 0);
 		}
 
