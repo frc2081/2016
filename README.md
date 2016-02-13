@@ -1,5 +1,4 @@
 # FIRST Robotics 2016 Code
----
 
 #### Controller Mapping
 * Controller 1
@@ -9,7 +8,7 @@
 
 ![alt tag](https://raw.githubusercontent.com/matthewknecht/RealRoboCode2016/master/2016%20Controller%202.png)
 
-#### Pin-Out Record
+#### Incorrect Pin-Out Record
 ```
 Left Drive Encoder: DIO 0, 5
 Right Drive Encoder: DIO 1, 6
@@ -35,4 +34,10 @@ Solenoid Poker: PCM 2
 Solenoid Arm Lever: PCM 4
 ```
 #### To Do
-* 
+* Label Controllers physically
+* Fix pressure sensor
+* Install Robot Signal Light (RSL)
+* Label all pneumatic solenoids
+* Label all PWM connectors with their port numbers
+* Put retention clips on all electrical connectors
+* Test Classmate PC with the robot
