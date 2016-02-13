@@ -105,24 +105,32 @@ void Robot::AutonomousPeriodic()
 		//???
 	}
 	if(autoDefense == MOAT && atDefense == TRUE) {
-		if(LEnc->Get() && LEnc->Get()) {
-			drive->Drive(1, 0);
+		if(LEnc->Get() < 273 && LEnc->Get() < 273) {
+			drive->Drive(0.9, 0);
 		}
 	}
 	if(autoDefense == RAMPART && atDefense == TRUE) {
-		drive->Drive(1, 0);
+		if(LEnc->Get() < 273 && LEnc->Get() < 273) {
+			drive->Drive(0.9, 0);
+		}
 
 	}
 	if(autoDefense == ROCKWALL && atDefense == TRUE) {
-		drive->Drive(1, 0);
+		if(LEnc->Get() < 273 && LEnc->Get() < 273) {
+			drive->Drive(0.9, 0);
+		}
 
 	}
 	if(autoDefense == ROUGHT && atDefense == TRUE) {
-		drive->Drive(1, 0);
+		if(LEnc->Get() < 273 && LEnc->Get() < 273) {
+			drive->Drive(0.9, 0);
+		}
 
 	}
 	if(autoDefense == LOWBAR && atDefense == TRUE) {
-		drive->Drive(1, 0);
+		if(LEnc->Get() < 273 && LEnc->Get() < 273) {
+			drive->Drive(0.9, 0);
+		}
 
 	}
 	//Autonomous code for positioning
