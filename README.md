@@ -10,10 +10,11 @@
 
 #### Incorrect Pin-Out Record
 ```
-Left Drive Encoder: DIO 0, 5
-Right Drive Encoder: DIO 1, 6
-Winch Encoder: DIO 3, 7
-Photo-Eye: DIO 4, 8
+Left Drive Encoder: DIO 0, 1
+Right Drive Encoder: DIO 2, 3
+Winch Encoder: DIO 4, 5
+Photo-Eye: DIO 6
+Gypo: SPI 
 
 Left Motors: PWM 0
 	Left Motor 1: Motor Port 0
@@ -28,11 +29,11 @@ Winch Right CIM: PWM 2
 Winch Motor Mini-CIM: PWM 2
 	Winch Motor Mini-CIM: Motor Port 6
 
-Solenoid Arm Closer: PCM1 0, 1
-Solenoid Lifter: PCM1 2, 3
-Solenoid Poker: PCM1 4, 5
-Solenoid Arm Lever: PCM1 6, 7
-Solenoid Winch: PCM2 0, 1
+Solenoid Arm Closer: PCM0 0, 1
+Solenoid Lifter: PCM0 6, 7
+Solenoid Poker: PCM0 2, 3
+Solenoid Arm Lever: PCM0 4, 5
+Solenoid Winch: PCM1 0, 1
 ```
 #### To Do
 * Label Controllers physically
