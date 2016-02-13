@@ -28,10 +28,11 @@ Winch Right CIM: PWM 2
 Winch Motor Mini-CIM: PWM 2
 	Winch Motor Mini-CIM: Motor Port 6
 
-Solenoid Arm Closer: PCM 0
-Solenoid Arm Closer 2: PCM 1
-Solenoid Poker: PCM 2
-Solenoid Arm Lever: PCM 4
+Solenoid Arm Closer: PCM1 0, 1
+Solenoid Lifter: PCM1 2, 3
+Solenoid Poker: PCM1 4, 5
+Solenoid Arm Lever: PCM1 6, 7
+Solenoid Winch: PCM2 0, 1
 ```
 #### To Do
 * Label Controllers physically
