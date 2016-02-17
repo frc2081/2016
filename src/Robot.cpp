@@ -33,11 +33,12 @@ void Robot::RobotInit()
 
 
 	//Solenoids
+	//1 is back PCM, 0 is front PCM(front at track angle)
 	sArm = new DoubleSolenoid(0, 0, 1);	// Solenoid for the opening and closing of the arms
 	sLifter = new DoubleSolenoid(0, 6, 7);	// Solenoid for lifting up the robot
 	sPoker = new DoubleSolenoid(0, 2, 3);	// Solenoid for the poker
-	sLever = new DoubleSolenoid(0, 4, 5);	// Solenoid to raise and lower the arms
-	sWinch = new DoubleSolenoid(1, 0, 1); // Solenoid to raise the winch
+	sLever = new DoubleSolenoid(1, 0, 1);	// Solenoid to raise and lower the arms
+	sWinch = new DoubleSolenoid(0, 4, 5); // Solenoid to raise the winch
 
 	//Encoders
 	LEnc = new Encoder(0, 1, false, Encoder::EncodingType::k4X);	// New encoder instance (Left drive)
@@ -47,7 +48,7 @@ void Robot::RobotInit()
 	LEnc->SetDistancePerPulse(ducksperpulse);
 	REnc->SetDistancePerPulse(ducksperpulse);
 
-	winchmot = new VictorSP(3);
+	winchmot = new VictorSP(2);
 	lmotor = new VictorSP(0);
 	rmotor = new VictorSP(1);
 	PreSen = new AnalogInput(0);
@@ -106,9 +107,39 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
+
+	checkbuttons();
+
+	// Get joystick values
+	//Axes are swapped on xbox controllers....seems weird....
+	//Hopefully this is correct?????
+	LaxisX = stick->GetY();
+	LaxisY = stick->GetX();
+	RaxisX = stick->GetRawAxis(5);
+	RaxisY = stick->GetRawAxis(4);
+	RTrig = stick->GetRawAxis(3);
+	LTrig = stick->GetRawAxis(2);
+	RaxisY *= -1;
+
+
+	if (bStart == true && bStartHold == false)
+	{
+		direction = !direction;
+	}
+
+
+	if(direction == false)
+	{
+		LaxisX *= -1;
+		LaxisY *= -1;
+		RaxisX *= -1;
+		RaxisY *= -1;
+	}
+
+
 	//ArcadeDrive method documentation LIES.
 	//Turn value is first argument, move value is 2nd argument
-	drive->ArcadeDrive(RaxisX, LaxisY);
+	drive->ArcadeDrive(LaxisX, RaxisY);
 	lmotspeed = lmotor->Get();
 	rmotspeed = rmotor->Get();
 
@@ -139,32 +170,9 @@ void Robot::TeleopPeriodic()
 	float range = (Vm*1000)*((5/4.88)*.03937);
 
 	//Update all joystick buttons
-	checkbuttons();
+
 	ArmEncValue = ArmEnc->Get();
 	gyroAngle = gyro->GetAngle();
-	// Get joystick values
-	//Axes are swapped on xbox controllers....seems weird....
-	//Hopefully this is correct?????
-	LaxisX = stick->GetX();
-	LaxisY = stick->GetY();
-	RaxisX = stick->GetRawAxis(4);
-	RaxisY = stick->GetRawAxis(5);
-	RTrig = stick->GetRawAxis(3);
-	LTrig = stick->GetRawAxis(2);
-
-	if (bStart == true && bStartHold == false)
-	{
-		direction = !direction;
-	}
-
-
-	if(direction == false)
-	{
-		LaxisX *= -1;
-		LaxisY *= -1;
-		RaxisX *= -1;
-		RaxisY *= -1;
-	}
 
 	//Get sensor inputs
 	phoSensorVal = PhoSen->Get();
@@ -374,7 +382,7 @@ void Robot::TeleopPeriodic()
 	lmotor->Set(lmotspeed);
 	rmotor->Set(rmotspeed);
 
-	SmartDashboard::PutNumber("Left Motor Final Command: ", lmotor->Get());
+	/*SmartDashboard::PutNumber("Left Motor Final Command: ", lmotor->Get());
 	SmartDashboard::PutNumber("Right Motor Final Command: ", rmotor->Get());
 	SmartDashboard::PutNumber("Winch", setWinch);
 	SmartDashboard::PutBoolean("Arms: \n", arms);
@@ -388,7 +396,7 @@ void Robot::TeleopPeriodic()
 	SmartDashboard::PutNumber("Ultrasonic", range);
 	SmartDashboard::PutBoolean("dirChange: ", dirChange);
 	SmartDashboard::PutBoolean("Pressure is Good!", pressGood);
-	SmartDashboard::PutNumber("Pressure: ", Pres);
+	SmartDashboard::PutNumber("Pressure: ", Pres);*/
 }
 
 void Robot::TestPeriodic()
