@@ -179,7 +179,9 @@ void Robot::TeleopPeriodic()
 
 	//Math for winch thing
 	//Combines both triggers into a single command for the winch motors
-	LTrig *= -1;
+	//limit winch extend power
+	LTrig *= .3;
+	RTrig *= -1;
 	Trig = LTrig + RTrig;
 
 	//Automatic winch control
@@ -289,7 +291,7 @@ void Robot::TeleopPeriodic()
 				lifter = false; //Lifter retracted
 
 				//If the A button is pressed, open and arms move them inside the robot, and go back to IDLE
-				if (bA2 == true) { currentState = UNLOAD; }
+				if (bA2 == true && bA2Hold == false) { currentState = UNLOAD; }
 				//If start button is pressed, move to idle state
 				if (bStart2 == true) { currentState = IDLE; }
 				break;
@@ -368,8 +370,8 @@ void Robot::TeleopPeriodic()
 	else {sLifter->Set(DoubleSolenoid::kReverse);}
 	if(arms == true) {sArm->Set(DoubleSolenoid::kForward);}
 	else {sArm->Set(DoubleSolenoid::kReverse);}
-	if(lever == true) {sLever->Set(DoubleSolenoid::kForward);}
-	else {sLever->Set(DoubleSolenoid::kReverse);}
+	if(lever == true) {sLever->Set(DoubleSolenoid::kReverse);}
+	else {sLever->Set(DoubleSolenoid::kForward);}
 	if(poker == true) {sPoker->Set(DoubleSolenoid::kForward);}
 	else {sPoker->Set(DoubleSolenoid::kReverse);}
 	if (winchSol == true) {sWinch->Set(DoubleSolenoid::kForward);}
