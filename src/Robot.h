@@ -88,7 +88,7 @@ private:
 
 	float setWinch, winchHold, ArmEncValue;
 	double lmotspeed, rmotspeed;
-
+	float Pres;
 
 	bool winchMan, stateMan, dirChange;
 

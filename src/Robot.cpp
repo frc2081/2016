@@ -154,7 +154,9 @@ void Robot::TeleopPeriodic()
 	} else {stateMan = false;}
 
 	//Pressure Sensor Code
-	int Pres = PreSen->GetVoltage();
+	Pres = PreSen->GetVoltage();
+	Pres = 250 * (Pres/5) - 25;
+
 	if(Pres>=45)
 	{
 		pressGood = true;
@@ -166,8 +168,8 @@ void Robot::TeleopPeriodic()
 
 
 	//Range Finder Math
-	float Vm = RaFin->GetVoltage();
-	float range = (Vm*1000)*((5/4.88)*.03937);
+	//float Vm = RaFin->GetVoltage();
+	//float range = (Vm*1000)*((5/4.88)*.03937);
 
 	//Update all joystick buttons
 
@@ -199,7 +201,7 @@ void Robot::TeleopPeriodic()
 
 		if (bLB == true) //If winch is commanded to auto-retract
 		{
-			winchSol = false;
+			winchSol = true;
 			setWinch = -0.5; //Set winch to retract at a certain power
 			if (ArmEncValue <= 200)
 			{
@@ -208,7 +210,7 @@ void Robot::TeleopPeriodic()
 				lmotspeed = 0;
 				rmotspeed = 0;
 			}
-			if (ArmEncValue <= 500) //If the winch has raised the robot to a certian value, turn on the treads
+			else if (ArmEncValue <= 500) //If the winch has raised the robot to a certian value, turn on the treads
 			{
 				//drive->Drive(0.5, 0);
 				lmotspeed = 0.5;
@@ -384,7 +386,7 @@ void Robot::TeleopPeriodic()
 	lmotor->Set(lmotspeed);
 	rmotor->Set(rmotspeed);
 
-	/*SmartDashboard::PutNumber("Left Motor Final Command: ", lmotor->Get());
+	SmartDashboard::PutNumber("Left Motor Final Command: ", lmotor->Get());
 	SmartDashboard::PutNumber("Right Motor Final Command: ", rmotor->Get());
 	SmartDashboard::PutNumber("Winch", setWinch);
 	SmartDashboard::PutBoolean("Arms: \n", arms);
@@ -395,10 +397,10 @@ void Robot::TeleopPeriodic()
 	SmartDashboard::PutNumber("Current State: ", currentState);
 	SmartDashboard::PutNumber("Arm Encoder: ", ArmEncValue);
 	SmartDashboard::PutBoolean("Winch Solenoid: ", winchSol);
-	SmartDashboard::PutNumber("Ultrasonic", range);
+	//SmartDashboard::PutNumber("Ultrasonic", range);
 	SmartDashboard::PutBoolean("dirChange: ", dirChange);
 	SmartDashboard::PutBoolean("Pressure is Good!", pressGood);
-	SmartDashboard::PutNumber("Pressure: ", Pres);*/
+	SmartDashboard::PutNumber("Pressure: ", Pres);
 }
 
 void Robot::TestPeriodic()
