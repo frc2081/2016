@@ -379,6 +379,9 @@ void Robot::TeleopPeriodic()
 	if (winchSol == true) {sWinch->Set(DoubleSolenoid::kForward);}
 	else {sWinch->Set(DoubleSolenoid::kReverse);}
 	
+	//Apply all motor limits
+	if(setWinch > winchMaxExtendPower) {setWinch = winchMaxExtendPower; }
+
 
 	//Apply drive train mechanical compensation coeffcient
 	lmotspeed *= motorCorrectionValue;
