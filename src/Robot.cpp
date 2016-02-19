@@ -58,7 +58,7 @@ void Robot::RobotInit()
 	compress->Start();
 
 	PhoSen = new DigitalInput(6);
-	winchHold = 0.12;
+	winchHold = -0.12;
 	direction = true;
 	winchSol = false;
 
@@ -181,6 +181,7 @@ void Robot::TeleopPeriodic()
 
 	//Math for winch thing
 	//Combines both triggers into a single command for the winch motors
+	//Positive command extends the winch, negative retracts it
 	//limit winch extend power
 	LTrig *= .3;
 	RTrig *= -1;
@@ -192,12 +193,13 @@ void Robot::TeleopPeriodic()
 		if (bRB == true) //If winch is commanded to auto-extend
 		{
 			winchSol = true;
-			setWinch = 0.5; //Set winch to extend at a certain power
+			setWinch = winchMaxExtendPower; //Set winch to extend at full speed
 			if (ArmEncValue >= 5000)
 			{
 				setWinch = 0; //When the winch hits the proper height, turn it off
 			}
 		}
+		else { setWinch = 0;} //stop extending the winch if the operator lets go of the button
 
 		if (bLB == true) //If winch is commanded to auto-retract
 		{
@@ -215,8 +217,10 @@ void Robot::TeleopPeriodic()
 				//drive->Drive(0.5, 0);
 				lmotspeed = 0.5;
 				rmotspeed = 0.5;
-			} else {lmotspeed = 0; rmotspeed = 0;}
+			}
+			else {lmotspeed = 0; rmotspeed = 0;}
 		}
+		else { setWinch = 0;} //stop retracting the winch if the operator lets go of the button
 	}
 
 	/*
@@ -344,11 +348,11 @@ void Robot::TeleopPeriodic()
 		}
 		else
 		{
-			if (Trig > winchHold) //If the trigger value is greater then 0.05, the winch hold value, set the winch power to the triggers
+			if (Trig < winchHold) //If the trigger value is greater then 0.05, the winch hold value, set the winch power to the triggers
 			{
 				setWinch = Trig; //Set the value of the winch power to the value of the triggers
 			}
-			else //If the trigger value is less than the hold value, 0.05, set it to 0.05
+			else //If the trigger value is less than the hold value, set it to the hold value
 			{setWinch = winchHold;}
 		}
 		if (bRB == true && bRBHold == false)
