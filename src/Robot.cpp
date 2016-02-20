@@ -239,8 +239,8 @@ void Robot::TeleopPeriodic()
 		true = extended
 		false = retracted
 	LIFTER
-		true = extended
-		false = retracted
+		true = robot on ground
+		false = robot tilted
 
 	DOUBLE SOLENOID CLASS
 		kForward = true
@@ -253,14 +253,15 @@ void Robot::TeleopPeriodic()
 			case ENTER: //Entry state, nothing is commanded. Hit A to continue
 				//Changed ENTER state to not advance to IDLE until a new button press of A is detected to ensure that
 				//operator really intended to enter ball capture mode
+
 				if (bA2 == true && bA2Hold == false) {currentState = IDLE;}
 				break;
 
 			case IDLE: //Idle state, nothing happens
-				arms = true; //Arms open
-				lever = true; //Arms out of robot
+				arms = false; //Arms closed at startup
+				lever = true; //Arms outside of robot
 				poker = false; //Poker retracted
-				lifter = false; //Lifter retracted
+				lifter = true; //Lifter retracted
 
 				//If the A button is pressed, change state to MV_TO_CAP
 				if (bA2 == true) { currentState = MV_TO_CAP; }
@@ -269,7 +270,7 @@ void Robot::TeleopPeriodic()
 			case MV_TO_CAP: //Moves arms into position and opens them
 				arms = true; //Arms open
 				lever = true; //Arms out of robot
-				lifter = false; //Lifter retracted
+				lifter = true; //Lifter retracted
 				poker = false; //Poker retracted
 				if (bA2 == true) { currentState = WT_FOR_BALL; } //Sets state to WT_FOR_BALL
 				break;
@@ -283,7 +284,7 @@ void Robot::TeleopPeriodic()
 					arms = false; //Arms closed
 					lever = true; //Arms out
 					poker = false; //Poker retracted
-					lifter = false; //Lifter retracted
+					lifter = true; //Lifter retracted
 					currentState = HOLD_BALL;
 				}
 				//If start button is pressed, change to idle state
@@ -294,7 +295,7 @@ void Robot::TeleopPeriodic()
 				arms = false; //Arms closed
 				lever = true; //Arms out
 				poker = false; //Poker retracted
-				lifter = false; //Lifter retracted
+				lifter = true; //Lifter retracted
 
 				//If the A button is pressed, open and arms move them inside the robot, and go back to IDLE
 				if (bA2 == true && bA2Hold == false) { currentState = UNLOAD; }
@@ -305,7 +306,7 @@ void Robot::TeleopPeriodic()
 			case UNLOAD:
 				arms = true; //Arms open
 				lever = true; //Arms out
-				poker = false; //Poker retracted
+				poker = true; //Poker extended to take a shot
 				lifter = false; //Lifter retracted
 
 				//If the photo sensor is not tripped, set state to IDLE
