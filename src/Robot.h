@@ -114,6 +114,7 @@ private:
 	void checkbuttons();
 	void TeleopPeriodic();
 	void TestPeriodic();
+	void DisabledPeriodic();
 
 	CAMERAFEEDS *cameras;
 };

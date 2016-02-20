@@ -2,7 +2,7 @@
 
 void Robot::RobotInit()
 {
-	currentState = IDLE;
+	currentState = STARTUP;
 
 	cameras = new CAMERAFEEDS(stick);
 	cameras->init();
@@ -447,6 +447,39 @@ void Robot::TeleopPeriodic()
 
 void Robot::TestPeriodic()
 {
+}
+
+void Robot::DisabledPeriodic()
+{
+/*	cameras->run();
+*/
+	Pres = PreSen->GetVoltage();
+	Pres = 250 * (Pres/5) - 25;
+
+	if(Pres>=45)
+	{
+		pressGood = true;
+	}
+	else
+	{
+		pressGood = false;
+	}
+
+	SmartDashboard::PutNumber("Left Motor Final Command: ", lmotor->Get());
+	SmartDashboard::PutNumber("Right Motor Final Command: ", rmotor->Get());
+	SmartDashboard::PutNumber("Winch", setWinch);
+	SmartDashboard::PutBoolean("Arms: \n", arms);
+	SmartDashboard::PutBoolean("Lever: \n", lever);
+	SmartDashboard::PutBoolean("Poker: \n", poker);
+	SmartDashboard::PutBoolean("Lifter: \n", lifter);
+	SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
+	SmartDashboard::PutNumber("Current State: ", currentState);
+	SmartDashboard::PutNumber("Arm Encoder: ", ArmEncValue);
+	SmartDashboard::PutBoolean("Winch Solenoid: ", winchSol);
+	//SmartDashboard::PutNumber("Ultrasonic", range);
+	SmartDashboard::PutBoolean("dirChange: ", dirChange);
+	SmartDashboard::PutBoolean("Pressure is Good!", pressGood);
+	SmartDashboard::PutNumber("Pressure: ", Pres);
 }
 
 void Robot::checkbuttons() {
