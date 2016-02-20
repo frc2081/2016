@@ -93,14 +93,17 @@ private:
 	float Pres;
 
 	bool winchMan, stateMan, dirChange;
+	bool armClearDelay;
 
 	enum states {
+		STARTUP,
 		ENTER,
 		IDLE,
 		MV_TO_CAP,
 		WT_FOR_BALL,
 		HOLD_BALL,
-		UNLOAD
+		UNLOAD,
+		SHOOT
 	};
 	states currentState;
 	void RobotInit(); // Scopes/initialization for robot functions

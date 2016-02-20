@@ -89,6 +89,12 @@ void Robot::RobotInit()
 
 
 	drive = new RobotDrive(lmotor, rmotor);
+	lifter = true; //Lifter retracted
+	arms = false; //Arms closed at startup
+	lever = true; //Arms outside of robot
+	poker = false; //Poker retracted
+
+	armClearDelay = false;
 }
 
 void Robot::AutonomousInit()
@@ -250,18 +256,24 @@ void Robot::TeleopPeriodic()
 	{
 		switch (currentState)
 		{
-			case ENTER: //Entry state, nothing is commanded. Hit A to continue
-				//Changed ENTER state to not advance to IDLE until a new button press of A is detected to ensure that
-				//operator really intended to enter ball capture mode
-
-				if (bA2 == true && bA2Hold == false) {currentState = IDLE;}
-				break;
-
-			case IDLE: //Idle state, nothing happens
+			case STARTUP: //Initial robot state - ball in bot, arms closed and up
+				//Startup is only used at start of game and advances directly to ball hold on first tap
 				arms = false; //Arms closed at startup
 				lever = true; //Arms outside of robot
 				poker = false; //Poker retracted
-				lifter = true; //Lifter retracted
+				if (bA2 == true && bA2Hold == false) {currentState = HOLD_BALL;}
+				break;
+
+				//enter case that does nothing so we can hand control back to the
+				//state machine without moving stuff
+			case ENTER:
+			if (bA2 == true) { currentState = IDLE; }
+			break;
+
+			case IDLE: //Idle state, nothing happens
+				arms = true; //Arms open is default state to save air on return from a shot
+				lever = true; //Arms outside of robot
+				poker = false; //Poker retracted
 
 				//If the A button is pressed, change state to MV_TO_CAP
 				if (bA2 == true) { currentState = MV_TO_CAP; }
@@ -270,75 +282,91 @@ void Robot::TeleopPeriodic()
 			case MV_TO_CAP: //Moves arms into position and opens them
 				arms = true; //Arms open
 				lever = true; //Arms out of robot
-				lifter = true; //Lifter retracted
 				poker = false; //Poker retracted
 				if (bA2 == true) { currentState = WT_FOR_BALL; } //Sets state to WT_FOR_BALL
 				break;
 
 			case WT_FOR_BALL: //Waiting for the ball to trip the photo sensor
 				//Added new exit path to allow operator to stop trying to capture a ball by releasing the A button
-				if (bA2 == false) { currentState = MV_TO_CAP; }
+				if (bA2 == false) { currentState = IDLE; }
 				//If photo sensor is tripped, close the arms and change state to HOLD_BALL
 				if (phoSensorVal == true)
 				{
 					arms = false; //Arms closed
 					lever = true; //Arms out
 					poker = false; //Poker retracted
-					lifter = true; //Lifter retracted
 					currentState = HOLD_BALL;
 				}
 				//If start button is pressed, change to idle state
 				if (bStart2 == true) { currentState = IDLE; }
 				break;
 
-			case HOLD_BALL: //Holds the ball in front of the robot
+				//Holds the ball in front of the robot
+			case HOLD_BALL:
 				arms = false; //Arms closed
 				lever = true; //Arms out
 				poker = false; //Poker retracted
-				lifter = true; //Lifter retracted
 
-				//If the A button is pressed, open and arms move them inside the robot, and go back to IDLE
+				//Press A again to shoot the ball
 				if (bA2 == true && bA2Hold == false) { currentState = UNLOAD; }
 				//If start button is pressed, move to idle state
 				if (bStart2 == true) { currentState = IDLE; }
 				break;
 
+				//Unload opens the arms but does not poke yet. This gives the arms ~40ms to clear the ball
 			case UNLOAD:
 				arms = true; //Arms open
 				lever = true; //Arms out
-				poker = true; //Poker extended to take a shot
-				lifter = false; //Lifter retracted
+				poker = false; //Poker stays retracted to give arms time to clear ball
 
-				//If the photo sensor is not tripped, set state to IDLE
+				//Need to wait for the arms to clear the ball
+				//This bit of code causes the state machine to spend one extra loop in this state
+				//giving the arms about 40ms to open before the poker shoots the ball
+				if(armClearDelay == true)
+				{
+					currentState = SHOOT;
+					armClearDelay = false;
+				}
+				else {armClearDelay = true;}
+				break;
+
+				//Take the shot! Then return to idle to wait for another ball capture
+			case SHOOT:
+				arms = true;
+				lever = true;
+				poker = true;
+				//Keep the arms open until the ball has cleared the
 				if (phoSensorVal != true) { currentState = IDLE; }
 				break;
 		}
 	}
 
+	//Lever control is always manual
+	if (bY2 == true && bY2Hold == false)
+	{
+		lever = !lever;
+	}
+
+
 	//Manual mode controls engaged when left stick is held down
 	if (stateMan == true)
 	{
-			if (bY2 == true && bY2Hold == false)
-			{
-				lever = !lever;
-			}
-			//When A button is tapped, toggle the arms
-			if (bA2 == true && bA2Hold == false)
-			{
-				arms = !arms;
-			}
-			//When B button is tapped, toggle the poker
-			if (bB2 == true && bB2Hold == false)
-			{
-				poker = !poker;
-			}
-			//When X button is tapped, toggle the lifter
-			if (bX2 == true && bX2Hold == false)
-			{
-				lifter = !lifter;
-			}
-
-			currentState = ENTER;
+		//When A button is tapped, toggle the arms
+		if (bA2 == true && bA2Hold == false)
+		{
+			arms = !arms;
+		}
+		//When B button is tapped, toggle the poker
+		if (bB2 == true && bB2Hold == false)
+		{
+			poker = !poker;
+		}
+		//When X button is tapped, toggle the lifter
+		if (bX2 == true && bX2Hold == false)
+		{
+			lifter = !lifter;
+		}
+		currentState = ENTER;
 	}
 	if (winchMan == true)
 	{
