@@ -1,9 +1,3 @@
-/*
- * init.h
- *
- *  Created on: Jan 28, 2016
- *      Author: Matthew
- */
 
 #ifndef INIT_H_
 #define INIT_H_
@@ -16,6 +10,7 @@
 #include "WPILib.h"
 #include <string>
 #include <iostream>
+#include "CameraFeeds.h"
 
 class Robot: public IterativeRobot {
 private:
@@ -110,6 +105,8 @@ private:
 	void checkbuttons();
 	void TeleopPeriodic();
 	void TestPeriodic();
+
+	CAMERAFEEDS *cameras;
 };
 
 #endif /* INIT_H_ */

@@ -4,9 +4,13 @@ void Robot::RobotInit()
 {
 	currentState = IDLE;
 
+
 	// Declare new Joysticks
 	stick = new Joystick(0);
 	stick2 = new Joystick(1);
+
+	cameras = new CAMERAFEEDS(stick);
+	cameras->init();
 
 	// Declate buttons based on what button they literally are
 	buttonA = new JoystickButton(stick, 1),
@@ -64,9 +68,9 @@ void Robot::RobotInit()
 
 	averageGyro = 1.5;
 	gyroCalibrate = 0;
-	gyro = new ADXRS450_Gyro();
-	gyro->Reset();
-	gyro->Calibrate();
+	//gyro = new ADXRS450_Gyro();
+	//gyro->Reset();
+	//gyro->Calibrate();
 
 	/*while (gyroCalibrate < 5){
 		while (averageGyro >= 1) {
@@ -87,13 +91,12 @@ void Robot::RobotInit()
 	}*/
 	// Declare new drive on PWM's 0 and 1
 
-
 	drive = new RobotDrive(lmotor, rmotor);
 }
 
 void Robot::AutonomousInit()
 {
-	gyro->Reset();
+	//gyro->Reset();
 }
 
 void Robot::AutonomousPeriodic()
@@ -107,8 +110,8 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
-
 	checkbuttons();
+	cameras->run();
 
 	// Get joystick values
 	//Axes are swapped on xbox controllers....seems weird....
@@ -174,7 +177,7 @@ void Robot::TeleopPeriodic()
 	//Update all joystick buttons
 
 	ArmEncValue = ArmEnc->Get();
-	gyroAngle = gyro->GetAngle();
+	//gyroAngle = gyro->GetAngle();
 
 	//Get sensor inputs
 	phoSensorVal = PhoSen->Get();
