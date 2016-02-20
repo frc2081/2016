@@ -4,7 +4,6 @@ void Robot::RobotInit()
 {
 	currentState = IDLE;
 
-
 	// Declare new Joysticks
 	stick = new Joystick(0);
 	stick2 = new Joystick(1);
@@ -68,9 +67,9 @@ void Robot::RobotInit()
 
 	averageGyro = 1.5;
 	gyroCalibrate = 0;
-	//gyro = new ADXRS450_Gyro();
-	//gyro->Reset();
-	//gyro->Calibrate();
+	gyro = new ADXRS450_Gyro();
+	gyro->Reset();
+	gyro->Calibrate();
 
 	/*while (gyroCalibrate < 5){
 		while (averageGyro >= 1) {
@@ -96,7 +95,7 @@ void Robot::RobotInit()
 
 void Robot::AutonomousInit()
 {
-	//gyro->Reset();
+	gyro->Reset();
 }
 
 void Robot::AutonomousPeriodic()
@@ -157,7 +156,7 @@ void Robot::TeleopPeriodic()
 	} else {stateMan = false;}
 
 	//Pressure Sensor Code
-	Pres = PreSen->GetVoltage();
+	//Pres = PreSen->GetVoltage();
 	Pres = 250 * (Pres/5) - 25;
 
 	if(Pres>=45)
@@ -176,11 +175,11 @@ void Robot::TeleopPeriodic()
 
 	//Update all joystick buttons
 
-	ArmEncValue = ArmEnc->Get();
+	//ArmEncValue = ArmEnc->Get();
 	//gyroAngle = gyro->GetAngle();
 
 	//Get sensor inputs
-	phoSensorVal = PhoSen->Get();
+	//phoSensorVal = PhoSen->Get();
 
 	//Math for winch thing
 	//Combines both triggers into a single command for the winch motors
@@ -249,6 +248,7 @@ void Robot::TeleopPeriodic()
 		kForward = true
 		kReverse = false
 	*/
+
 	if (stateMan == false)
 	{
 		switch (currentState)
@@ -388,11 +388,11 @@ void Robot::TeleopPeriodic()
 	
 	//Apply all motor limits
 	if(setWinch > winchMaxExtendPower) {setWinch = winchMaxExtendPower; }
-
-
-	//Apply drive train mechanical compensation coeffcient
-	lmotspeed *= motorCorrectionValue;
 	winchmot->Set(setWinch);
+
+	////Apply drive train mechanical compensation coeffcient
+	lmotspeed *= motorCorrectionValue;
+
 	lmotor->Set(lmotspeed);
 	rmotor->Set(rmotspeed);
 
@@ -411,6 +411,7 @@ void Robot::TeleopPeriodic()
 	SmartDashboard::PutBoolean("dirChange: ", dirChange);
 	SmartDashboard::PutBoolean("Pressure is Good!", pressGood);
 	SmartDashboard::PutNumber("Pressure: ", Pres);
+
 }
 
 void Robot::TestPeriodic()
