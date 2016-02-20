@@ -107,6 +107,7 @@ private:
 	void TestPeriodic();
 
 	CAMERAFEEDS *cameras;
+	Timer *time;
 };
 
 #endif /* INIT_H_ */

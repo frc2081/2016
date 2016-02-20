@@ -1,4 +1,6 @@
 #include "Robot.h"
+#include <thread>
+#include "timer.h"
 
 void Robot::RobotInit()
 {
@@ -91,6 +93,8 @@ void Robot::RobotInit()
 	// Declare new drive on PWM's 0 and 1
 
 	drive = new RobotDrive(lmotor, rmotor);
+	//drive->SetSafetyEnabled(false);
+	drive->SetExpiration(.150);
 }
 
 void Robot::AutonomousInit()
@@ -138,10 +142,10 @@ void Robot::TeleopPeriodic()
 		RaxisY *= -1;
 	}
 
-
 	//ArcadeDrive method documentation LIES.
 	//Turn value is first argument, move value is 2nd argument
 	drive->ArcadeDrive(LaxisX, RaxisY);
+
 	lmotspeed = lmotor->Get();
 	rmotspeed = rmotor->Get();
 
@@ -175,11 +179,11 @@ void Robot::TeleopPeriodic()
 
 	//Update all joystick buttons
 
-	//ArmEncValue = ArmEnc->Get();
-	//gyroAngle = gyro->GetAngle();
+	ArmEncValue = ArmEnc->Get();
+	gyroAngle = gyro->GetAngle();
 
 	//Get sensor inputs
-	//phoSensorVal = PhoSen->Get();
+	phoSensorVal = PhoSen->Get();
 
 	//Math for winch thing
 	//Combines both triggers into a single command for the winch motors
@@ -225,29 +229,7 @@ void Robot::TeleopPeriodic()
 		else { setWinch = 0;} //stop retracting the winch if the operator lets go of the button
 	}
 
-	/*
-	arms = part of the robot that grabs the ball
-	lever = part of robot that moves the arms inside and outside the robot
-	poker = part of robot on front that extends outward
-	lifter = part of robot that will extend beneath the robot to lift it up
 
-	ARMS
-		true = open
-		false = closed
-	LEVER
-		true = out of robot
-		false = in robot
-	POKER
-		true = extended
-		false = retracted
-	LIFTER
-		true = extended
-		false = retracted
-
-	DOUBLE SOLENOID CLASS
-		kForward = true
-		kReverse = false
-	*/
 
 	if (stateMan == false)
 	{
@@ -364,16 +346,7 @@ void Robot::TeleopPeriodic()
 		}
 	}
 
-	/*
-	//Creates two integers: t and Tcurve
-	int t, Tcurve;
-	 Multiplies trigger value by 100 to get percent
-	t = Trig * 100;
-	 Creates parabolic throttle curve with equation of y=0.000001x^4
-	Tcurve = 0.000001 * pow(t, 4);
-	 Creates linear throttle curve
-	Tcurve = abs(t);
-	*/
+
 
 	if(lifter == true) {sLifter->Set(DoubleSolenoid::kForward);}
 	else {sLifter->Set(DoubleSolenoid::kReverse);}
