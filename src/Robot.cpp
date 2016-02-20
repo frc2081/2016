@@ -268,12 +268,14 @@ void Robot::TeleopPeriodic()
 				lever = true; //Arms outside of robot
 				poker = false; //Poker retracted
 				if (bA2 == true && bA2Hold == false) {currentState = HOLD_BALL;}
+				printf("STARTUP");
 				break;
 
 				//enter case that does nothing so we can hand control back to the
 				//state machine without moving stuff
 			case ENTER:
 			if (bA2 == true) { currentState = IDLE; }
+			printf("ENTER");
 			break;
 
 			case IDLE: //Idle state, nothing happens
@@ -283,6 +285,7 @@ void Robot::TeleopPeriodic()
 
 				//If the A button is pressed, change state to MV_TO_CAP
 				if (bA2 == true) { currentState = MV_TO_CAP; }
+				printf("IDLE");
 				break;
 
 			case MV_TO_CAP: //Moves arms into position and opens them
@@ -290,6 +293,7 @@ void Robot::TeleopPeriodic()
 				lever = true; //Arms out of robot
 				poker = false; //Poker retracted
 				if (bA2 == true) { currentState = WT_FOR_BALL; } //Sets state to WT_FOR_BALL
+				printf("MV_TO_CAP");
 				break;
 
 			case WT_FOR_BALL: //Waiting for the ball to trip the photo sensor
@@ -305,6 +309,7 @@ void Robot::TeleopPeriodic()
 				}
 				//If start button is pressed, change to idle state
 				if (bStart2 == true) { currentState = IDLE; }
+				printf("WT_FOR_BALL");
 				break;
 
 				//Holds the ball in front of the robot
@@ -317,6 +322,7 @@ void Robot::TeleopPeriodic()
 				if (bA2 == true && bA2Hold == false) { currentState = UNLOAD; }
 				//If start button is pressed, move to idle state
 				if (bStart2 == true) { currentState = IDLE; }
+				printf("HOLD_BALL");
 				break;
 
 				//Unload opens the arms but does not poke yet. This gives the arms ~40ms to clear the ball
@@ -334,6 +340,7 @@ void Robot::TeleopPeriodic()
 					armClearDelay = false;
 				}
 				else {armClearDelay = true;}
+				printf("UNLOAD");
 				break;
 
 				//Take the shot! Then return to idle to wait for another ball capture
@@ -343,6 +350,7 @@ void Robot::TeleopPeriodic()
 				poker = true;
 				//Keep the arms open until the ball has cleared the
 				if (phoSensorVal != true) { currentState = IDLE; }
+				printf("SHOOT");
 				break;
 		}
 	}
