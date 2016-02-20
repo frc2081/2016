@@ -119,7 +119,7 @@ void Robot::TeleopInit()
 void Robot::TeleopPeriodic()
 {
 
-	checkbuttons();\
+	checkbuttons();
 	cameras->run();
 
 	// Get joystick values
