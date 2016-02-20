@@ -4,12 +4,12 @@ void Robot::RobotInit()
 {
 	currentState = STARTUP;
 
-	//cameras = new CAMERAFEEDS(stick);
-	//cameras->init();
-
 	// Declare new Joysticks
 	stick = new Joystick(0);
 	stick2 = new Joystick(1);
+
+	cameras = new CAMERAFEEDS(stick);
+	cameras->init();
 
 	// Declate buttons based on what button they literally are
 	buttonA = new JoystickButton(stick, 1),
@@ -120,7 +120,7 @@ void Robot::TeleopPeriodic()
 {
 
 	checkbuttons();
-	//cameras->run();
+	cameras->run();
 
 	// Get joystick values
 	//Axes are swapped on xbox controllers....seems weird....
