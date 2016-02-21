@@ -91,7 +91,7 @@ private:
 
 	float setWinch, winchHold, ArmEncValue;
 	double lmotspeed, rmotspeed;
-	float Pres;
+	float Pres, PresVoltage;
 
 	bool winchMan, stateMan, dirChange;
 	bool armClearDelay;

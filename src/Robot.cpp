@@ -145,7 +145,7 @@ void Robot::TeleopPeriodic()
 		LaxisX *= -1;
 		LaxisY *= -1;
 		RaxisX *= -1;
-		RaxisY *= -1;
+		//RaxisY *= -1;
 	}
 
 
@@ -268,14 +268,14 @@ void Robot::TeleopPeriodic()
 				lever = true; //Arms outside of robot
 				poker = false; //Poker retracted
 				if (bA2 == true && bA2Hold == false) {currentState = HOLD_BALL;}
-				printf("STARTUP");
+				printf("STARTUP\n");
 				break;
 
 				//enter case that does nothing so we can hand control back to the
 				//state machine without moving stuff
 			case ENTER:
 			if (bA2 == true) { currentState = IDLE; }
-			printf("ENTER");
+			printf("ENTER\n");
 			break;
 
 			case IDLE: //Idle state, nothing happens
@@ -285,7 +285,7 @@ void Robot::TeleopPeriodic()
 
 				//If the A button is pressed, change state to MV_TO_CAP
 				if (bA2 == true) { currentState = MV_TO_CAP; }
-				printf("IDLE");
+				printf("IDLE\n");
 				break;
 
 			case MV_TO_CAP: //Moves arms into position and opens them
@@ -293,14 +293,14 @@ void Robot::TeleopPeriodic()
 				lever = true; //Arms out of robot
 				poker = false; //Poker retracted
 				if (bA2 == true) { currentState = WT_FOR_BALL; } //Sets state to WT_FOR_BALL
-				printf("MV_TO_CAP");
+				printf("MV_TO_CAP\n");
 				break;
 
 			case WT_FOR_BALL: //Waiting for the ball to trip the photo sensor
 				//Added new exit path to allow operator to stop trying to capture a ball by releasing the A button
 				if (bA2 == false) { currentState = IDLE; }
 				//If photo sensor is tripped, close the arms and change state to HOLD_BALL
-				if (phoSensorVal == true)
+				if (phoSensorVal == false)
 				{
 					arms = false; //Arms closed
 					lever = true; //Arms out
@@ -309,7 +309,7 @@ void Robot::TeleopPeriodic()
 				}
 				//If start button is pressed, change to idle state
 				if (bStart2 == true) { currentState = IDLE; }
-				printf("WT_FOR_BALL");
+				printf("WT_FOR_BALL\n");
 				break;
 
 				//Holds the ball in front of the robot
@@ -322,7 +322,7 @@ void Robot::TeleopPeriodic()
 				if (bA2 == true && bA2Hold == false) { currentState = UNLOAD; }
 				//If start button is pressed, move to idle state
 				if (bStart2 == true) { currentState = IDLE; }
-				printf("HOLD_BALL");
+				printf("HOLD_BALL\n");
 				break;
 
 				//Unload opens the arms but does not poke yet. This gives the arms ~40ms to clear the ball
@@ -340,7 +340,7 @@ void Robot::TeleopPeriodic()
 					armClearDelay = false;
 				}
 				else {armClearDelay = true;}
-				printf("UNLOAD");
+				printf("UNLOAD\n");
 				break;
 
 				//Take the shot! Then return to idle to wait for another ball capture
@@ -349,8 +349,8 @@ void Robot::TeleopPeriodic()
 				lever = true;
 				poker = true;
 				//Keep the arms open until the ball has cleared the
-				if (phoSensorVal != true) { currentState = IDLE; }
-				printf("SHOOT");
+				currentState = IDLE;
+				printf("SHOOT\n");
 				break;
 		}
 	}
@@ -371,7 +371,7 @@ void Robot::TeleopPeriodic()
 			arms = !arms;
 		}
 		//When B button is tapped, toggle the poker
-		if (bB2 == true && bB2Hold == false)
+		if (bB2 == true)
 		{
 			poker = !poker;
 		}
@@ -459,10 +459,10 @@ void Robot::TestPeriodic()
 
 void Robot::DisabledPeriodic()
 {
-/*	cameras->run();
-*/
-	Pres = PreSen->GetVoltage();
-	Pres = 250 * (Pres/5) - 25;
+	cameras->run();
+
+	PresVoltage = PreSen->GetVoltage();
+	Pres = 250 * (PresVoltage/5) - 25;
 
 	if(Pres>=45)
 	{
@@ -475,6 +475,7 @@ void Robot::DisabledPeriodic()
 
 	SmartDashboard::PutNumber("Left Motor Final Command: ", lmotor->Get());
 	SmartDashboard::PutNumber("Right Motor Final Command: ", rmotor->Get());
+
 	SmartDashboard::PutNumber("Winch", setWinch);
 	SmartDashboard::PutBoolean("Arms: \n", arms);
 	SmartDashboard::PutBoolean("Lever: \n", lever);
@@ -488,6 +489,7 @@ void Robot::DisabledPeriodic()
 	SmartDashboard::PutBoolean("dirChange: ", dirChange);
 	SmartDashboard::PutBoolean("Pressure is Good!", pressGood);
 	SmartDashboard::PutNumber("Pressure: ", Pres);
+	SmartDashboard::PutNumber("Pressure Sensor Voltage: ", PresVoltage);
 }
 
 void Robot::checkbuttons() {
