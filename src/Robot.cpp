@@ -2,7 +2,7 @@
 
 void Robot::RobotInit()
 {
-	currentState = STARTUP;
+	currentState = ENTER;
 
 	// Declare new Joysticks
 	stick = new Joystick(0);
@@ -94,26 +94,84 @@ void Robot::RobotInit()
 	drive = new RobotDrive(lmotor, rmotor);
 	lifter = true; //Lifter retracted
 	arms = false; //Arms closed at startup
-	lever = true; //Arms outside of robot
+	lever = false; //Arms inside of robot
 	poker = false; //Poker retracted
 
-	armClearDelay = false;
-	drive->SetExpiration(.150);
+	autoDistance = 0;
+	autoHighDrive = .8;
+	autoLowDrive = .5;
+	autoPosition = 1;
+	autoDefense = LOWBAR;
+	autoDrivePower = 0.5;
 
+	armClearDelay = 0;
+	drive->SetExpiration(.20);
+
+	SmartDashboard::PutNumber("AutoDefense", 0);
+	SmartDashboard::PutNumber("AutoPosition", 1);
 }
 
 void Robot::AutonomousInit()
 {
+	printf("***********Initiating autonomous mode*************\n");
+	autoDefense = static_cast<Defense>(SmartDashboard::GetNumber("AutoDefense", 0));
+	autoPosition = SmartDashboard::GetNumber("AutoPosition", 1);
+	printf("autoDefense: %i autoPosition: %i\n",autoDefense, autoPosition);
+	printf("***********************************************\n\n\n");
+
+	autoDistance = 0;
 	gyro->Reset();
+	LEnc->Reset();
+	REnc->Reset();
+
+	if(autoDefense == ROUGHTERRAIN)
+	{
+		autoDrivePower  = autoHighDrive;
+	}
+	else {autoDrivePower = autoLowDrive;}
+
+	//put arms outside robot to do lowbar
+	if(autoDefense == LOWBAR)
+	{
+		lever = true;
+	}
 }
 
 void Robot::AutonomousPeriodic()
 {
-	//drive->Drive(0.5, 0);
+	autoDistance = (LEnc->GetDistance() + REnc->GetDistance())/2;
+	printf("Defense: %i Position: %i Distance: %f rEnc: %f lEnc: %f\n", autoDefense, autoPosition, autoDistance, REnc->GetDistance(), LEnc->GetDistance());
+
+	if(autoDistance < 60)
+	{
+		drive->Drive(autoDrivePower, 0);
+	}
+	else if (autoDistance < 220)
+	{
+		drive->Drive(autoDrivePower, 0);
+	}
+	else
+	{
+		drive->Drive(0, 0);
+	}
+
+	if(lifter == true) {sLifter->Set(DoubleSolenoid::kForward);}
+	else {sLifter->Set(DoubleSolenoid::kReverse);}
+	if(arms == true) {sArm->Set(DoubleSolenoid::kForward);}
+	else {sArm->Set(DoubleSolenoid::kReverse);}
+	if(lever == true) {sLever->Set(DoubleSolenoid::kReverse);}
+	else {sLever->Set(DoubleSolenoid::kForward);}
+	if(poker == true) {sPoker->Set(DoubleSolenoid::kForward);}
+	else {sPoker->Set(DoubleSolenoid::kReverse);}
+	if (winchSol == true) {sWinch->Set(DoubleSolenoid::kForward);}
+	else {sWinch->Set(DoubleSolenoid::kReverse);}
 }
 
 void Robot::TeleopInit()
 {
+	autoDistance = 0;
+	LEnc->Reset();
+	REnc->Reset();
 }
 
 void Robot::TeleopPeriodic()
@@ -262,95 +320,54 @@ void Robot::TeleopPeriodic()
 	{
 		switch (currentState)
 		{
-			case STARTUP: //Initial robot state - ball in bot, arms closed and up
-				//Startup is only used at start of game and advances directly to ball hold on first tap
-				arms = false; //Arms closed at startup
-				lever = true; //Arms outside of robot
-				poker = false; //Poker retracted
-				if (bA2 == true && bA2Hold == false) {currentState = HOLD_BALL;}
-				printf("STARTUP\n");
-				break;
-
 				//enter case that does nothing so we can hand control back to the
 				//state machine without moving stuff
 			case ENTER:
-			if (bA2 == true) { currentState = IDLE; }
-			printf("ENTER\n");
+				poker = false; //Poker retracted
+				if (bA2 == true && bA2Hold == false) { currentState = WT_FOR_BALL; }
+				if (bRB2 == true && bRB2Hold == false) { currentState = UNLOAD; }
 			break;
-
-			case IDLE: //Idle state, nothing happens
-				arms = true; //Arms open is default state to save air on return from a shot
-				lever = true; //Arms outside of robot
-				poker = false; //Poker retracted
-
-				//If the A button is pressed, change state to MV_TO_CAP
-				if (bA2 == true) { currentState = MV_TO_CAP; }
-				printf("IDLE\n");
-				break;
-
-			case MV_TO_CAP: //Moves arms into position and opens them
-				arms = true; //Arms open
-				lever = true; //Arms out of robot
-				poker = false; //Poker retracted
-				if (bA2 == true) { currentState = WT_FOR_BALL; } //Sets state to WT_FOR_BALL
-				printf("MV_TO_CAP\n");
-				break;
 
 			case WT_FOR_BALL: //Waiting for the ball to trip the photo sensor
 				//Added new exit path to allow operator to stop trying to capture a ball by releasing the A button
-				if (bA2 == false) { currentState = IDLE; }
+				if (bA2 == false) { currentState = ENTER; }
+
+				//Open arms when entering ball capture
+				arms = true;
+				poker = false; //Poker retracted
+
 				//If photo sensor is tripped, close the arms and change state to HOLD_BALL
 				if (phoSensorVal == false)
 				{
 					arms = false; //Arms closed
-					lever = true; //Arms out
 					poker = false; //Poker retracted
-					currentState = HOLD_BALL;
+					currentState = ENTER;
 				}
 				//If start button is pressed, change to idle state
-				if (bStart2 == true) { currentState = IDLE; }
-				printf("WT_FOR_BALL\n");
-				break;
-
-				//Holds the ball in front of the robot
-			case HOLD_BALL:
-				arms = false; //Arms closed
-				lever = true; //Arms out
-				poker = false; //Poker retracted
-
-				//Press A again to shoot the ball
-				if (bA2 == true && bA2Hold == false) { currentState = UNLOAD; }
-				//If start button is pressed, move to idle state
-				if (bStart2 == true) { currentState = IDLE; }
-				printf("HOLD_BALL\n");
 				break;
 
 				//Unload opens the arms but does not poke yet. This gives the arms ~40ms to clear the ball
 			case UNLOAD:
 				arms = true; //Arms open
-				lever = true; //Arms out
 				poker = false; //Poker stays retracted to give arms time to clear ball
 
 				//Need to wait for the arms to clear the ball
 				//This bit of code causes the state machine to spend one extra loop in this state
 				//giving the arms about 40ms to open before the poker shoots the ball
-				if(armClearDelay == true)
+				if(armClearDelay > 15)
 				{
 					currentState = SHOOT;
-					armClearDelay = false;
+					armClearDelay = 0;
 				}
-				else {armClearDelay = true;}
-				printf("UNLOAD\n");
+				else {armClearDelay++;}
 				break;
 
 				//Take the shot! Then return to idle to wait for another ball capture
 			case SHOOT:
 				arms = true;
-				lever = true;
 				poker = true;
 				//Keep the arms open until the ball has cleared the
-				currentState = IDLE;
-				printf("SHOOT\n");
+				currentState = ENTER;
 				break;
 		}
 	}
@@ -361,6 +378,11 @@ void Robot::TeleopPeriodic()
 		lever = !lever;
 	}
 
+	//driver can shoot ball at any time
+	if (bB2 == true && bA2Hold == false)
+	{
+		poker = true;
+	}
 
 	//Manual mode controls engaged when left stick is held down
 	if (stateMan == true)
@@ -371,10 +393,12 @@ void Robot::TeleopPeriodic()
 			arms = !arms;
 		}
 		//When B button is tapped, toggle the poker
-		if (bB2 == true)
+		if (bB2 == true && bA2Hold == false)
 		{
-			poker = !poker;
+			poker = true;
 		}
+		else {poker = false;}
+
 		//When X button is tapped, toggle the lifter
 		if (bX2 == true && bX2Hold == false)
 		{
@@ -438,6 +462,8 @@ void Robot::TeleopPeriodic()
 
 	SmartDashboard::PutNumber("Left Motor Final Command: ", lmotor->Get());
 	SmartDashboard::PutNumber("Right Motor Final Command: ", rmotor->Get());
+	SmartDashboard::PutNumber("Left track distance ", LEnc->Get());
+	SmartDashboard::PutNumber("Right track distance ", REnc->Get());
 	SmartDashboard::PutNumber("Winch", setWinch);
 	SmartDashboard::PutBoolean("Arms: \n", arms);
 	SmartDashboard::PutBoolean("Lever: \n", lever);
@@ -459,7 +485,7 @@ void Robot::TestPeriodic()
 
 void Robot::DisabledPeriodic()
 {
-	cameras->run();
+	//cameras->run();
 
 	PresVoltage = PreSen->GetVoltage();
 	Pres = 250 * (PresVoltage/5) - 25;

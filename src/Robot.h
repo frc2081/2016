@@ -94,18 +94,29 @@ private:
 	float Pres, PresVoltage;
 
 	bool winchMan, stateMan, dirChange;
-	bool armClearDelay;
+	int armClearDelay;
+
+	float autoDistance, autoHighDrive, autoLowDrive;
+	int autoPosition, autoDrivePower;
 
 	enum states {
-		STARTUP,
 		ENTER,
-		IDLE,
-		MV_TO_CAP,
 		WT_FOR_BALL,
-		HOLD_BALL,
 		UNLOAD,
 		SHOOT
 	};
+
+	enum Defense{
+		LOWBAR,
+		ROUGHTERRAIN,
+		MOAT,
+		RAMPART,
+		ROCKWALL,
+		CHEVAL
+	};
+
+	Defense autoDefense;
+
 	states currentState;
 	void RobotInit(); // Scopes/initialization for robot functions
 	void AutonomousInit();
