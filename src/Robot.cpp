@@ -113,11 +113,11 @@ void Robot::RobotInit()
 
 void Robot::AutonomousInit()
 {
-	printf("***********Initiating autonomous mode*************\n");
+	printf("\n\n\n***********Initiating autonomous mode*************\n");
 	autoDefense = static_cast<Defense>(SmartDashboard::GetNumber("AutoDefense", 0));
 	autoPosition = SmartDashboard::GetNumber("AutoPosition", 1);
-	printf("autoDefense: %i autoPosition: %i\n",autoDefense, autoPosition);
-	printf("***********************************************\n\n\n");
+	printf("Defense: %i Position: %i\n",autoDefense, autoPosition);
+	printf("**************************************************\n\n\n");
 
 	autoDistance = 0;
 	gyro->Reset();
