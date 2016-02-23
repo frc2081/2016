@@ -176,7 +176,6 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
-
 	checkbuttons();
 	cameras->run();
 
@@ -485,7 +484,7 @@ void Robot::TestPeriodic()
 
 void Robot::DisabledPeriodic()
 {
-	//cameras->run();
+	cameras->run();
 
 	PresVoltage = PreSen->GetVoltage();
 	Pres = 250 * (PresVoltage/5) - 25;

@@ -18,7 +18,7 @@
 		if(imaqError != IMAQdxErrorSuccess) {
 			DriverStation::ReportError("IMAQdxOpenCamera error: " + std::to_string((long)imaqError) + "\n");
 		}
-		curCam = camFront;
+		curCam = camBack;
 		frame = imaqCreateImage(IMAQ_IMAGE_RGB, 0);
 		server = CameraServer::GetInstance();
 		server->SetQuality(imgQuality);
@@ -32,7 +32,7 @@
 
 	}
 	void CAMERAFEEDS::init() {
-		changeCam (camFront);
+		changeCam (camBack);
 	}
 
 	void  CAMERAFEEDS::end() {
