@@ -34,7 +34,6 @@ void Robot::RobotInit()
 	buttonLS2 = new JoystickButton(stick2, 9),
 	buttonRS2 = new JoystickButton(stick2, 10);
 
-
 	//Solenoids
 	//1 is back PCM, 0 is front PCM(front at track angle)
 	sArm = new DoubleSolenoid(0, 0, 1);	// Solenoid for the opening and closing of the arms
@@ -68,9 +67,9 @@ void Robot::RobotInit()
 	averageGyro = 1.5;
 	gyroCalibrate = 0;
 	gyro = new ADXRS450_Gyro();
-	gyro->Reset();
 	gyro->Calibrate();
-
+	gyro->Reset();
+	
 	/*while (gyroCalibrate < 5){
 		while (averageGyro >= 1) {
 			gyro->Calibrate();
@@ -88,88 +87,306 @@ void Robot::RobotInit()
 			break;
 		}
 	}*/
-	// Declare new drive on PWM's 0 and 1
-
-
+	
+	// Declare new drive with our drive motors
 	drive = new RobotDrive(lmotor, rmotor);
 	lifter = true; //Lifter retracted
-	arms = false; //Arms closed at startup
+	arms = false; //Arms closed
 	lever = false; //Arms inside of robot
 	poker = false; //Poker retracted
 
-	autoDistance = 0;
+	/*
+	AutoMode Settings
+	0 = no auto mode
+	1 = move to defense but do not attempt to cross it
+	2 = move to defense and cross it
+	3 = move to defense, cross it, then attempt a goal. Works only in positions 1, 2, and 5
+	*/
+	autoMode = 0;		//autoMode is always initialized to do nothing
+	autoPosition = 1; 	//Position is 1 indexed to match the field diagram
+	autoDefense = LOWBAR;
+	
 	autoHighDrive = .8;
 	autoLowDrive = .5;
-	autoPosition = 1;
-	autoDefense = LOWBAR;
-	autoDrivePower = 0.5;
-
-	armClearDelay = 0;
+	autoNavigationDrive = .5;
+	autoArmMoveTime = 5; //duration of time arms need to move. units are # of software loops
+	
+	armClearDelay = 0; //when taking a shot, amount of time to wait for ball to settle after opening arms 
 	drive->SetExpiration(.20);
 
 	SmartDashboard::PutNumber("AutoDefense", 0);
 	SmartDashboard::PutNumber("AutoPosition", 1);
+	SmartDashboard::PutNumber("AutoMode", 0);
 }
 
 void Robot::AutonomousInit()
 {
-	printf("\n\n\n***********Initiating autonomous mode*************\n");
-	autoDefense = static_cast<Defense>(SmartDashboard::GetNumber("AutoDefense", 0));
-	autoPosition = SmartDashboard::GetNumber("AutoPosition", 1);
-	printf("Defense: %i Position: %i\n",autoDefense, autoPosition);
-	printf("**************************************************\n\n\n");
-
+	//Saftey Feature - autoMode is set to 0 on start of autoInit so that auto will only run if the robot successfully pulls an auto command from the dashboard
+	autoMode = 0;
+	
+	//Reset auto Variables in case this isn't the first time auto is run in the power cycle
 	autoDistance = 0;
+	autoDefenseDrivePower = 0;
+	autoDrivePower = 0;
+	autoTurnPower = 0;
+	
+	autoCurrentStep = MOVE_TO_DEFENSE;
+	autoDelay = 0; //generic counter used to various delay tasks in auto mode
+	
+	//Reset sensors
 	gyro->Reset();
 	LEnc->Reset();
-	REnc->Reset();
-
+	REnc->Reset();	
+	
+	//Get autonoumous mode parameters from the dashboard 
+	autoMode = SmartDashboard::GetNumber("AutoMode", 0);
+	autoDefense = static_cast<Defense>(SmartDashboard::GetNumber("AutoDefense", 0));
+	autoPosition = SmartDashboard::GetNumber("AutoPosition", 1);
+	
+	//The automated goal code only works in positions 1, 2 and 5, so
+	//Automode 3 is not allowed in Positions 3 and 4;
+	if(autoMode >= 3 && (autoPosition == 3 || autoPosition == 4))
+	{
+		autoMode = 2;
+	}
+	
+	//Update drive here to prevent tripping the drive safety timout
+	drive->Drive(0, 0);
+	
+	//Select drive power based on defense
+	//RoughTerrain needs more power and speed to cross
+	//Cheval must be approached in reverse
+	//all other defenses are low power
 	if(autoDefense == ROUGHTERRAIN)
 	{
-		autoDrivePower  = autoHighDrive;
+		autoDefenseDrivePower = autoHighDrive;
 	}
-	else {autoDrivePower = autoLowDrive;}
-
-	//put arms outside robot to do lowbar
-	if(autoDefense == LOWBAR)
-	{
-		lever = true;
-	}
+	else if (autoDefense == CHEVAL)  {autoDefenseDrivePower = -autoLowDrive;}
+	else{autoDefenseDrivePower = autoLowDrive;}	
+	
+	//Configure target angle for castle turn
+	//Cheval and portcullis routines drive backward and so must have a different angle
+	if(autoDefense == CHEVAL || autoDefense == PORTCULLIS) {autoCastleTargetAngle = 45;}
+	else {autoCastleTargetAngle = -135;}
+	
+	//Announce to console that auto mode is beginning and the settings it is using
+	printf("\n\n\n***********Initiating autonomous run*************\n");
+	printf("Mode: %i Defense: %i Position: %i\n", autoMode, autoDefense, autoPosition);
+	printf("**************************************************\n\n\n");
 }
 
 void Robot::AutonomousPeriodic()
 {
-	autoDistance = (LEnc->GetDistance() + REnc->GetDistance())/2;
-	printf("Defense: %i Position: %i Distance: %f rEnc: %f lEnc: %f\n", autoDefense, autoPosition, autoDistance, REnc->GetDistance(), LEnc->GetDistance());
+	LEncVal = LEnc->GetDistance();
+	REncVal = REnc->GetDistance();
+	autoDistance = (LEncVal + REncVal) / 2;
+	gyroAngle = gyro->GetAngle();
+	autoDrivePower = 0;
+	autoTurnPower = 0;
+	
+	printf("Step: %i Distance: %f rEnc: %f lEnc: %f gAngle %f\n", autoCurrentStep, autoDistance, REncVal, LEncVal, gyroAngle);
 
-	if(autoDistance < 60)
-	{
-		drive->Drive(autoDrivePower, 0);
+//***************AUTO MODE**********************************
+	//Move to defense Step
+	if(autoMode >= 1 && autoCurrentStep == MOVE_TO_DEFENSE)
+	{				
+		if(autoDistance < 60) 
+		{
+			autoDrivePower = autoDefenseDrivePower;
+		}
+		else 
+		{	
+			autoDrivePower = 0;
+			autoTurnPower = 0;
+			autoCurrentStep = DEFENSE_SPECIFIC;
+			
+			//Encoders are reset here so the drive in the next step has a good starting point
+			LEnc->Reset();
+			REnc->Reset();
+			//When encoders are reset, values for the current loop must also be recalculated
+			LEncVal = LEnc->GetDistance();
+			REncVal = REnc->GetDistance();
+			autoDistance = (LEncVal + REncVal) / 2;
+		}
+		
+		//For some defenses, the arms need to be down. 
+		//Put them down while moving to save time
+		if(autoDefense == LOWBAR || autoDefense == PORTCULLIS)
+		{
+			lever = true;
+		}
 	}
-	else if (autoDistance < 220)
-	{
-		drive->Drive(autoDrivePower, 0);
+	
+//*****************************************************
+	//Perform any actions specific to crossing a certain defense
+	if(autoMode >= 2 && autoCurrentStep == DEFENSE_SPECIFIC)
+	{		
+		//CHEVAL actions - once robot has reached the defense, put arms down to push platform down
+		if(autoDefense == CHEVAL)
+		{
+			lever = true;
+			autoDelay++;
+			autoDrivePower = 0;
+			autoTurnPower = 0;
+			
+			if(autoDelay > autoArmMoveTime)
+			{
+				autoCurrentStep = CROSS_DEFENSE;
+				autoDelay = 0;
+			}
+		} else
+		//PORTCULLIS actions - raise arms up while slowly driving forward to raise the gate
+		if(autoDefense == PORTCULLIS)
+		{
+			lever = false;
+			autoDelay++;
+			autoDrivePower = .3;
+			autoTurnPower = 0;
+			
+			if(autoDelay > 10)
+			{
+				autoCurrentStep = CROSS_DEFENSE;
+				autoDelay = 0;
+			}
+		}
+		else {autoCurrentStep = CROSS_DEFENSE;}
 	}
-	else
+	
+//*****************************************************
+	//Cross defense step
+	if(autoMode >= 2 && autoCurrentStep == CROSS_DEFENSE)
 	{
-		drive->Drive(0, 0);
-	}
+		if(autoDistance < 120) 
+		{
+			autoDrivePower = autoDefenseDrivePower;	
+		}
+		else 
+		{	
+			autoDrivePower = 0;
+			autoTurnPower = 0;
+			autoCurrentStep = ALIGN_TO_ZERO;
+		}
+	}		
 
-	if(lifter == true) {sLifter->Set(DoubleSolenoid::kForward);}
-	else {sLifter->Set(DoubleSolenoid::kReverse);}
-	if(arms == true) {sArm->Set(DoubleSolenoid::kForward);}
-	else {sArm->Set(DoubleSolenoid::kReverse);}
-	if(lever == true) {sLever->Set(DoubleSolenoid::kReverse);}
-	else {sLever->Set(DoubleSolenoid::kForward);}
-	if(poker == true) {sPoker->Set(DoubleSolenoid::kForward);}
-	else {sPoker->Set(DoubleSolenoid::kReverse);}
-	if (winchSol == true) {sWinch->Set(DoubleSolenoid::kForward);}
-	else {sWinch->Set(DoubleSolenoid::kReverse);}
+//*****************************************************	
+	//Rotate back to 0 angle step
+	//put arms back in robot for safety and to increase clearance
+	if(autoMode >= 3 && autoCurrentStep == ALIGN_TO_ZERO)
+	{
+		lever = false;
+		if(gyroAngle < -2) { autoTurnPower = autoTurnRate; }
+		else if(gyroAngle > 2) { autoTurnPower = -autoTurnRate; }
+		else 
+		{	
+			//Encoders are reset here so the drive in the next step has a good starting point
+			LEnc->Reset();
+			REnc->Reset();
+			//When encoders are reset, values for the current loop must also be recalculated
+			LEncVal = LEnc->GetDistance();
+			REncVal = REnc->GetDistance();
+			autoDistance = (LEncVal + REncVal) / 2;
+	
+			autoDrivePower = 0;
+			autoTurnPower = 0;
+			autoCurrentStep = MOVE_TO_CASTLE_TURN;
+		}
+	}		
+	
+//*****************************************************	
+	//Drive to the point where the robot turns to face the goal
+	if(autoMode >= 3 && autoCurrentStep == MOVE_TO_CASTLE_TURN)
+	{
+		if(autoDistance < 50) 
+		{
+			autoDrivePower = autoNavigationDrive;	
+		}
+		else 
+		{	
+			autoDrivePower = 0;
+			autoTurnPower = 0;
+			autoCurrentStep = CASTLE_TURN;
+		}
+	}		
+
+//*****************************************************	
+	//Turn to aim the ball at the goal
+	//If Defense was CHEVAL or PORTCULLIS, robot is approching backwards and must turn differently
+	//Otherwise, all turns are the same
+	if(autoMode >= 3 && autoCurrentStep == CASTLE_TURN)
+	{		
+		if(gyroAngle > autoCastleTargetAngle) { autoTurnPower = -autoTurnRate; }
+		else if(gyroAngle <autoCastleTargetAngle) { autoTurnPower = autoTurnRate; }
+		else 
+		{	
+			//Encoders are reset here so the drive in the next step has a good starting point
+			LEnc->Reset();
+			REnc->Reset();
+			LEncVal = LEnc->GetDistance();
+			REncVal = REnc->GetDistance();
+			autoDistance = (LEncVal + REncVal) / 2;
+			
+			autoDrivePower = 0;
+			autoTurnPower = 0;
+			autoCurrentStep = MV_TO_CASTLE;
+		}
+	}	
+	
+//*****************************************************	
+	//Move to the castle and put the arms down for a shot
+	if(autoMode >= 3 && autoCurrentStep == MV_TO_CASTLE)
+	{
+		lever = true;
+		if(autoDistance < 20) 
+		{
+			autoDrivePower = autoNavigationDrive;	
+		}
+		else 
+		{	
+			autoDrivePower = 0;
+			autoTurnPower = 0;
+			autoCurrentStep = AUTO_SHOOT;
+		}
+	}	
+
+//*****************************************************	
+	//Open the arms and then shoot until the end of auto
+	if(autoMode >= 3 && autoCurrentStep == AUTO_SHOOT)
+	{
+		arms = true;
+		poker = false;
+		armClearDelay++;
+		
+		//Shoot every 15 loops
+		if(armClearDelay >= 15)
+		{	
+			poker = true;
+			armClearDelay = 0;
+		}
+	}		
+//*****************************************************	
+	//Only allow drive commands to be sent to the ouputs if an auto mode has been selected
+	if(autoMode != 0)
+	{
+		drive->Drive(autoDrivePower, autoTurnPower);
+
+		if(lifter == true) {sLifter->Set(DoubleSolenoid::kForward);}
+		else {sLifter->Set(DoubleSolenoid::kReverse);}
+		if(arms == true) {sArm->Set(DoubleSolenoid::kForward);}
+		else {sArm->Set(DoubleSolenoid::kReverse);}
+		if(lever == true) {sLever->Set(DoubleSolenoid::kReverse);}
+		else {sLever->Set(DoubleSolenoid::kForward);}
+		if(poker == true) {sPoker->Set(DoubleSolenoid::kForward);}
+		else {sPoker->Set(DoubleSolenoid::kReverse);}
+		if (winchSol == true) {sWinch->Set(DoubleSolenoid::kForward);}
+		else {sWinch->Set(DoubleSolenoid::kReverse);}
+	}
 }
 
 void Robot::TeleopInit()
 {
+	//Safety feature - Turn off autoMode every time we enter Teleop so that auto is always off except when the operators have deliberately enabled it just prior to using it
 	autoDistance = 0;
+	autoMode = 0;
 	LEnc->Reset();
 	REnc->Reset();
 }
@@ -462,8 +679,8 @@ void Robot::TeleopPeriodic()
 
 	SmartDashboard::PutNumber("Left Motor Final Command: ", lmotor->Get());
 	SmartDashboard::PutNumber("Right Motor Final Command: ", rmotor->Get());
-	SmartDashboard::PutNumber("Left track distance ", LEnc->Get());
-	SmartDashboard::PutNumber("Right track distance ", REnc->Get());
+	SmartDashboard::PutNumber("Left track distance ", LEnc->GetDistance());
+	SmartDashboard::PutNumber("Right track distance ", REnc->GetDistance());
 	SmartDashboard::PutNumber("Winch", setWinch);
 	SmartDashboard::PutBoolean("Arms: \n", arms);
 	SmartDashboard::PutBoolean("Lever: \n", lever);
@@ -485,7 +702,7 @@ void Robot::TestPeriodic()
 
 void Robot::DisabledPeriodic()
 {
-	//cameras->run();
+	cameras->run();
 
 	PresVoltage = PreSen->GetVoltage();
 	Pres = 250 * (PresVoltage/5) - 25;
@@ -501,7 +718,8 @@ void Robot::DisabledPeriodic()
 
 	SmartDashboard::PutNumber("Left Motor Final Command: ", lmotor->Get());
 	SmartDashboard::PutNumber("Right Motor Final Command: ", rmotor->Get());
-
+	SmartDashboard::PutNumber("Left track distance ", LEnc->GetDistance());
+	SmartDashboard::PutNumber("Right track distance ", REnc->GetDistance());
 	SmartDashboard::PutNumber("Winch", setWinch);
 	SmartDashboard::PutBoolean("Arms: \n", arms);
 	SmartDashboard::PutBoolean("Lever: \n", lever);

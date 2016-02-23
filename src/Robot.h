@@ -12,6 +12,7 @@
 #define winchMaxExtendPower 0.3
 #define tryingtofixmotor 1 //(Dis)enables the motor correction code- 1 means it will run the correction code
 #define motorCorrectionValue 1 //Value the left motor will be mu
+#define autoTurnRate 0.3
 
 #include "WPILib.h"
 #include <string>
@@ -89,15 +90,15 @@ private:
 	bool direction; //Holds current "front" direction of robot. False = ball grabber is front, true = track angle is front
 	bool pressGood;
 
-	float setWinch, winchHold, ArmEncValue;
+	float setWinch, winchHold, ArmEncValue, LEncVal, REncVal;
 	double lmotspeed, rmotspeed;
 	float Pres, PresVoltage;
 
 	bool winchMan, stateMan, dirChange;
 	int armClearDelay;
 
-	float autoDistance, autoHighDrive, autoLowDrive;
-	int autoPosition, autoDrivePower;
+	float autoDistance, autoHighDrive, autoLowDrive, autoDrivePower, autoDefenseDrivePower, autoTurnPower, autoNavigationDrive;
+	int autoMode, autoArmMoveTime, autoDelay, autoCastleTargetAngle, autoPosition;
 
 	enum states {
 		ENTER,
@@ -112,9 +113,22 @@ private:
 		MOAT,
 		RAMPART,
 		ROCKWALL,
-		CHEVAL
+		CHEVAL,
+		PORTCULLIS
+	};
+	
+	enum auto_Step{
+		MOVE_TO_DEFENSE,
+		DEFENSE_SPECIFIC,
+		CROSS_DEFENSE,
+		ALIGN_TO_ZERO,
+		MOVE_TO_CASTLE_TURN,
+		CASTLE_TURN,
+		MV_TO_CASTLE,
+		AUTO_SHOOT
 	};
 
+	auto_Step autoCurrentStep;
 	Defense autoDefense;
 
 	states currentState;
