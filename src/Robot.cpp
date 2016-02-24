@@ -54,6 +54,7 @@ void Robot::RobotInit()
 	lmotor = new VictorSP(0);
 	rmotor = new VictorSP(1);
 	PreSen = new AnalogInput(0);
+	PreSen->SetAverageBits(3);
 	RaFin =  new AnalogInput (3);
 	compress = new Compressor(0);
 	compress->SetClosedLoopControl(true);
@@ -446,7 +447,7 @@ void Robot::TeleopPeriodic()
 	} else {stateMan = false;}
 
 	//Pressure Sensor Code
-	Pres = PreSen->GetVoltage();
+	Pres = PreSen->GetAverageVoltage();
 	Pres = 250 * (Pres/5) - 25;
 
 	if(Pres>=45)
@@ -717,7 +718,7 @@ void Robot::DisabledPeriodic()
 {
 	cameras->run();
 
-	PresVoltage = PreSen->GetVoltage();
+	PresVoltage = PreSen->GetAverageVoltage();
 	Pres = 250 * (PresVoltage/5) - 25;
 
 	if(Pres>=45)
