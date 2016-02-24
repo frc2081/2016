@@ -25,7 +25,7 @@
 		contrlr = newJoy;
 		kBtPrev = false;
 		kBtCurr = false;
-		currCamNum  = 0;
+		currCamNum  = 1;
 	}
 
 	CAMERAFEEDS::~CAMERAFEEDS() {

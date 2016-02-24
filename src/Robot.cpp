@@ -314,8 +314,8 @@ void Robot::AutonomousPeriodic()
 	//Otherwise, all turns are the same
 	if(autoMode >= 3 && autoCurrentStep == CASTLE_TURN)
 	{		
-		if(gyroAngle > autoCastleTargetAngle) { autoTurnPower = -autoTurnRate; }
-		else if(gyroAngle <autoCastleTargetAngle) { autoTurnPower = autoTurnRate; }
+		if(gyroAngle > autoCastleTargetAngle + 2) { autoTurnPower = -autoTurnRate; }
+		else if(gyroAngle < autoCastleTargetAngle -2) { autoTurnPower = autoTurnRate; }
 		else 
 		{	
 			//Encoders are reset here so the drive in the next step has a good starting point
@@ -389,6 +389,11 @@ void Robot::TeleopInit()
 	autoMode = 0;
 	LEnc->Reset();
 	REnc->Reset();
+
+	//Set dashboard automode to a safe value
+	SmartDashboard::PutNumber("AutoDefense", 0);
+	SmartDashboard::PutNumber("AutoPosition", 1);
+	SmartDashboard::PutNumber("AutoMode", 0);
 }
 
 void Robot::TeleopPeriodic()
@@ -698,6 +703,14 @@ void Robot::TeleopPeriodic()
 
 void Robot::TestPeriodic()
 {
+}
+
+void Robot::DisabledInit()
+{
+	//Set dashboard automode to a safe value
+	SmartDashboard::PutNumber("AutoDefense", 0);
+	SmartDashboard::PutNumber("AutoPosition", 1);
+	SmartDashboard::PutNumber("AutoMode", 0);
 }
 
 void Robot::DisabledPeriodic()

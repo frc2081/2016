@@ -140,6 +140,7 @@ private:
 	void TeleopPeriodic();
 	void TestPeriodic();
 	void DisabledPeriodic();
+	void DisabledInit();
 
 	CAMERAFEEDS *cameras;
 };
