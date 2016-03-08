@@ -12,7 +12,7 @@
 #define winchMaxExtendPower 0.3
 #define tryingtofixmotor 1 //(Dis)enables the motor correction code- 1 means it will run the correction code
 #define motorCorrectionValue 1 //Value the left motor will be mu
-#define autoTurnRate 0.3
+#define autoTurnRate .5
 
 #include "WPILib.h"
 #include <string>
@@ -98,7 +98,7 @@ private:
 	int armClearDelay;
 
 	float autoDistance, autoHighDrive, autoLowDrive, autoDrivePower, autoDefenseDrivePower, autoTurnPower, autoNavigationDrive;
-	int autoMode, autoArmMoveTime, autoDelay, autoCastleTargetAngle, autoPosition;
+	int autoMode, autoArmMoveTime, autoDelay, autoCastleTargetAngle, autoPosition, autoCastleDistance;
 
 	enum states {
 		ENTER,

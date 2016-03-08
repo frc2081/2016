@@ -107,9 +107,11 @@ void Robot::RobotInit()
 	autoPosition = 1; 	//Position is 1 indexed to match the field diagram
 	autoDefense = LOWBAR;
 	
-	autoHighDrive = .8;
-	autoLowDrive = .5;
-	autoNavigationDrive = .5;
+	autoHighDrive = 1;
+	autoLowDrive = .8;
+	autoNavigationDrive = .8;
+	autoCastleDistance = 0;
+
 	autoArmMoveTime = 5; //duration of time arms need to move. units are # of software loops
 	
 	armClearDelay = 0; //when taking a shot, amount of time to wait for ball to settle after opening arms 
@@ -168,7 +170,7 @@ void Robot::AutonomousInit()
 	//Configure target angle for castle turn
 	//Cheval and portcullis routines drive backward and so must have a different angle
 	if(autoDefense == CHEVAL || autoDefense == PORTCULLIS) {autoCastleTargetAngle = 45;}
-	else {autoCastleTargetAngle = -135;}
+	else {autoCastleTargetAngle = -110;}
 	
 	//Announce to console that auto mode is beginning and the settings it is using
 	printf("\n\n\n***********Initiating autonomous run*************\n");
@@ -185,7 +187,7 @@ void Robot::AutonomousPeriodic()
 	autoDrivePower = 0;
 	autoTurnPower = 0;
 	
-	printf("Step: %i Distance: %f rEnc: %f lEnc: %f gAngle %f\n", autoCurrentStep, autoDistance, REncVal, LEncVal, gyroAngle);
+	printf("Mode: %i Step: %i Distance: %f rEnc: %f lEnc: %f gAngle %f\n", autoMode, autoCurrentStep, autoDistance, REncVal, LEncVal, gyroAngle);
 
 //***************AUTO MODE**********************************
 	//Move to defense Step
@@ -222,6 +224,7 @@ void Robot::AutonomousPeriodic()
 	//Perform any actions specific to crossing a certain defense
 	if(autoMode >= 2 && autoCurrentStep == DEFENSE_SPECIFIC)
 	{		
+		printf("\n\n\nDefense Specific");
 		//CHEVAL actions - once robot has reached the defense, put arms down to push platform down
 		if(autoDefense == CHEVAL)
 		{
@@ -257,26 +260,29 @@ void Robot::AutonomousPeriodic()
 	//Cross defense step
 	if(autoMode >= 2 && autoCurrentStep == CROSS_DEFENSE)
 	{
-		if(autoDistance < 120) 
+		if(autoDistance < 80)
 		{
 			autoDrivePower = autoDefenseDrivePower;	
+			printf("\n\n\ncrossing");
 		}
 		else 
 		{	
 			autoDrivePower = 0;
 			autoTurnPower = 0;
 			autoCurrentStep = ALIGN_TO_ZERO;
+			printf("\n\n\ndone with crossing");
 		}
 	}		
 
 //*****************************************************	
 	//Rotate back to 0 angle step
 	//put arms back in robot for safety and to increase clearance
-	if(autoMode >= 3 && autoCurrentStep == ALIGN_TO_ZERO)
+	if(autoMode == 3 && autoCurrentStep == ALIGN_TO_ZERO)
 	{
+		printf("\n\n\nTest");
 		lever = false;
-		if(gyroAngle < -2) { autoTurnPower = autoTurnRate; }
-		else if(gyroAngle > 2) { autoTurnPower = -autoTurnRate; }
+		if(gyroAngle < -2) { autoTurnPower = -.7; printf("\n\n\nturn right"); }
+		else if(gyroAngle > 2) { autoTurnPower = .7;printf("\n\n\nturn left");  }
 		else 
 		{	
 			//Encoders are reset here so the drive in the next step has a good starting point
@@ -295,9 +301,9 @@ void Robot::AutonomousPeriodic()
 	
 //*****************************************************	
 	//Drive to the point where the robot turns to face the goal
-	if(autoMode >= 3 && autoCurrentStep == MOVE_TO_CASTLE_TURN)
+	if(autoMode == 3 && autoCurrentStep == MOVE_TO_CASTLE_TURN)
 	{
-		if(autoDistance < 50) 
+		if(autoDistance < 130)
 		{
 			autoDrivePower = autoNavigationDrive;	
 		}
@@ -313,10 +319,11 @@ void Robot::AutonomousPeriodic()
 	//Turn to aim the ball at the goal
 	//If Defense was CHEVAL or PORTCULLIS, robot is approching backwards and must turn differently
 	//Otherwise, all turns are the same
-	if(autoMode >= 3 && autoCurrentStep == CASTLE_TURN)
+	if(autoMode == 3 && autoCurrentStep == CASTLE_TURN)
 	{		
-		if(gyroAngle > autoCastleTargetAngle + 2) { autoTurnPower = -autoTurnRate; }
-		else if(gyroAngle < autoCastleTargetAngle -2) { autoTurnPower = autoTurnRate; }
+		lever = true;
+		if(gyroAngle > autoCastleTargetAngle + 2) { autoTurnPower = .7; }
+		else if(gyroAngle < autoCastleTargetAngle -2) { autoTurnPower = -.7; }
 		else 
 		{	
 			//Encoders are reset here so the drive in the next step has a good starting point
@@ -334,41 +341,51 @@ void Robot::AutonomousPeriodic()
 	
 //*****************************************************	
 	//Move to the castle and put the arms down for a shot
-	if(autoMode >= 3 && autoCurrentStep == MV_TO_CASTLE)
+	if(autoMode == 3 && autoCurrentStep == MV_TO_CASTLE)
 	{
-		lever = true;
-		if(autoDistance < 20) 
+		if(autoPosition == 2) {autoCastleDistance = -40;}
+		else if (autoPosition == 1 || autoPosition == 5) {autoCastleDistance = -90;}
+
+
+		armClearDelay++;
+		if(autoDistance > -40)
 		{
-			autoDrivePower = autoNavigationDrive;	
+			autoDrivePower = -autoNavigationDrive;
 		}
 		else 
 		{	
 			autoDrivePower = 0;
 			autoTurnPower = 0;
-			autoCurrentStep = AUTO_SHOOT;
+			if(armClearDelay>150)
+			{
+				autoCurrentStep = AUTO_SHOOT;
+				armClearDelay = 0;
+			}
 		}
 	}	
 
 //*****************************************************	
 	//Open the arms and then shoot until the end of auto
-	if(autoMode >= 3 && autoCurrentStep == AUTO_SHOOT)
+	if(autoMode == 3 && autoCurrentStep == AUTO_SHOOT)
 	{
 		arms = true;
 		poker = false;
 		armClearDelay++;
 		
 		//Shoot every 15 loops
-		if(armClearDelay >= 15)
+		if(armClearDelay >= 70)
 		{	
 			poker = true;
-			armClearDelay = 0;
 		}
+		if(armClearDelay>140)
+		{armClearDelay = 0;}
 	}		
 //*****************************************************	
 	//Only allow drive commands to be sent to the ouputs if an auto mode has been selected
 	if(autoMode != 0)
 	{
-		drive->Drive(autoDrivePower, autoTurnPower);
+		printf("autoDrivePower: %f autoTurnPower %f", autoDrivePower, autoTurnPower);
+		drive->ArcadeDrive(autoDrivePower, autoTurnPower);
 
 		if(lifter == true) {sLifter->Set(DoubleSolenoid::kForward);}
 		else {sLifter->Set(DoubleSolenoid::kReverse);}
@@ -734,6 +751,8 @@ void Robot::DisabledPeriodic()
 	SmartDashboard::PutNumber("Right Motor Final Command: ", rmotor->Get());
 	SmartDashboard::PutNumber("Left track distance ", LEnc->GetDistance());
 	SmartDashboard::PutNumber("Right track distance ", REnc->GetDistance());
+	SmartDashboard::PutNumber("Left track counts ", LEnc->Get());
+	SmartDashboard::PutNumber("Right track counts ", REnc->Get());
 	SmartDashboard::PutNumber("Winch", setWinch);
 	SmartDashboard::PutBoolean("Arms: \n", arms);
 	SmartDashboard::PutBoolean("Lever: \n", lever);
