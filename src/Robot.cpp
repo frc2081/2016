@@ -187,7 +187,7 @@ void Robot::AutonomousPeriodic()
 	autoDrivePower = 0;
 	autoTurnPower = 0;
 	
-	printf("Mode: %i Step: %i Distance: %f rEnc: %f lEnc: %f gAngle %f\n", autoMode, autoCurrentStep, autoDistance, REncVal, LEncVal, gyroAngle);
+	//printf("Mode: %i Step: %i Distance: %f rEnc: %f lEnc: %f gAngle %f\n", autoMode, autoCurrentStep, autoDistance, REncVal, LEncVal, gyroAngle);
 
 //***************AUTO MODE**********************************
 	//Move to defense Step
@@ -263,14 +263,14 @@ void Robot::AutonomousPeriodic()
 		if(autoDistance < 80)
 		{
 			autoDrivePower = autoDefenseDrivePower;	
-			printf("\n\n\ncrossing");
+			//printf("\n\n\ncrossing");
 		}
 		else 
 		{	
 			autoDrivePower = 0;
 			autoTurnPower = 0;
 			autoCurrentStep = ALIGN_TO_ZERO;
-			printf("\n\n\ndone with crossing");
+			//printf("\n\n\ndone with crossing");
 		}
 	}		
 
@@ -279,7 +279,7 @@ void Robot::AutonomousPeriodic()
 	//put arms back in robot for safety and to increase clearance
 	if(autoMode == 3 && autoCurrentStep == ALIGN_TO_ZERO)
 	{
-		printf("\n\n\nTest");
+		//printf("\n\n\nTest");
 		lever = false;
 		if(gyroAngle < -2) { autoTurnPower = -.7; printf("\n\n\nturn right"); }
 		else if(gyroAngle > 2) { autoTurnPower = .7;printf("\n\n\nturn left");  }
@@ -384,7 +384,7 @@ void Robot::AutonomousPeriodic()
 	//Only allow drive commands to be sent to the ouputs if an auto mode has been selected
 	if(autoMode != 0)
 	{
-		printf("autoDrivePower: %f autoTurnPower %f", autoDrivePower, autoTurnPower);
+		//printf("autoDrivePower: %f autoTurnPower %f", autoDrivePower, autoTurnPower);
 		drive->ArcadeDrive(autoDrivePower, autoTurnPower);
 
 		if(lifter == true) {sLifter->Set(DoubleSolenoid::kForward);}
@@ -726,9 +726,9 @@ void Robot::TestPeriodic()
 void Robot::DisabledInit()
 {
 	//Set dashboard automode to a safe value
-	SmartDashboard::PutNumber("AutoDefense", 0);
-	SmartDashboard::PutNumber("AutoPosition", 1);
-	SmartDashboard::PutNumber("AutoMode", 0);
+	//SmartDashboard::PutNumber("AutoDefense", 0);
+	//SmartDashboard::PutNumber("AutoPosition", 1);
+	//SmartDashboard::PutNumber("AutoMode", 0);
 }
 
 void Robot::DisabledPeriodic()
