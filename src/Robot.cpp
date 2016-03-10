@@ -649,18 +649,16 @@ void Robot::TeleopPeriodic()
 	if (winchMan == true)
 	{
 		//When X button is pressed, keep a minimum hold power applied to the winch. Otherwise, run winch like normal
-		if (bX == false) //If X button is not pressed
+		if (bX == false && winchSol == true) //If X button is not pressed
 		{
 			setWinch = Trig; //Set winch power to the trigger value
 		}
 		else
 		{
-			if (Trig < winchHold) //If the trigger value is greater then 0.05, the winch hold value, set the winch power to the triggers
+			if (Trig < winchHold && winchSol == true) //If the trigger value is greater then 0.05, the winch hold value, set the winch power to the triggers
 			{
 				setWinch = Trig; //Set the value of the winch power to the value of the triggers
 			}
-			else //If the trigger value is less than the hold value, set it to the hold value
-			{setWinch = winchHold;}
 		}
 		if (bRB == true && bRBHold == false)
 		{
