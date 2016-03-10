@@ -117,9 +117,9 @@ void Robot::RobotInit()
 	armClearDelay = 0; //when taking a shot, amount of time to wait for ball to settle after opening arms 
 	drive->SetExpiration(.20);
 
-	SmartDashboard::PutNumber("AutoDefense", 0);
-	SmartDashboard::PutNumber("AutoPosition", 1);
-	SmartDashboard::PutNumber("AutoMode", 0);
+	//SmartDashboard::PutNumber("AutoDefense", 0);
+	//SmartDashboard::PutNumber("AutoPosition", 1);
+	//SmartDashboard::PutNumber("AutoMode", 0);
 }
 
 void Robot::AutonomousInit()
@@ -409,9 +409,9 @@ void Robot::TeleopInit()
 	REnc->Reset();
 
 	//Set dashboard automode to a safe value
-	SmartDashboard::PutNumber("AutoDefense", 0);
-	SmartDashboard::PutNumber("AutoPosition", 1);
-	SmartDashboard::PutNumber("AutoMode", 0);
+	//SmartDashboard::PutNumber("AutoDefense", 0);
+	//SmartDashboard::PutNumber("AutoPosition", 1);
+	//SmartDashboard::PutNumber("AutoMode", 0);
 }
 
 void Robot::TeleopPeriodic()
