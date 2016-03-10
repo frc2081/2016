@@ -15,7 +15,7 @@ public:
 
 	const int kBtCamFront = 1;
 	const int kBtCamBack = 2;
-	const int kBtCamToggle = 7;
+	const int kBtCamToggle = 8;
 	bool kBtPrev, kBtCurr;
 	int currCamNum;
 	CAMERAFEEDS(Joystick *newJoy);
