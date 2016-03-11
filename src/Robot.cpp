@@ -260,7 +260,7 @@ void Robot::AutonomousPeriodic()
 	//Cross defense step
 	if(autoMode >= 2 && autoCurrentStep == CROSS_DEFENSE)
 	{
-		if(autoDistance < 80)
+		if(autoDistance < 95)
 		{
 			autoDrivePower = autoDefenseDrivePower;	
 			//printf("\n\n\ncrossing");
