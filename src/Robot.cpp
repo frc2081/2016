@@ -10,7 +10,7 @@ void Robot::RobotInit()
 
 	cameras = new CAMERAFEEDS(stick);
 	cameras->init();
-	cameras->cameraThread->join();
+	//cameras->cameraThread->join();
 
 	// Declate buttons based on what button they literally are
 	buttonA = new JoystickButton(stick, 1),

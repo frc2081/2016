@@ -26,8 +26,6 @@
 		kBtPrev = false;
 		kBtCurr = false;
 		currCamNum  = 1;
-
-		cameraThread = new Task("Camera Task", &CAMERAFEEDS::run, this);
 	}
 
 	CAMERAFEEDS::~CAMERAFEEDS() {
@@ -35,6 +33,7 @@
 	}
 	void CAMERAFEEDS::init() {
 		changeCam (camBack);
+		cameraThread = new Task("Camera Task", &CAMERAFEEDS::run, this);
 	}
 
 	void CAMERAFEEDS::end() {
