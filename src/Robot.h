@@ -17,6 +17,7 @@
 #include "WPILib.h"
 #include <string>
 #include <iostream>
+#include <thread>
 #include "CameraFeeds.h"
 
 class Robot: public IterativeRobot {

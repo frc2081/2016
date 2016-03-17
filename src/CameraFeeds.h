@@ -21,6 +21,8 @@ public:
 	CAMERAFEEDS(Joystick *newJoy);
 	~CAMERAFEEDS();
 
+	Task *cameraThread;
+
 	void init();
 	void run();
 	void end();

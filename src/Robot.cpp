@@ -120,12 +120,13 @@ void Robot::RobotInit()
 	//SmartDashboard::PutNumber("AutoDefense", 0);
 	//SmartDashboard::PutNumber("AutoPosition", 1);
 	//SmartDashboard::PutNumber("AutoMode", 0);
+
 }
 
 void Robot::AutonomousInit()
 {
 	//Saftey Feature - autoMode is set to 0 on start of autoInit so that auto will only run if the robot successfully pulls an auto command from the dashboard
-	autoMode = 0;
+	autoMode = 2;
 	
 	//Reset auto Variables in case this isn't the first time auto is run in the power cycle
 	autoDistance = 0;
@@ -142,7 +143,7 @@ void Robot::AutonomousInit()
 	REnc->Reset();	
 	
 	//Get autonoumous mode parameters from the dashboard 
-	autoMode = SmartDashboard::GetNumber("AutoMode", 0);
+	autoMode = SmartDashboard::GetNumber("AutoMode", 2);
 	autoDefense = static_cast<Defense>(SmartDashboard::GetNumber("AutoDefense", 0));
 	autoPosition = SmartDashboard::GetNumber("AutoPosition", 1);
 	
@@ -260,7 +261,7 @@ void Robot::AutonomousPeriodic()
 	//Cross defense step
 	if(autoMode >= 2 && autoCurrentStep == CROSS_DEFENSE)
 	{
-		if(autoDistance < 95)
+		if(autoDistance < 130)
 		{
 			autoDrivePower = autoDefenseDrivePower;	
 			//printf("\n\n\ncrossing");
@@ -418,7 +419,6 @@ void Robot::TeleopPeriodic()
 {
 
 	checkbuttons();
-	cameras->run();
 
 	// Get joystick values
 	//Axes are swapped on xbox controllers....seems weird....

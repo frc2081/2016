@@ -26,6 +26,8 @@
 		kBtPrev = false;
 		kBtCurr = false;
 		currCamNum  = 1;
+
+		cameraThread = new Task("Camera Task", &CAMERAFEEDS::run, this);
 	}
 
 	CAMERAFEEDS::~CAMERAFEEDS() {
@@ -33,9 +35,10 @@
 	}
 	void CAMERAFEEDS::init() {
 		changeCam (camBack);
+		cameraThread->join();
 	}
 
-	void  CAMERAFEEDS::end() {
+	void CAMERAFEEDS::end() {
 		IMAQdxStopAcquisition(curCam);
 	}
 
@@ -60,21 +63,25 @@
 
 	}
 
-	void CAMERAFEEDS::run() {
-		kBtPrev = kBtCurr;
-		kBtCurr = contrlr->GetRawButton(CAMERAFEEDS::kBtCamToggle);
-
-		if(kBtCurr == true && kBtPrev == false)
+	void CAMERAFEEDS::run()
+	{
+		while(true)
 		{
-			if (currCamNum == 1) {
-				changeCam(camFront);
-				currCamNum = 0;
+			kBtPrev = kBtCurr;
+			kBtCurr = contrlr->GetRawButton(CAMERAFEEDS::kBtCamToggle);
+
+			if(kBtCurr == true && kBtPrev == false)
+			{
+				if (currCamNum == 1) {
+					changeCam(camFront);
+					currCamNum = 0;
+				}
+				else if (currCamNum == 0) {
+					changeCam(camBack);
+					currCamNum = 1;
+				}
 			}
-			else if (currCamNum == 0) {
-				changeCam(camBack);
-				currCamNum = 1;
-			}
+			updateCam();
 		}
-		updateCam();
 	}
 
