@@ -35,7 +35,6 @@
 	}
 	void CAMERAFEEDS::init() {
 		changeCam (camBack);
-		cameraThread->join();
 	}
 
 	void CAMERAFEEDS::end() {
