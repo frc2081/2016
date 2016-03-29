@@ -23,6 +23,9 @@ public:
 
 	Task *cameraThread;
 
+	Timer *cameraDelay;
+	bool delay;
+
 	void init();
 	void run();
 	void end();

@@ -90,6 +90,10 @@ private:
 	bool sensor;
 	bool direction; //Holds current "front" direction of robot. False = ball grabber is front, true = track angle is front
 	bool pressGood;
+	bool autoReverse;
+	bool initReverse;
+
+	float startAngle, targetAngle;
 
 	float setWinch, winchHold, ArmEncValue, LEncVal, REncVal;
 	double lmotspeed, rmotspeed;

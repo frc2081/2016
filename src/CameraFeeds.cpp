@@ -26,6 +26,9 @@
 		kBtPrev = false;
 		kBtCurr = false;
 		currCamNum  = 1;
+		delay = true;
+
+		cameraDelay = new Timer();
 	}
 
 	CAMERAFEEDS::~CAMERAFEEDS() {
@@ -63,8 +66,10 @@
 
 	void CAMERAFEEDS::run()
 	{
+		printf("Camera Running");
 		while(true)
 		{
+			Wait(.1);
 			kBtPrev = kBtCurr;
 			kBtCurr = contrlr->GetRawButton(CAMERAFEEDS::kBtCamToggle);
 
@@ -80,6 +85,7 @@
 				}
 			}
 			updateCam();
+			printf("*");
 		}
 	}
 

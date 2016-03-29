@@ -8,8 +8,10 @@ void Robot::RobotInit()
 	stick = new Joystick(0);
 	stick2 = new Joystick(1);
 
+	printf("Beofre Camera Init");
 	cameras = new CAMERAFEEDS(stick);
 	cameras->init();
+	printf("Camera init is done");
 	//cameras->cameraThread->join();
 
 	// Declate buttons based on what button they literally are
@@ -66,11 +68,15 @@ void Robot::RobotInit()
 	direction = true;
 	winchSol = false;
 
+	autoReverse = false;
+	startAngle = 0;
+	targetAngle = 0;
+	initReverse = 0;
 	averageGyro = 1.5;
 	gyroCalibrate = 0;
-	gyro = new ADXRS450_Gyro();
-	gyro->Calibrate();
-	gyro->Reset();
+	//gyro = new ADXRS450_Gyro();
+	//gyro->Calibrate();
+	//gyro->Reset();
 	
 	/*while (gyroCalibrate < 5){
 		while (averageGyro >= 1) {
@@ -106,9 +112,9 @@ void Robot::RobotInit()
 	*/
 	autoMode = 0;		//autoMode is always initialized to do nothing
 	autoPosition = 1; 	//Position is 1 indexed to match the field diagram
-	autoDefense = LOWBAR;
+	autoDefense = MOAT;
 	
-	autoHighDrive = 1;
+	autoHighDrive = .8;
 	autoLowDrive = .8;
 	autoNavigationDrive = .8;
 	autoCastleDistance = 0;
@@ -118,9 +124,9 @@ void Robot::RobotInit()
 	armClearDelay = 0; //when taking a shot, amount of time to wait for ball to settle after opening arms 
 	drive->SetExpiration(.20);
 
-	//SmartDashboard::PutNumber("AutoDefense", 0);
-	//SmartDashboard::PutNumber("AutoPosition", 1);
-	//SmartDashboard::PutNumber("AutoMode", 0);
+	SmartDashboard::PutNumber("AutoDefense", 2);
+	SmartDashboard::PutNumber("AutoPosition", 1);
+	SmartDashboard::PutNumber("AutoMode", 2);
 
 }
 
@@ -139,13 +145,13 @@ void Robot::AutonomousInit()
 	autoDelay = 0; //generic counter used to various delay tasks in auto mode
 	
 	//Reset sensors
-	gyro->Reset();
+	//gyro->Reset();
 	LEnc->Reset();
 	REnc->Reset();	
 	
 	//Get autonoumous mode parameters from the dashboard 
 	autoMode = SmartDashboard::GetNumber("AutoMode", 2);
-	autoDefense = static_cast<Defense>(SmartDashboard::GetNumber("AutoDefense", 0));
+	autoDefense = static_cast<Defense>(SmartDashboard::GetNumber("AutoDefense", 2));
 	autoPosition = SmartDashboard::GetNumber("AutoPosition", 1);
 	
 	//The automated goal code only works in positions 1, 2 and 5, so
@@ -185,7 +191,7 @@ void Robot::AutonomousPeriodic()
 	LEncVal = LEnc->GetDistance();
 	REncVal = REnc->GetDistance();
 	autoDistance = (LEncVal + REncVal) / 2;
-	gyroAngle = gyro->GetAngle();
+	//gyroAngle = gyro->GetAngle();
 	autoDrivePower = 0;
 	autoTurnPower = 0;
 	
@@ -283,7 +289,7 @@ void Robot::AutonomousPeriodic()
 	{
 		//printf("\n\n\nTest");
 		lever = false;
-		if(gyroAngle < -2) { autoTurnPower = -.7; printf("\n\n\nturn right"); }
+		/*if(gyroAngle < -2) { autoTurnPower = -.7; printf("\n\n\nturn right"); }
 		else if(gyroAngle > 2) { autoTurnPower = .7;printf("\n\n\nturn left");  }
 		else 
 		{	
@@ -298,7 +304,7 @@ void Robot::AutonomousPeriodic()
 			autoDrivePower = 0;
 			autoTurnPower = 0;
 			autoCurrentStep = MOVE_TO_CASTLE_TURN;
-		}
+		}*/
 	}		
 	
 //*****************************************************	
@@ -324,7 +330,7 @@ void Robot::AutonomousPeriodic()
 	if(autoMode == 3 && autoCurrentStep == CASTLE_TURN)
 	{		
 		lever = true;
-		if(gyroAngle > autoCastleTargetAngle + 2) { autoTurnPower = .7; }
+		/*if(gyroAngle > autoCastleTargetAngle + 2) { autoTurnPower = .7; }
 		else if(gyroAngle < autoCastleTargetAngle -2) { autoTurnPower = -.7; }
 		else 
 		{	
@@ -338,7 +344,7 @@ void Robot::AutonomousPeriodic()
 			autoDrivePower = 0;
 			autoTurnPower = 0;
 			autoCurrentStep = MV_TO_CASTLE;
-		}
+		}*/
 	}	
 	
 //*****************************************************	
@@ -418,6 +424,7 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
+	printf("-");
 
 	checkbuttons();
 
@@ -438,6 +445,11 @@ void Robot::TeleopPeriodic()
 		direction = !direction;
 	}
 
+	if (bA == true && bAHold == false)
+	{
+		autoReverse = true;
+	}
+
 
 	if(direction == false)
 	{
@@ -450,9 +462,33 @@ void Robot::TeleopPeriodic()
 
 	//ArcadeDrive method documentation LIES.
 	//Turn value is first argument, move value is 2nd argument
-	drive->ArcadeDrive(LaxisX, RaxisY);
-	lmotspeed = lmotor->Get();
-	rmotspeed = rmotor->Get();
+
+
+	if(bA == true && bAHold == false)
+	{
+		//gyro->Reset();
+	}
+	if(bA == false)
+	{
+		drive->ArcadeDrive(LaxisX, RaxisY);
+		lmotspeed = lmotor->Get();
+		rmotspeed = rmotor->Get();
+	}
+	else if(bA == true)
+	{
+		/*gyroAngle = gyro->GetAngle();
+
+		if(gyroAngle < 175)
+		{
+			lmotspeed = -.75;
+			rmotspeed = -.75;
+		}
+		else if (gyroAngle > 185)
+		{
+			lmotspeed = -.75;
+			rmotspeed = -.75;
+		}*/
+	}
 
 	if (bY == true)
 	{
@@ -485,7 +521,6 @@ void Robot::TeleopPeriodic()
 	//Update all joystick buttons
 
 	ArmEncValue = ArmEnc->Get();
-	gyroAngle = gyro->GetAngle();
 
 	//Get sensor inputs
 	phoSensorVal = PhoSen->Get();
@@ -595,7 +630,7 @@ void Robot::TeleopPeriodic()
 				//Need to wait for the arms to clear the ball
 				//This bit of code causes the state machine to spend one extra loop in this state
 				//giving the arms about 40ms to open before the poker shoots the ball
-				if(armClearDelay > 15)
+				if(armClearDelay > 45)
 				{
 					currentState = SHOOT;
 					armClearDelay = 0;
@@ -608,7 +643,14 @@ void Robot::TeleopPeriodic()
 				arms = true;
 				poker = true;
 				//Keep the arms open until the ball has cleared the
-				currentState = ENTER;
+				if(armClearDelay > 15)
+				{
+					currentState = SHOOT;
+					armClearDelay = 0;
+					currentState = ENTER;
+				}
+				else {armClearDelay++;}
+
 				break;
 		}
 	}
@@ -708,7 +750,7 @@ void Robot::TeleopPeriodic()
 	SmartDashboard::PutBoolean("Lever: \n", lever);
 	SmartDashboard::PutBoolean("Poker: \n", poker);
 	SmartDashboard::PutBoolean("Lifter: \n", lifter);
-	SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
+	//SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
 	SmartDashboard::PutNumber("Current State: ", currentState);
 	SmartDashboard::PutNumber("Arm Encoder: ", ArmEncValue);
 	SmartDashboard::PutBoolean("Winch Solenoid: ", winchSol);
@@ -732,7 +774,7 @@ void Robot::DisabledInit()
 
 void Robot::DisabledPeriodic()
 {
-	cameras->run();
+	//cameras->run();
 
 	PresVoltage = PreSen->GetAverageVoltage();
 	Pres = 250 * (PresVoltage/5) - 25;
@@ -757,7 +799,7 @@ void Robot::DisabledPeriodic()
 	SmartDashboard::PutBoolean("Lever: \n", lever);
 	SmartDashboard::PutBoolean("Poker: \n", poker);
 	SmartDashboard::PutBoolean("Lifter: \n", lifter);
-	SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
+	//SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
 	SmartDashboard::PutNumber("Current State: ", currentState);
 	SmartDashboard::PutNumber("Arm Encoder: ", ArmEncValue);
 	SmartDashboard::PutBoolean("Winch Solenoid: ", winchSol);
