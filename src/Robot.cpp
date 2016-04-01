@@ -39,10 +39,16 @@ void Robot::RobotInit()
 
 	//Solenoids
 	//1 is back PCM, 0 is front PCM(front at track angle)
+	//sArm = new DoubleSolenoid(0, 0, 1);	// Solenoid for the opening and closing of the arms
+	//sLifter = new DoubleSolenoid(0, 6, 7);	// Solenoid for lifting up the robot
+	//sPoker = new DoubleSolenoid(0, 2, 3);	// Solenoid for the poker
+	//sLever = new DoubleSolenoid(1, 0, 1);	// Solenoid to raise and lower the arms
+	//sWinch = new DoubleSolenoid(0, 4, 5); // Solenoid to raise the winch
+
 	sArm = new DoubleSolenoid(0, 0, 1);	// Solenoid for the opening and closing of the arms
-	sLifter = new DoubleSolenoid(0, 6, 7);	// Solenoid for lifting up the robot
+	sLifter = new DoubleSolenoid(1, 6, 7);	// Solenoid for lifting up the robot
 	sPoker = new DoubleSolenoid(0, 2, 3);	// Solenoid for the poker
-	sLever = new DoubleSolenoid(1, 0, 1);	// Solenoid to raise and lower the arms
+	sLever = new DoubleSolenoid(0, 6, 7);	// Solenoid to raise and lower the arms
 	sWinch = new DoubleSolenoid(0, 4, 5); // Solenoid to raise the winch
 
 	//Encoders
@@ -170,10 +176,10 @@ void Robot::AutonomousInit()
 	//all other defenses are low power
 	if(autoDefense == ROUGHTERRAIN)
 	{
-		autoDefenseDrivePower = autoHighDrive;
+		autoDefenseDrivePower = -autoHighDrive;
 	}
-	else if (autoDefense == CHEVAL)  {autoDefenseDrivePower = -autoLowDrive;}
-	else{autoDefenseDrivePower = autoLowDrive;}	
+	else if (autoDefense == CHEVAL)  {autoDefenseDrivePower = autoLowDrive;}
+	else{autoDefenseDrivePower = -autoLowDrive;}
 	
 	//Configure target angle for castle turn
 	//Cheval and portcullis routines drive backward and so must have a different angle
