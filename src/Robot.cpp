@@ -74,9 +74,9 @@ void Robot::RobotInit()
 	initReverse = 0;
 	averageGyro = 1.5;
 	gyroCalibrate = 0;
-	//gyro = new ADXRS450_Gyro();
-	//gyro->Calibrate();
-	//gyro->Reset();
+	gyro = new ADXRS450_Gyro();
+	gyro->Calibrate();
+	gyro->Reset();
 	
 	/*while (gyroCalibrate < 5){
 		while (averageGyro >= 1) {
@@ -145,7 +145,7 @@ void Robot::AutonomousInit()
 	autoDelay = 0; //generic counter used to various delay tasks in auto mode
 	
 	//Reset sensors
-	//gyro->Reset();
+	gyro->Reset();
 	LEnc->Reset();
 	REnc->Reset();	
 	
@@ -191,7 +191,7 @@ void Robot::AutonomousPeriodic()
 	LEncVal = LEnc->GetDistance();
 	REncVal = REnc->GetDistance();
 	autoDistance = (LEncVal + REncVal) / 2;
-	//gyroAngle = gyro->GetAngle();
+	gyroAngle = gyro->GetAngle();
 	autoDrivePower = 0;
 	autoTurnPower = 0;
 	
@@ -289,7 +289,7 @@ void Robot::AutonomousPeriodic()
 	{
 		//printf("\n\n\nTest");
 		lever = false;
-		/*if(gyroAngle < -2) { autoTurnPower = -.7; printf("\n\n\nturn right"); }
+		if(gyroAngle < -2) { autoTurnPower = -.7; printf("\n\n\nturn right"); }
 		else if(gyroAngle > 2) { autoTurnPower = .7;printf("\n\n\nturn left");  }
 		else 
 		{	
@@ -304,7 +304,7 @@ void Robot::AutonomousPeriodic()
 			autoDrivePower = 0;
 			autoTurnPower = 0;
 			autoCurrentStep = MOVE_TO_CASTLE_TURN;
-		}*/
+		}
 	}		
 	
 //*****************************************************	
@@ -330,7 +330,7 @@ void Robot::AutonomousPeriodic()
 	if(autoMode == 3 && autoCurrentStep == CASTLE_TURN)
 	{		
 		lever = true;
-		/*if(gyroAngle > autoCastleTargetAngle + 2) { autoTurnPower = .7; }
+		if(gyroAngle > autoCastleTargetAngle + 2) { autoTurnPower = .7; }
 		else if(gyroAngle < autoCastleTargetAngle -2) { autoTurnPower = -.7; }
 		else 
 		{	
@@ -344,7 +344,7 @@ void Robot::AutonomousPeriodic()
 			autoDrivePower = 0;
 			autoTurnPower = 0;
 			autoCurrentStep = MV_TO_CASTLE;
-		}*/
+		}
 	}	
 	
 //*****************************************************	
@@ -466,7 +466,7 @@ void Robot::TeleopPeriodic()
 
 	if(bA == true && bAHold == false)
 	{
-		//gyro->Reset();
+		gyro->Reset();
 	}
 	if(bA == false)
 	{
@@ -476,7 +476,7 @@ void Robot::TeleopPeriodic()
 	}
 	else if(bA == true)
 	{
-		/*gyroAngle = gyro->GetAngle();
+		gyroAngle = gyro->GetAngle();
 
 		if(gyroAngle < 175)
 		{
@@ -487,7 +487,7 @@ void Robot::TeleopPeriodic()
 		{
 			lmotspeed = -.75;
 			rmotspeed = -.75;
-		}*/
+		}
 	}
 
 	if (bY == true)
@@ -750,7 +750,7 @@ void Robot::TeleopPeriodic()
 	SmartDashboard::PutBoolean("Lever: \n", lever);
 	SmartDashboard::PutBoolean("Poker: \n", poker);
 	SmartDashboard::PutBoolean("Lifter: \n", lifter);
-	//SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
+	SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
 	SmartDashboard::PutNumber("Current State: ", currentState);
 	SmartDashboard::PutNumber("Arm Encoder: ", ArmEncValue);
 	SmartDashboard::PutBoolean("Winch Solenoid: ", winchSol);
@@ -799,7 +799,7 @@ void Robot::DisabledPeriodic()
 	SmartDashboard::PutBoolean("Lever: \n", lever);
 	SmartDashboard::PutBoolean("Poker: \n", poker);
 	SmartDashboard::PutBoolean("Lifter: \n", lifter);
-	//SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
+	SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
 	SmartDashboard::PutNumber("Current State: ", currentState);
 	SmartDashboard::PutNumber("Arm Encoder: ", ArmEncValue);
 	SmartDashboard::PutBoolean("Winch Solenoid: ", winchSol);
