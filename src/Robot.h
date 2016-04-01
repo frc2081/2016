@@ -135,6 +135,7 @@ private:
 
 	auto_Step autoCurrentStep;
 	Defense autoDefense;
+	int autoDriveDistance;
 
 	states currentState;
 	void RobotInit(); // Scopes/initialization for robot functions

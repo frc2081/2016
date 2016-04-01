@@ -268,7 +268,8 @@ void Robot::AutonomousPeriodic()
 	//Cross defense step
 	if(autoMode >= 2 && autoCurrentStep == CROSS_DEFENSE)
 	{
-		if(autoDistance < 130)
+		autoDriveDistance = 130;
+		if(autoDistance < autoDriveDistance)
 		{
 			autoDrivePower = autoDefenseDrivePower;	
 			//printf("\n\n\ncrossing");
@@ -280,6 +281,7 @@ void Robot::AutonomousPeriodic()
 			autoCurrentStep = ALIGN_TO_ZERO;
 			//printf("\n\n\ndone with crossing");
 		}
+		//gyro->Reset();
 	}		
 
 //*****************************************************	
@@ -287,6 +289,10 @@ void Robot::AutonomousPeriodic()
 	//put arms back in robot for safety and to increase clearance
 	if(autoMode == 3 && autoCurrentStep == ALIGN_TO_ZERO)
 	{
+		if (gyroAngle < 175) { autoTurnPower = -.7; }
+		else if (gyroAngle > 185) { autoTurnPower = .7; }
+		else {autoTurnPower = 0; autoCurrentStep = MOVE_TO_CASTLE_TURN;}
+		/*
 		//printf("\n\n\nTest");
 		lever = false;
 		if(gyroAngle < -2) { autoTurnPower = -.7; printf("\n\n\nturn right"); }
@@ -305,12 +311,19 @@ void Robot::AutonomousPeriodic()
 			autoTurnPower = 0;
 			autoCurrentStep = MOVE_TO_CASTLE_TURN;
 		}
+		*/
 	}		
 	
 //*****************************************************	
 	//Drive to the point where the robot turns to face the goal
 	if(autoMode == 3 && autoCurrentStep == MOVE_TO_CASTLE_TURN)
 	{
+		if (autoDistance < (2 *autoDriveDistance)) {
+			autoDrivePower = autoDefenseDrivePower;
+		}
+		else {autoDrivePower = 0; autoCurrentStep = CASTLE_TURN;}
+	}
+		/*
 		if(autoDistance < 130)
 		{
 			autoDrivePower = autoNavigationDrive;	
@@ -321,6 +334,7 @@ void Robot::AutonomousPeriodic()
 			autoTurnPower = 0;
 			autoCurrentStep = CASTLE_TURN;
 		}
+		*/
 	}		
 
 //*****************************************************	
@@ -328,7 +342,11 @@ void Robot::AutonomousPeriodic()
 	//If Defense was CHEVAL or PORTCULLIS, robot is approching backwards and must turn differently
 	//Otherwise, all turns are the same
 	if(autoMode == 3 && autoCurrentStep == CASTLE_TURN)
-	{		
+	{
+		if(gyroAngle < -2) { autoTurnPower = -.7; printf("\n\n\nturn right"); }
+		else if(gyroAngle > 2) { autoTurnPower = .7;printf("\n\n\nturn left");  }
+		else {autoTurnPower = 0;}
+		/*
 		lever = true;
 		if(gyroAngle > autoCastleTargetAngle + 2) { autoTurnPower = .7; }
 		else if(gyroAngle < autoCastleTargetAngle -2) { autoTurnPower = -.7; }
@@ -345,6 +363,7 @@ void Robot::AutonomousPeriodic()
 			autoTurnPower = 0;
 			autoCurrentStep = MV_TO_CASTLE;
 		}
+		*/
 	}	
 	
 //*****************************************************	
