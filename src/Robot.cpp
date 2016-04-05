@@ -156,7 +156,7 @@ void Robot::AutonomousInit()
 	
 	//The automated goal code only works in positions 1, 2 and 5, so
 	//Automode 3 is not allowed in Positions 3 and 4;
-	if(autoMode >= 3 && (autoPosition == 3 || autoPosition == 4))
+	if(autoMode == 3 && (autoPosition == 3 || autoPosition == 4))
 	{
 		autoMode = 2;
 	}
@@ -268,18 +268,32 @@ void Robot::AutonomousPeriodic()
 	//Cross defense step
 	if(autoMode >= 2 && autoCurrentStep == CROSS_DEFENSE)
 	{
-		autoDriveDistance = 130;
-		if(autoDistance < autoDriveDistance)
-		{
-			autoDrivePower = autoDefenseDrivePower;	
-			//printf("\n\n\ncrossing");
+		if (autoDefense != PORTCULLIS || autoDefense != CHEVAL) {
+			autoDriveDistance = 130;
+			if(autoDistance < autoDriveDistance)
+			{
+				autoDrivePower = autoDefenseDrivePower;
+				//printf("\n\n\ncrossing");
+			}
+			else
+			{
+				autoDrivePower = 0;
+				autoTurnPower = 0;
+				autoCurrentStep = ALIGN_TO_ZERO;
+				//printf("\n\n\ndone with crossing");
+			}
 		}
-		else 
-		{	
-			autoDrivePower = 0;
-			autoTurnPower = 0;
-			autoCurrentStep = ALIGN_TO_ZERO;
-			//printf("\n\n\ndone with crossing");
+		else {
+				lever = !lever;
+				autoDelay++;
+				if (autoDelay > 12) {
+					autoDrivePower = -0.7;
+					if (autoDistance >= -130) {
+						autoDrivePower = 0;
+					}
+				} else {
+					autoDrivePower = 0;
+				}
 		}
 		//gyro->Reset();
 	}		
@@ -289,10 +303,6 @@ void Robot::AutonomousPeriodic()
 	//put arms back in robot for safety and to increase clearance
 	if(autoMode == 3 && autoCurrentStep == ALIGN_TO_ZERO)
 	{
-		if (gyroAngle < 175) { autoTurnPower = -.7; }
-		else if (gyroAngle > 185) { autoTurnPower = .7; }
-		else {autoTurnPower = 0; autoCurrentStep = MOVE_TO_CASTLE_TURN;}
-		/*
 		//printf("\n\n\nTest");
 		lever = false;
 		if(gyroAngle < -2) { autoTurnPower = -.7; printf("\n\n\nturn right"); }
@@ -311,19 +321,13 @@ void Robot::AutonomousPeriodic()
 			autoTurnPower = 0;
 			autoCurrentStep = MOVE_TO_CASTLE_TURN;
 		}
-		*/
 	}		
 	
 //*****************************************************	
 	//Drive to the point where the robot turns to face the goal
 	if(autoMode == 3 && autoCurrentStep == MOVE_TO_CASTLE_TURN)
 	{
-		if (autoDistance < (2 *autoDriveDistance)) {
-			autoDrivePower = autoDefenseDrivePower;
-		}
-		else {autoDrivePower = 0; autoCurrentStep = CASTLE_TURN;}
-	}
-		/*
+
 		if(autoDistance < 130)
 		{
 			autoDrivePower = autoNavigationDrive;	
@@ -334,8 +338,7 @@ void Robot::AutonomousPeriodic()
 			autoTurnPower = 0;
 			autoCurrentStep = CASTLE_TURN;
 		}
-		*/
-	}		
+	}
 
 //*****************************************************	
 	//Turn to aim the ball at the goal
@@ -343,10 +346,6 @@ void Robot::AutonomousPeriodic()
 	//Otherwise, all turns are the same
 	if(autoMode == 3 && autoCurrentStep == CASTLE_TURN)
 	{
-		if(gyroAngle < -2) { autoTurnPower = -.7; printf("\n\n\nturn right"); }
-		else if(gyroAngle > 2) { autoTurnPower = .7;printf("\n\n\nturn left");  }
-		else {autoTurnPower = 0;}
-		/*
 		lever = true;
 		if(gyroAngle > autoCastleTargetAngle + 2) { autoTurnPower = .7; }
 		else if(gyroAngle < autoCastleTargetAngle -2) { autoTurnPower = -.7; }
@@ -363,9 +362,7 @@ void Robot::AutonomousPeriodic()
 			autoTurnPower = 0;
 			autoCurrentStep = MV_TO_CASTLE;
 		}
-		*/
 	}	
-	
 //*****************************************************	
 	//Move to the castle and put the arms down for a shot
 	if(autoMode == 3 && autoCurrentStep == MV_TO_CASTLE)
@@ -408,6 +405,25 @@ void Robot::AutonomousPeriodic()
 		{armClearDelay = 0;}
 	}		
 //*****************************************************	
+	if (autoMode == 4 && autoCurrentStep == TURN_AROUND) {
+		if (gyroAngle < 175) { autoTurnPower = -.7; }
+				else if (gyroAngle > 185) { autoTurnPower = .7; }
+				else {autoTurnPower = 0; autoCurrentStep = DRIVE_BACK;}
+	}
+//*****************************************************
+	if (autoMode == 4 && autoCurrentStep == DRIVE_BACK) {
+		if (autoDistance < (2 *autoDriveDistance)) {
+			autoDrivePower = autoDefenseDrivePower;
+		}
+		else {autoDrivePower = 0; autoCurrentStep = FACE_CASTLE;}
+	}
+//*****************************************************
+	if (autoMode == 4 && autoCurrentStep == FACE_CASTLE) {
+		if(gyroAngle < -2) { autoTurnPower = -.7; printf("\n\n\nturn right"); }
+		else if(gyroAngle > 2) { autoTurnPower = .7;printf("\n\n\nturn left");  }
+		else {autoTurnPower = 0;}
+	}
+//*****************************************************
 	//Only allow drive commands to be sent to the ouputs if an auto mode has been selected
 	if(autoMode != 0)
 	{

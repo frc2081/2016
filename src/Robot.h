@@ -130,7 +130,10 @@ private:
 		MOVE_TO_CASTLE_TURN,
 		CASTLE_TURN,
 		MV_TO_CASTLE,
-		AUTO_SHOOT
+		AUTO_SHOOT,
+		TURN_AROUND,
+		DRIVE_BACK,
+		FACE_CASTLE
 	};
 
 	auto_Step autoCurrentStep;
