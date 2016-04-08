@@ -8,13 +8,13 @@ void Robot::RobotInit()
 	stick = new Joystick(0);
 	stick2 = new Joystick(1);
 
-	printf("Beofre Camera Init");
+	printf("Before Camera Init");
 	cameras = new CAMERAFEEDS(stick);
 	cameras->init();
 	printf("Camera init is done");
 	//cameras->cameraThread->join();
 
-	// Declate buttons based on what button they literally are
+	// Declare buttons based on what button they literally are
 	buttonA = new JoystickButton(stick, 1),
 	buttonB = new JoystickButton(stick, 2),
 	buttonX = new JoystickButton(stick, 3),
@@ -172,7 +172,7 @@ void Robot::AutonomousInit()
 	{
 		autoDefenseDrivePower = autoHighDrive;
 	}
-	else if (autoDefense == CHEVAL)  {autoDefenseDrivePower = -autoLowDrive;}
+	else if (autoDefense == CHEVAL || autoDefense == PORTCULLIS)  {autoDefenseDrivePower = -autoLowDrive;}
 	else{autoDefenseDrivePower = autoLowDrive;}	
 	
 	//Configure target angle for castle turn
@@ -252,7 +252,8 @@ void Robot::AutonomousPeriodic()
 		{
 			lever = false;
 			autoDelay++;
-			autoDrivePower = .3;
+			//on advice of driver, do driving while arms moving
+			autoDrivePower = 0;
 			autoTurnPower = 0;
 			
 			if(autoDelay > 10)
@@ -268,7 +269,7 @@ void Robot::AutonomousPeriodic()
 	//Cross defense step
 	if(autoMode >= 2 && autoCurrentStep == CROSS_DEFENSE)
 	{
-		if (autoDefense != PORTCULLIS || autoDefense != CHEVAL) {
+		//if (autoDefense != PORTCULLIS || autoDefense != CHEVAL) {
 			autoDriveDistance = 130;
 			if(autoDistance < autoDriveDistance)
 			{
@@ -282,8 +283,7 @@ void Robot::AutonomousPeriodic()
 				autoCurrentStep = ALIGN_TO_ZERO;
 				//printf("\n\n\ndone with crossing");
 			}
-		}
-		else {
+		/*else {
 				lever = !lever;
 				autoDelay++;
 				if (autoDelay > 12) {
@@ -291,11 +291,12 @@ void Robot::AutonomousPeriodic()
 					if (autoDistance >= -130) {
 						autoDrivePower = 0;
 					}
-				} else {
+					} else {
 					autoDrivePower = 0;
 				}
-		}
+		}*/
 		//gyro->Reset();
+		if (autoMode == 4) {autoCurrentStep = TURN_AROUND;}
 	}		
 
 //*****************************************************	
@@ -304,7 +305,7 @@ void Robot::AutonomousPeriodic()
 	if(autoMode == 3 && autoCurrentStep == ALIGN_TO_ZERO)
 	{
 		//printf("\n\n\nTest");
-		lever = false;
+		//lever = false;
 		if(gyroAngle < -2) { autoTurnPower = -.7; printf("\n\n\nturn right"); }
 		else if(gyroAngle > 2) { autoTurnPower = .7;printf("\n\n\nturn left");  }
 		else 
@@ -342,7 +343,7 @@ void Robot::AutonomousPeriodic()
 
 //*****************************************************	
 	//Turn to aim the ball at the goal
-	//If Defense was CHEVAL or PORTCULLIS, robot is approching backwards and must turn differently
+	//If Defense was CHEVAL or PORTCULLIS, robot is approaching backwards and must turn differently
 	//Otherwise, all turns are the same
 	if(autoMode == 3 && autoCurrentStep == CASTLE_TURN)
 	{
@@ -380,11 +381,11 @@ void Robot::AutonomousPeriodic()
 		{	
 			autoDrivePower = 0;
 			autoTurnPower = 0;
-			if(armClearDelay>150)
-			{
+			//if(armClearDelay>150)
+			//{
 				autoCurrentStep = AUTO_SHOOT;
 				armClearDelay = 0;
-			}
+			//}
 		}
 	}	
 
