@@ -8,11 +8,13 @@ void Robot::RobotInit()
 	stick = new Joystick(0);
 	stick2 = new Joystick(1);
 
+	printf("Before Camera Init");
 	cameras = new CAMERAFEEDS(stick);
 	cameras->init();
+	printf("Camera init is done");
 	//cameras->cameraThread->join();
 
-	// Declate buttons based on what button they literally are
+	// Declare buttons based on what button they literally are
 	buttonA = new JoystickButton(stick, 1),
 	buttonB = new JoystickButton(stick, 2),
 	buttonX = new JoystickButton(stick, 3),
@@ -66,6 +68,10 @@ void Robot::RobotInit()
 	direction = true;
 	winchSol = false;
 
+	autoReverse = false;
+	startAngle = 0;
+	targetAngle = 0;
+	initReverse = 0;
 	averageGyro = 1.5;
 	gyroCalibrate = 0;
 	gyro = new ADXRS450_Gyro();
@@ -90,6 +96,11 @@ void Robot::RobotInit()
 		}
 	}*/
 	
+	assistStep = 0;
+	assistDistance = 0;
+	assistDelay = 0;
+
+
 	// Declare new drive with our drive motors
 	drive = new RobotDrive(lmotor, rmotor);
 	lifter = true; //Lifter retracted
@@ -106,9 +117,9 @@ void Robot::RobotInit()
 	*/
 	autoMode = 0;		//autoMode is always initialized to do nothing
 	autoPosition = 1; 	//Position is 1 indexed to match the field diagram
-	autoDefense = LOWBAR;
+	autoDefense = MOAT;
 	
-	autoHighDrive = 1;
+	autoHighDrive = .8;
 	autoLowDrive = .8;
 	autoNavigationDrive = .8;
 	autoCastleDistance = 0;
@@ -118,9 +129,9 @@ void Robot::RobotInit()
 	armClearDelay = 0; //when taking a shot, amount of time to wait for ball to settle after opening arms 
 	drive->SetExpiration(.20);
 
-	//SmartDashboard::PutNumber("AutoDefense", 0);
-	//SmartDashboard::PutNumber("AutoPosition", 1);
-	//SmartDashboard::PutNumber("AutoMode", 0);
+	SmartDashboard::PutNumber("AutoDefense", 2);
+	SmartDashboard::PutNumber("AutoPosition", 1);
+	SmartDashboard::PutNumber("AutoMode", 2);
 
 }
 
@@ -145,12 +156,12 @@ void Robot::AutonomousInit()
 	
 	//Get autonoumous mode parameters from the dashboard 
 	autoMode = SmartDashboard::GetNumber("AutoMode", 2);
-	autoDefense = static_cast<Defense>(SmartDashboard::GetNumber("AutoDefense", 0));
+	autoDefense = static_cast<Defense>(SmartDashboard::GetNumber("AutoDefense", 2));
 	autoPosition = SmartDashboard::GetNumber("AutoPosition", 1);
 	
 	//The automated goal code only works in positions 1, 2 and 5, so
 	//Automode 3 is not allowed in Positions 3 and 4;
-	if(autoMode >= 3 && (autoPosition == 3 || autoPosition == 4))
+	if(autoMode == 3 && (autoPosition == 3 || autoPosition == 4))
 	{
 		autoMode = 2;
 	}
@@ -166,7 +177,7 @@ void Robot::AutonomousInit()
 	{
 		autoDefenseDrivePower = autoHighDrive;
 	}
-	else if (autoDefense == CHEVAL)  {autoDefenseDrivePower = -autoLowDrive;}
+	else if (autoDefense == CHEVAL || autoDefense == PORTCULLIS)  {autoDefenseDrivePower = -autoLowDrive;}
 	else{autoDefenseDrivePower = autoLowDrive;}	
 	
 	//Configure target angle for castle turn
@@ -246,7 +257,8 @@ void Robot::AutonomousPeriodic()
 		{
 			lever = false;
 			autoDelay++;
-			autoDrivePower = .3;
+			//on advice of driver, do driving while arms moving
+			autoDrivePower = 0;
 			autoTurnPower = 0;
 			
 			if(autoDelay > 10)
@@ -262,18 +274,34 @@ void Robot::AutonomousPeriodic()
 	//Cross defense step
 	if(autoMode >= 2 && autoCurrentStep == CROSS_DEFENSE)
 	{
-		if(autoDistance < 130)
-		{
-			autoDrivePower = autoDefenseDrivePower;	
-			//printf("\n\n\ncrossing");
-		}
-		else 
-		{	
-			autoDrivePower = 0;
-			autoTurnPower = 0;
-			autoCurrentStep = ALIGN_TO_ZERO;
-			//printf("\n\n\ndone with crossing");
-		}
+		//if (autoDefense != PORTCULLIS || autoDefense != CHEVAL) {
+			autoDriveDistance = 130;
+			if(autoDistance < autoDriveDistance)
+			{
+				autoDrivePower = autoDefenseDrivePower;
+				//printf("\n\n\ncrossing");
+			}
+			else
+			{
+				autoDrivePower = 0;
+				autoTurnPower = 0;
+				autoCurrentStep = ALIGN_TO_ZERO;
+				//printf("\n\n\ndone with crossing");
+			}
+		/*else {
+				lever = !lever;
+				autoDelay++;
+				if (autoDelay > 12) {
+					autoDrivePower = -0.7;
+					if (autoDistance >= -130) {
+						autoDrivePower = 0;
+					}
+					} else {
+					autoDrivePower = 0;
+				}
+		}*/
+		//gyro->Reset();
+		if (autoMode == 4) {autoCurrentStep = TURN_AROUND;}
 	}		
 
 //*****************************************************	
@@ -282,7 +310,7 @@ void Robot::AutonomousPeriodic()
 	if(autoMode == 3 && autoCurrentStep == ALIGN_TO_ZERO)
 	{
 		//printf("\n\n\nTest");
-		lever = false;
+		//lever = false;
 		if(gyroAngle < -2) { autoTurnPower = -.7; printf("\n\n\nturn right"); }
 		else if(gyroAngle > 2) { autoTurnPower = .7;printf("\n\n\nturn left");  }
 		else 
@@ -305,6 +333,7 @@ void Robot::AutonomousPeriodic()
 	//Drive to the point where the robot turns to face the goal
 	if(autoMode == 3 && autoCurrentStep == MOVE_TO_CASTLE_TURN)
 	{
+
 		if(autoDistance < 130)
 		{
 			autoDrivePower = autoNavigationDrive;	
@@ -315,14 +344,14 @@ void Robot::AutonomousPeriodic()
 			autoTurnPower = 0;
 			autoCurrentStep = CASTLE_TURN;
 		}
-	}		
+	}
 
 //*****************************************************	
 	//Turn to aim the ball at the goal
-	//If Defense was CHEVAL or PORTCULLIS, robot is approching backwards and must turn differently
+	//If Defense was CHEVAL or PORTCULLIS, robot is approaching backwards and must turn differently
 	//Otherwise, all turns are the same
 	if(autoMode == 3 && autoCurrentStep == CASTLE_TURN)
-	{		
+	{
 		lever = true;
 		if(gyroAngle > autoCastleTargetAngle + 2) { autoTurnPower = .7; }
 		else if(gyroAngle < autoCastleTargetAngle -2) { autoTurnPower = -.7; }
@@ -340,7 +369,6 @@ void Robot::AutonomousPeriodic()
 			autoCurrentStep = MV_TO_CASTLE;
 		}
 	}	
-	
 //*****************************************************	
 	//Move to the castle and put the arms down for a shot
 	if(autoMode == 3 && autoCurrentStep == MV_TO_CASTLE)
@@ -358,11 +386,11 @@ void Robot::AutonomousPeriodic()
 		{	
 			autoDrivePower = 0;
 			autoTurnPower = 0;
-			if(armClearDelay>150)
-			{
+			//if(armClearDelay>150)
+			//{
 				autoCurrentStep = AUTO_SHOOT;
 				armClearDelay = 0;
-			}
+			//}
 		}
 	}	
 
@@ -383,6 +411,25 @@ void Robot::AutonomousPeriodic()
 		{armClearDelay = 0;}
 	}		
 //*****************************************************	
+	if (autoMode == 4 && autoCurrentStep == TURN_AROUND) {
+		if (gyroAngle < 175) { autoTurnPower = -.7; }
+				else if (gyroAngle > 185) { autoTurnPower = .7; }
+				else {autoTurnPower = 0; autoCurrentStep = DRIVE_BACK;}
+	}
+//*****************************************************
+	if (autoMode == 4 && autoCurrentStep == DRIVE_BACK) {
+		if (autoDistance < (2 *autoDriveDistance)) {
+			autoDrivePower = autoDefenseDrivePower;
+		}
+		else {autoDrivePower = 0; autoCurrentStep = FACE_CASTLE;}
+	}
+//*****************************************************
+	if (autoMode == 4 && autoCurrentStep == FACE_CASTLE) {
+		if(gyroAngle < -2) { autoTurnPower = -.7; printf("\n\n\nturn right"); }
+		else if(gyroAngle > 2) { autoTurnPower = .7;printf("\n\n\nturn left");  }
+		else {autoTurnPower = 0;}
+	}
+//*****************************************************
 	//Only allow drive commands to be sent to the ouputs if an auto mode has been selected
 	if(autoMode != 0)
 	{
@@ -418,6 +465,7 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
+	printf("-");
 
 	checkbuttons();
 
@@ -438,6 +486,11 @@ void Robot::TeleopPeriodic()
 		direction = !direction;
 	}
 
+	if (bA == true && bAHold == false)
+	{
+		autoReverse = true;
+	}
+
 
 	if(direction == false)
 	{
@@ -448,11 +501,77 @@ void Robot::TeleopPeriodic()
 	}
 
 
-	//ArcadeDrive method documentation LIES.
-	//Turn value is first argument, move value is 2nd argument
-	drive->ArcadeDrive(LaxisX, RaxisY);
-	lmotspeed = lmotor->Get();
-	rmotspeed = rmotor->Get();
+
+
+	/*****************Driver Assist Functions************************************
+	 * Hold A button to automatically turn robot 180 degrees					*
+	 * Hold X button to automatically score from the left side of the goal		*
+	 * Hold B button to automatically score for the right side of the goal		*
+	 ****************************************************************************/
+
+	//Reinitialize the assist sensors and variables each time an assist is triggered
+	if((bA == true && bAHold == false) || (bB == true && bBHold == false) || (bX == true && bXHold == false))
+	{
+		gyro->Reset();
+		encoderReset();
+
+		assistStep = 0;
+		assistDelay = 0;
+	}
+
+	//Auto-turn function
+	if(bA == true)
+	{
+		gyroTurn(180, 1);
+	}
+
+	//Auto score function
+	else if (bB == true || bX == true)
+	{
+		//Step 0: Back up from the wall about 12"
+		if(assistStep == 0)
+		{
+			calcAssistDistance();
+			if(assistDistance <= 12) { lmotspeed = .75; rmotspeed = .75;}
+			else
+			{
+				encoderReset();
+				assistStep = 1;
+			}
+		}
+
+		//Step 1: Turn to face the goal
+		if(assistStep == 1)
+		{
+			if(bB == true)
+			{
+				if(gyroTurn(95, 1)) { assistStep = 2; encoderReset(); }
+			}
+			else if (bX == true)
+			{
+				if(gyroTurn(-95, -1)) { assistStep = 2; encoderReset();}
+			}
+		}
+
+		//Step 2: Back up to the goal and lower the arms
+		if(assistStep == 2)
+		{
+			lever = true;
+			calcAssistDistance();
+
+			if(assistDistance <= 12) { lmotspeed = .75; rmotspeed = .75;}
+		}
+	}
+
+	//Normal drive function
+	else if(bA == false)
+	{
+		//Turn value is first argument, move value is 2nd argument
+		drive->ArcadeDrive(LaxisX, RaxisY);
+		lmotspeed = lmotor->Get();
+		rmotspeed = rmotor->Get();
+	}
+
 
 	if (bY == true)
 	{
@@ -485,7 +604,6 @@ void Robot::TeleopPeriodic()
 	//Update all joystick buttons
 
 	ArmEncValue = ArmEnc->Get();
-	gyroAngle = gyro->GetAngle();
 
 	//Get sensor inputs
 	phoSensorVal = PhoSen->Get();
@@ -595,7 +713,7 @@ void Robot::TeleopPeriodic()
 				//Need to wait for the arms to clear the ball
 				//This bit of code causes the state machine to spend one extra loop in this state
 				//giving the arms about 40ms to open before the poker shoots the ball
-				if(armClearDelay > 15)
+				if(armClearDelay > 45)
 				{
 					currentState = SHOOT;
 					armClearDelay = 0;
@@ -608,7 +726,14 @@ void Robot::TeleopPeriodic()
 				arms = true;
 				poker = true;
 				//Keep the arms open until the ball has cleared the
-				currentState = ENTER;
+				if(armClearDelay > 15)
+				{
+					currentState = SHOOT;
+					armClearDelay = 0;
+					currentState = ENTER;
+				}
+				else {armClearDelay++;}
+
 				break;
 		}
 	}
@@ -732,7 +857,7 @@ void Robot::DisabledInit()
 
 void Robot::DisabledPeriodic()
 {
-	cameras->run();
+	//cameras->run();
 
 	PresVoltage = PreSen->GetAverageVoltage();
 	Pres = 250 * (PresVoltage/5) - 25;
@@ -816,5 +941,46 @@ void Robot::checkbuttons() {
 	bRS2 = stick2->GetRawButton(10);
 
 }
+
+void Robot::encoderReset()
+{
+	LEnc->Reset();
+	REnc->Reset();
+	calcAssistDistance();
+
+	return;
+	//When encoders are reset, values for the current loop must also be recalculated
+}
+
+void Robot::calcAssistDistance()
+{
+	LEncVal = LEnc->GetDistance();
+	REncVal = REnc->GetDistance();
+	assistDistance = (LEncVal + REncVal) / 2;
+	return;
+}
+
+bool Robot::gyroTurn(int target, int direction)
+{
+	gyroAngle = gyro->GetAngle();
+
+	if(gyroAngle < target - 5)
+	{
+		lmotspeed = -.75 * direction;
+		rmotspeed = -.75 * direction;
+	}
+	else if (gyroAngle > target + 5)
+	{
+		lmotspeed = .75 * direction;
+		rmotspeed = .75 * direction;
+	}
+
+	if(gyroAngle > target -5 && gyroAngle < target + 5)
+	{
+		return true;
+	}
+	else { return false; }
+}
+
 //Start robot
 START_ROBOT_CLASS(Robot)

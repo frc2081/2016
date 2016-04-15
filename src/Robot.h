@@ -90,6 +90,10 @@ private:
 	bool sensor;
 	bool direction; //Holds current "front" direction of robot. False = ball grabber is front, true = track angle is front
 	bool pressGood;
+	bool autoReverse;
+	bool initReverse;
+
+	float startAngle, targetAngle;
 
 	float setWinch, winchHold, ArmEncValue, LEncVal, REncVal;
 	double lmotspeed, rmotspeed;
@@ -100,6 +104,10 @@ private:
 
 	float autoDistance, autoHighDrive, autoLowDrive, autoDrivePower, autoDefenseDrivePower, autoTurnPower, autoNavigationDrive;
 	int autoMode, autoArmMoveTime, autoDelay, autoCastleTargetAngle, autoPosition, autoCastleDistance;
+
+	int assistStep;
+	double assistDistance;
+	double assistDelay;
 
 	enum states {
 		ENTER,
@@ -126,11 +134,15 @@ private:
 		MOVE_TO_CASTLE_TURN,
 		CASTLE_TURN,
 		MV_TO_CASTLE,
-		AUTO_SHOOT
+		AUTO_SHOOT,
+		TURN_AROUND,
+		DRIVE_BACK,
+		FACE_CASTLE
 	};
 
 	auto_Step autoCurrentStep;
 	Defense autoDefense;
+	int autoDriveDistance;
 
 	states currentState;
 	void RobotInit(); // Scopes/initialization for robot functions
@@ -142,6 +154,10 @@ private:
 	void TestPeriodic();
 	void DisabledPeriodic();
 	void DisabledInit();
+
+	void encoderReset();
+	void calcAssistDistance();
+	bool gyroTurn(int target, int direction);
 
 	CAMERAFEEDS *cameras;
 };
