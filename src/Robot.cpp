@@ -57,44 +57,25 @@ void Robot::RobotInit()
 	lmotor = new VictorSP(0);
 	rmotor = new VictorSP(1);
 	PreSen = new AnalogInput(0);
-	PreSen->SetAverageBits(3);
+	PreSen->SetAverageBits(12);
 	RaFin =  new AnalogInput (3);
 	compress = new Compressor(0);
 	compress->SetClosedLoopControl(true);
 	compress->Start();
+
+	p60 = FALSE;
 
 	PhoSen = new DigitalInput(6);
 	winchHold = -0.12;
 	direction = true;
 	winchSol = false;
 
-	autoReverse = false;
 	startAngle = 0;
 	targetAngle = 0;
 	initReverse = 0;
-	averageGyro = 1.5;
-	gyroCalibrate = 0;
 	gyro = new ADXRS450_Gyro();
 	gyro->Calibrate();
 	gyro->Reset();
-	
-	/*while (gyroCalibrate < 5){
-		while (averageGyro >= 1) {
-			gyro->Calibrate();
-			gyroAngle = gyro->GetAngle();
-			Wait(100);
-			gyroAngle2 = gyro->GetAngle();
-			Wait(100);
-			gyroAngle3 = gyro->GetAngle();
-			Wait(100);
-			gyroAngle4 = gyro->GetAngle();
-			averageGyro = (gyroAngle + gyroAngle2 + gyroAngle3 + gyroAngle4) / 4;
-			gyroCalibrate += 1;
-		}
-		if (averageGyro < 0.5) {
-			break;
-		}
-	}*/
 	
 	assistStep = 0;
 	assistDistance = 0;
@@ -288,19 +269,6 @@ void Robot::AutonomousPeriodic()
 				autoCurrentStep = ALIGN_TO_ZERO;
 				//printf("\n\n\ndone with crossing");
 			}
-		/*else {
-				lever = !lever;
-				autoDelay++;
-				if (autoDelay > 12) {
-					autoDrivePower = -0.7;
-					if (autoDistance >= -130) {
-						autoDrivePower = 0;
-					}
-					} else {
-					autoDrivePower = 0;
-				}
-		}*/
-		//gyro->Reset();
 		if (autoMode == 4) {autoCurrentStep = TURN_AROUND;}
 	}		
 
@@ -456,17 +424,10 @@ void Robot::TeleopInit()
 	autoMode = 0;
 	LEnc->Reset();
 	REnc->Reset();
-
-	//Set dashboard automode to a safe value
-	//SmartDashboard::PutNumber("AutoDefense", 0);
-	//SmartDashboard::PutNumber("AutoPosition", 1);
-	//SmartDashboard::PutNumber("AutoMode", 0);
 }
 
 void Robot::TeleopPeriodic()
 {
-	printf("-");
-
 	checkbuttons();
 
 	// Get joystick values
@@ -480,17 +441,10 @@ void Robot::TeleopPeriodic()
 	LTrig = stick->GetRawAxis(2);
 	RaxisY *= -1;
 
-
 	if (bStart == true && bStartHold == false)
 	{
 		direction = !direction;
 	}
-
-	if (bA == true && bAHold == false)
-	{
-		autoReverse = true;
-	}
-
 
 	if(direction == false)
 	{
@@ -499,9 +453,6 @@ void Robot::TeleopPeriodic()
 		RaxisX *= -1;
 		//RaxisY *= -1;
 	}
-
-
-
 
 	/*****************Driver Assist Functions************************************
 	 * Hold A button to automatically turn robot 180 degrees					*
@@ -532,9 +483,12 @@ void Robot::TeleopPeriodic()
 		if(assistStep == 0)
 		{
 			calcAssistDistance();
-			if(assistDistance <= 12) { lmotspeed = .75; rmotspeed = .75;}
+			if(assistDistance >= -8) { lmotspeed = .75; rmotspeed = -.75;}
 			else
 			{
+				lmotspeed = 0;
+				rmotspeed = 0;
+
 				encoderReset();
 				assistStep = 1;
 			}
@@ -559,7 +513,9 @@ void Robot::TeleopPeriodic()
 			lever = true;
 			calcAssistDistance();
 
-			if(assistDistance <= 12) { lmotspeed = .75; rmotspeed = .75;}
+			if(bX == true && assistDistance >= -8) { lmotspeed = .75; rmotspeed = -.75;}
+			else if(bB == true && assistDistance >= -16) { lmotspeed = .75; rmotspeed = -.75;}
+			else { lmotspeed = 0; rmotspeed = 0;}
 		}
 	}
 
@@ -583,29 +539,10 @@ void Robot::TeleopPeriodic()
 		stateMan = true;
 	} else {stateMan = false;}
 
-	//Pressure Sensor Code
-	Pres = PreSen->GetAverageVoltage();
-	Pres = 250 * (Pres/5) - 25;
-
-	if(Pres>=45)
-	{
-		pressGood = true;
-	}
-	else
-	{
-		pressGood = false;
-	}
-
-
-	//Range Finder Math
-	//float Vm = RaFin->GetVoltage();
-	//float range = (Vm*1000)*((5/4.88)*.03937);
-
-	//Update all joystick buttons
-
-	ArmEncValue = ArmEnc->Get();
+	pressureUpdate();
 
 	//Get sensor inputs
+	ArmEncValue = ArmEnc->Get();
 	phoSensorVal = PhoSen->Get();
 
 	//Math for winch thing
@@ -792,17 +729,6 @@ void Robot::TeleopPeriodic()
 		}
 	}
 
-	/*
-	//Creates two integers: t and Tcurve
-	int t, Tcurve;
-	 Multiplies trigger value by 100 to get percent
-	t = Trig * 100;
-	 Creates parabolic throttle curve with equation of y=0.000001x^4
-	Tcurve = 0.000001 * pow(t, 4);
-	 Creates linear throttle curve
-	Tcurve = abs(t);
-	*/
-
 	if(lifter == true) {sLifter->Set(DoubleSolenoid::kForward);}
 	else {sLifter->Set(DoubleSolenoid::kReverse);}
 	if(arms == true) {sArm->Set(DoubleSolenoid::kForward);}
@@ -824,23 +750,7 @@ void Robot::TeleopPeriodic()
 	lmotor->Set(lmotspeed);
 	rmotor->Set(rmotspeed);
 
-	SmartDashboard::PutNumber("Left Motor Final Command: ", lmotor->Get());
-	SmartDashboard::PutNumber("Right Motor Final Command: ", rmotor->Get());
-	SmartDashboard::PutNumber("Left track distance ", LEnc->GetDistance());
-	SmartDashboard::PutNumber("Right track distance ", REnc->GetDistance());
-	SmartDashboard::PutNumber("Winch", setWinch);
-	SmartDashboard::PutBoolean("Arms: \n", arms);
-	SmartDashboard::PutBoolean("Lever: \n", lever);
-	SmartDashboard::PutBoolean("Poker: \n", poker);
-	SmartDashboard::PutBoolean("Lifter: \n", lifter);
-	SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
-	SmartDashboard::PutNumber("Current State: ", currentState);
-	SmartDashboard::PutNumber("Arm Encoder: ", ArmEncValue);
-	SmartDashboard::PutBoolean("Winch Solenoid: ", winchSol);
-	//SmartDashboard::PutNumber("Ultrasonic", range);
-	SmartDashboard::PutBoolean("dirChange: ", dirChange);
-	SmartDashboard::PutBoolean("Pressure is Good!", pressGood);
-	SmartDashboard::PutNumber("Pressure: ", Pres);
+	updateSmartDB();
 }
 
 void Robot::TestPeriodic()
@@ -849,48 +759,12 @@ void Robot::TestPeriodic()
 
 void Robot::DisabledInit()
 {
-	//Set dashboard automode to a safe value
-	//SmartDashboard::PutNumber("AutoDefense", 0);
-	//SmartDashboard::PutNumber("AutoPosition", 1);
-	//SmartDashboard::PutNumber("AutoMode", 0);
 }
 
 void Robot::DisabledPeriodic()
 {
-	//cameras->run();
-
-	PresVoltage = PreSen->GetAverageVoltage();
-	Pres = 250 * (PresVoltage/5) - 25;
-
-	if(Pres>=45)
-	{
-		pressGood = true;
-	}
-	else
-	{
-		pressGood = false;
-	}
-
-	SmartDashboard::PutNumber("Left Motor Final Command: ", lmotor->Get());
-	SmartDashboard::PutNumber("Right Motor Final Command: ", rmotor->Get());
-	SmartDashboard::PutNumber("Left track distance ", LEnc->GetDistance());
-	SmartDashboard::PutNumber("Right track distance ", REnc->GetDistance());
-	SmartDashboard::PutNumber("Left track counts ", LEnc->Get());
-	SmartDashboard::PutNumber("Right track counts ", REnc->Get());
-	SmartDashboard::PutNumber("Winch", setWinch);
-	SmartDashboard::PutBoolean("Arms: \n", arms);
-	SmartDashboard::PutBoolean("Lever: \n", lever);
-	SmartDashboard::PutBoolean("Poker: \n", poker);
-	SmartDashboard::PutBoolean("Lifter: \n", lifter);
-	SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
-	SmartDashboard::PutNumber("Current State: ", currentState);
-	SmartDashboard::PutNumber("Arm Encoder: ", ArmEncValue);
-	SmartDashboard::PutBoolean("Winch Solenoid: ", winchSol);
-	//SmartDashboard::PutNumber("Ultrasonic", range);
-	SmartDashboard::PutBoolean("dirChange: ", dirChange);
-	SmartDashboard::PutBoolean("Pressure is Good!", pressGood);
-	SmartDashboard::PutNumber("Pressure: ", Pres);
-	SmartDashboard::PutNumber("Pressure Sensor Voltage: ", PresVoltage);
+	pressureUpdate();
+	updateSmartDB();
 }
 
 void Robot::checkbuttons() {
@@ -956,7 +830,8 @@ void Robot::calcAssistDistance()
 {
 	LEncVal = LEnc->GetDistance();
 	REncVal = REnc->GetDistance();
-	assistDistance = (LEncVal + REncVal) / 2;
+	//assistDistance = (LEncVal + REncVal) / 2;
+	assistDistance = LEncVal;
 	return;
 }
 
@@ -964,22 +839,79 @@ bool Robot::gyroTurn(int target, int direction)
 {
 	gyroAngle = gyro->GetAngle();
 
-	if(gyroAngle < target - 5)
-	{
-		lmotspeed = -.75 * direction;
-		rmotspeed = -.75 * direction;
-	}
-	else if (gyroAngle > target + 5)
+	if(gyroAngle < (target - 5) * direction)
 	{
 		lmotspeed = .75 * direction;
 		rmotspeed = .75 * direction;
 	}
+	else if (gyroAngle > (target + 5) * direction)
+	{
+		lmotspeed = -.75 * direction;
+		rmotspeed = -.75 * direction;
+	}
+	else { lmotspeed = 0; rmotspeed = 0; }
 
 	if(gyroAngle > target -5 && gyroAngle < target + 5)
 	{
 		return true;
 	}
 	else { return false; }
+}
+
+void Robot::pressureUpdate()
+{
+	//Pressure Sensor Code
+	Pres = PreSen->GetAverageVoltage();
+	Pres = 250 * (Pres/5) - 25;
+
+	p60 = Pres >= 60;
+	p65 = Pres >= 65;
+	p70 = Pres >= 70;
+	p75 = Pres >= 75;
+	p80 = Pres >= 80;
+	p85 = Pres >= 85;
+	p90= Pres >= 90;
+	p95 = Pres >= 95;
+	p100 = Pres >= 100;
+	p105 = Pres >= 105;
+	p110 = Pres >= 110;
+	p115 = Pres >= 115;
+}
+
+void Robot::updateSmartDB()
+{
+	SmartDashboard::PutNumber("Left Motor Final Command: ", lmotor->Get());
+	SmartDashboard::PutNumber("Right Motor Final Command: ", rmotor->Get());
+	SmartDashboard::PutNumber("Left track distance ", LEnc->GetDistance());
+	SmartDashboard::PutNumber("Right track distance ", REnc->GetDistance());
+	SmartDashboard::PutNumber("Left track counts ", LEnc->Get());
+	SmartDashboard::PutNumber("Right track counts ", REnc->Get());
+	SmartDashboard::PutNumber("Winch", setWinch);
+	SmartDashboard::PutBoolean("Arms: \n", arms);
+	SmartDashboard::PutBoolean("Lever: \n", lever);
+	SmartDashboard::PutBoolean("Poker: \n", poker);
+	SmartDashboard::PutBoolean("Lifter: \n", lifter);
+	SmartDashboard::PutNumber("Gyro: \n", gyroAngle);
+	SmartDashboard::PutNumber("Current State: ", currentState);
+	SmartDashboard::PutNumber("Arm Encoder: ", ArmEncValue);
+	SmartDashboard::PutBoolean("Winch Solenoid: ", winchSol);
+	//SmartDashboard::PutNumber("Ultrasonic", range);
+	SmartDashboard::PutBoolean("dirChange: ", dirChange);
+	SmartDashboard::PutBoolean("p60", p60);
+	SmartDashboard::PutBoolean("p65", p65);
+	SmartDashboard::PutBoolean("p70", p70);
+	SmartDashboard::PutBoolean("p75", p75);
+	SmartDashboard::PutBoolean("p80", p80);
+	SmartDashboard::PutBoolean("p85", p85);
+	SmartDashboard::PutBoolean("p90", p90);
+	SmartDashboard::PutBoolean("p95", p95);
+	SmartDashboard::PutBoolean("p100", p100);
+	SmartDashboard::PutBoolean("p105", p105);
+	SmartDashboard::PutBoolean("p110", p110);
+	SmartDashboard::PutBoolean("p115", p115);
+
+	SmartDashboard::PutNumber("Pressure: ", Pres);
+	SmartDashboard::PutNumber("Pressure Sensor Voltage: ", PresVoltage);
 }
 
 //Start robot
