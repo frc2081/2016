@@ -175,9 +175,9 @@ void Robot::AutonomousInit()
 void Robot::AutonomousPeriodic()
 {
 	LEncVal = LEnc->GetDistance();
-	//REncVal = REnc->GetDistance();
-	//autoDistance = (LEncVal + REncVal) / 2;
-	autoDistance = LEncVal;
+	REncVal = REnc->GetDistance();
+	autoDistance = (LEncVal + REncVal) / 2;
+	//autoDistance = LEncVal;
 	if (autoDefense == CHEVAL || autoDefense == PORTCULLIS) {
 		autoDistance *= -1;
 	}
@@ -206,9 +206,9 @@ void Robot::AutonomousPeriodic()
 			REnc->Reset();
 			//When encoders are reset, values for the current loop must also be recalculated
 			LEncVal = LEnc->GetDistance();
-			//REncVal = REnc->GetDistance();
-			//autoDistance = (LEncVal + REncVal) / 2;
-			autoDistance = LEncVal;
+			REncVal = REnc->GetDistance();
+			autoDistance = (LEncVal + REncVal) / 2;
+			//autoDistance = LEncVal;
 		}
 		
 		//For some defenses, the arms need to be down. 
@@ -293,9 +293,9 @@ void Robot::AutonomousPeriodic()
 			REnc->Reset();
 			//When encoders are reset, values for the current loop must also be recalculated
 			LEncVal = LEnc->GetDistance();
-			//REncVal = REnc->GetDistance();
-			//autoDistance = (LEncVal + REncVal) / 2;
-			autoDistance = LEncVal;
+			REncVal = REnc->GetDistance();
+			autoDistance = (LEncVal + REncVal) / 2;
+			//autoDistance = LEncVal;
 	
 			autoDrivePower = 0;
 			autoTurnPower = 0;
@@ -335,9 +335,9 @@ void Robot::AutonomousPeriodic()
 			LEnc->Reset();
 			REnc->Reset();
 			LEncVal = LEnc->GetDistance();
-			//REncVal = REnc->GetDistance();
-			//autoDistance = (LEncVal + REncVal) / 2;
-			autoDistance = LEncVal;
+			REncVal = REnc->GetDistance();
+			autoDistance = (LEncVal + REncVal) / 2;
+			//autoDistance = LEncVal;
 			
 			autoDrivePower = 0;
 			autoTurnPower = 0;
@@ -387,8 +387,8 @@ void Robot::AutonomousPeriodic()
 	}		
 //*****************************************************	
 	if (autoMode == 4 && autoCurrentStep == TURN_AROUND) {
-		if (gyroAngle < 175) { autoTurnPower = -.7; }
-				else if (gyroAngle > 185) { autoTurnPower = .7; }
+		if (gyroAngle < 175) { autoTurnPower = .7; }
+				else if (gyroAngle > 185) { autoTurnPower = -.7; }
 				else {autoTurnPower = 0; autoCurrentStep = DRIVE_BACK;}
 	}
 //*****************************************************
@@ -838,8 +838,8 @@ void Robot::calcAssistDistance()
 {
 	LEncVal = LEnc->GetDistance();
 	REncVal = REnc->GetDistance();
-	//assistDistance = (LEncVal + REncVal) / 2;
-	assistDistance = LEncVal;
+	assistDistance = (LEncVal + REncVal) / 2;
+	//assistDistance = LEncVal;
 	return;
 }
 
