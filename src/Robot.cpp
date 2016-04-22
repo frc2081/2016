@@ -40,9 +40,9 @@ void Robot::RobotInit()
 	//Solenoids
 	//1 is back PCM, 0 is front PCM(front at track angle)
 	sArm = new DoubleSolenoid(0, 0, 1);	// Solenoid for the opening and closing of the arms
-	sLifter = new DoubleSolenoid(0, 6, 7);	// Solenoid for lifting up the robot
+	sLifter = new DoubleSolenoid(1, 6, 7);	// Solenoid for lifting up the robot
 	sPoker = new DoubleSolenoid(0, 2, 3);	// Solenoid for the poker
-	sLever = new DoubleSolenoid(1, 0, 1);	// Solenoid to raise and lower the arms
+	sLever = new DoubleSolenoid (0, 6, 7);	// Solenoid to raise and lower the arms
 	sWinch = new DoubleSolenoid(0, 4, 5); // Solenoid to raise the winch
 
 	//Encoders
@@ -102,7 +102,7 @@ void Robot::RobotInit()
 	
 	autoHighDrive = .8;
 	autoLowDrive = .8;
-	autoNavigationDrive = .8;
+	autoNavigationDrive = -.8;
 	autoCastleDistance = 0;
 
 	autoArmMoveTime = 5; //duration of time arms need to move. units are # of software loops
@@ -156,10 +156,10 @@ void Robot::AutonomousInit()
 	//all other defenses are low power
 	if(autoDefense == ROUGHTERRAIN)
 	{
-		autoDefenseDrivePower = autoHighDrive;
+		autoDefenseDrivePower = -autoHighDrive;
 	}
-	else if (autoDefense == CHEVAL || autoDefense == PORTCULLIS)  {autoDefenseDrivePower = -autoLowDrive;}
-	else{autoDefenseDrivePower = autoLowDrive;}	
+	else if (autoDefense == CHEVAL || autoDefense == PORTCULLIS)  {autoDefenseDrivePower = autoLowDrive;}
+	else{autoDefenseDrivePower = -autoLowDrive;}
 	
 	//Configure target angle for castle turn
 	//Cheval and portcullis routines drive backward and so must have a different angle
@@ -175,8 +175,12 @@ void Robot::AutonomousInit()
 void Robot::AutonomousPeriodic()
 {
 	LEncVal = LEnc->GetDistance();
-	REncVal = REnc->GetDistance();
-	autoDistance = (LEncVal + REncVal) / 2;
+	//REncVal = REnc->GetDistance();
+	//autoDistance = (LEncVal + REncVal) / 2;
+	autoDistance = LEncVal;
+	if (autoDefense == CHEVAL || autoDefense == PORTCULLIS) {
+		autoDistance *= -1;
+	}
 	gyroAngle = gyro->GetAngle();
 	autoDrivePower = 0;
 	autoTurnPower = 0;
@@ -202,8 +206,9 @@ void Robot::AutonomousPeriodic()
 			REnc->Reset();
 			//When encoders are reset, values for the current loop must also be recalculated
 			LEncVal = LEnc->GetDistance();
-			REncVal = REnc->GetDistance();
-			autoDistance = (LEncVal + REncVal) / 2;
+			//REncVal = REnc->GetDistance();
+			//autoDistance = (LEncVal + REncVal) / 2;
+			autoDistance = LEncVal;
 		}
 		
 		//For some defenses, the arms need to be down. 
@@ -256,7 +261,7 @@ void Robot::AutonomousPeriodic()
 	if(autoMode >= 2 && autoCurrentStep == CROSS_DEFENSE)
 	{
 		//if (autoDefense != PORTCULLIS || autoDefense != CHEVAL) {
-			autoDriveDistance = 130;
+			autoDriveDistance = 50;
 			if(autoDistance < autoDriveDistance)
 			{
 				autoDrivePower = autoDefenseDrivePower;
@@ -268,8 +273,8 @@ void Robot::AutonomousPeriodic()
 				autoTurnPower = 0;
 				autoCurrentStep = ALIGN_TO_ZERO;
 				//printf("\n\n\ndone with crossing");
+				if (autoMode == 4) {autoCurrentStep = TURN_AROUND;}
 			}
-		if (autoMode == 4) {autoCurrentStep = TURN_AROUND;}
 	}		
 
 //*****************************************************	
@@ -288,8 +293,9 @@ void Robot::AutonomousPeriodic()
 			REnc->Reset();
 			//When encoders are reset, values for the current loop must also be recalculated
 			LEncVal = LEnc->GetDistance();
-			REncVal = REnc->GetDistance();
-			autoDistance = (LEncVal + REncVal) / 2;
+			//REncVal = REnc->GetDistance();
+			//autoDistance = (LEncVal + REncVal) / 2;
+			autoDistance = LEncVal;
 	
 			autoDrivePower = 0;
 			autoTurnPower = 0;
@@ -302,7 +308,7 @@ void Robot::AutonomousPeriodic()
 	if(autoMode == 3 && autoCurrentStep == MOVE_TO_CASTLE_TURN)
 	{
 
-		if(autoDistance < 130)
+		if(autoDistance < 90)
 		{
 			autoDrivePower = autoNavigationDrive;	
 		}
@@ -329,8 +335,9 @@ void Robot::AutonomousPeriodic()
 			LEnc->Reset();
 			REnc->Reset();
 			LEncVal = LEnc->GetDistance();
-			REncVal = REnc->GetDistance();
-			autoDistance = (LEncVal + REncVal) / 2;
+			//REncVal = REnc->GetDistance();
+			//autoDistance = (LEncVal + REncVal) / 2;
+			autoDistance = LEncVal;
 			
 			autoDrivePower = 0;
 			autoTurnPower = 0;
@@ -414,6 +421,7 @@ void Robot::AutonomousPeriodic()
 		else {sPoker->Set(DoubleSolenoid::kReverse);}
 		if (winchSol == true) {sWinch->Set(DoubleSolenoid::kForward);}
 		else {sWinch->Set(DoubleSolenoid::kReverse);}
+		updateSmartDB();
 	}
 }
 
