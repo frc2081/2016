@@ -262,7 +262,7 @@ void Robot::AutonomousPeriodic()
 	{
 		//if (autoDefense != PORTCULLIS || autoDefense != CHEVAL) {
 
-		if(autoMode == 2 || autoMode == 4){	autoDriveDistance = 50;}
+		if(autoMode == 2 || autoMode == 4){	autoDriveDistance = 90;}
 		if(autoMode == 1 || autoMode == 3){	autoDriveDistance = 50;}
 			if(autoDistance < autoDriveDistance)
 			{
