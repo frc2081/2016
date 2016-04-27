@@ -261,7 +261,9 @@ void Robot::AutonomousPeriodic()
 	if(autoMode >= 2 && autoCurrentStep == CROSS_DEFENSE)
 	{
 		//if (autoDefense != PORTCULLIS || autoDefense != CHEVAL) {
-			autoDriveDistance = 50;
+
+		if(autoMode == 2 || autoMode == 4){	autoDriveDistance = 50;}
+		if(autoMode == 1 || autoMode == 3){	autoDriveDistance = 50;}
 			if(autoDistance < autoDriveDistance)
 			{
 				autoDrivePower = autoDefenseDrivePower;
