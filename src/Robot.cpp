@@ -40,9 +40,9 @@ void Robot::RobotInit()
 	//Solenoids
 	//1 is back PCM, 0 is front PCM(front at track angle)
 	sArm = new DoubleSolenoid(0, 0, 1);	// Solenoid for the opening and closing of the arms
-	sLifter = new DoubleSolenoid(1, 6, 7);	// Solenoid for lifting up the robot
+	sLifter = new DoubleSolenoid(0, 6, 7);	// Solenoid for lifting up the robot
 	sPoker = new DoubleSolenoid(0, 2, 3);	// Solenoid for the poker
-	sLever = new DoubleSolenoid (0, 6, 7);	// Solenoid to raise and lower the arms
+	sLever = new DoubleSolenoid(1, 0, 1);	// Solenoid to raise and lower the arms
 	sWinch = new DoubleSolenoid(0, 4, 5); // Solenoid to raise the winch
 
 	//Encoders
@@ -564,7 +564,7 @@ void Robot::TeleopPeriodic()
 	//Automatic winch control
 	if (winchMan == false)
 	{
-		if (bRB == true) //If winch is commanded to auto-extend
+		if (bRB == true && winchMan == true) //If winch is commanded to auto-extend
 		{
 			winchSol = true;
 			setWinch = winchMaxExtendPower; //Set winch to extend at full speed
@@ -719,7 +719,7 @@ void Robot::TeleopPeriodic()
 	}
 	if (winchMan == true)
 	{
-		//When X button is pressed, keep a minimum hold power applied to the winch. Otherwise, run winch like normal
+		/*When X button is pressed, keep a minimum hold power applied to the winch. Otherwise, run winch like normal
 		if (bX == false && winchSol == true) //If X button is not pressed
 		{
 			setWinch = Trig; //Set winch power to the trigger value
@@ -731,6 +731,7 @@ void Robot::TeleopPeriodic()
 				setWinch = Trig; //Set the value of the winch power to the value of the triggers
 			}
 		}
+		*/
 		if (bRB == true && bRBHold == false)
 		{
 			winchSol = !winchSol;
@@ -773,6 +774,13 @@ void Robot::DisabledPeriodic()
 {
 	pressureUpdate();
 	updateSmartDB();
+	direction = true;
+	winchSol = false;
+	autoReverse = false;
+	startAngle = 0;
+	targetAngle = 0;
+	initReverse = 0;
+	lifter = true;
 }
 
 void Robot::checkbuttons() {
