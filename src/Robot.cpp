@@ -115,7 +115,7 @@ void Robot::RobotInit()
 	autoDefense = MOAT;
 	
 	autoHighDrive = .8;
-	autoLowDrive = .8;
+	autoLowDrive = .6;
 	autoNavigationDrive = .8;
 	autoCastleDistance = 0;
 
@@ -522,14 +522,18 @@ void Robot::TeleopPeriodic()
 	Pres = PreSen->GetAverageVoltage();
 	Pres = 250 * (Pres/5) - 25;
 
-	if(Pres>=45)
-	{
-		pressGood = true;
-	}
-	else
-	{
-		pressGood = false;
-	}
+	p60 = Pres >= 60;
+	p65 = Pres >= 65;
+	p70 = Pres >= 70;
+	p75 = Pres >= 75;
+	p80 = Pres >= 80;
+	p85 = Pres >= 85;
+	p90= Pres >= 90;
+	p95 = Pres >= 95;
+	p100 = Pres >= 100;
+	p105 = Pres >= 105;
+	p110 = Pres >= 110;
+	p115 = Pres >= 115;
 
 
 	//Range Finder Math
@@ -756,7 +760,7 @@ void Robot::TeleopPeriodic()
 	//Apply drive train mechanical compensation coeffcient
 	lmotspeed *= motorCorrectionValue;
 	winchmot->Set(setWinch);
-	lmotor->Set(lmotspeed);
+
 	rmotor->Set(rmotspeed);
 
 	SmartDashboard::PutNumber("Left Motor Final Command: ", lmotor->Get());
@@ -774,8 +778,19 @@ void Robot::TeleopPeriodic()
 	SmartDashboard::PutBoolean("Winch Solenoid: ", winchSol);
 	//SmartDashboard::PutNumber("Ultrasonic", range);
 	SmartDashboard::PutBoolean("dirChange: ", dirChange);
-	SmartDashboard::PutBoolean("Pressure is Good!", pressGood);
 	SmartDashboard::PutNumber("Pressure: ", Pres);
+	SmartDashboard::PutBoolean("p60", p60);
+	SmartDashboard::PutBoolean("p65", p65);
+	SmartDashboard::PutBoolean("p70", p70);
+	SmartDashboard::PutBoolean("p75", p75);
+	SmartDashboard::PutBoolean("p80", p80);
+	SmartDashboard::PutBoolean("p85", p85);
+	SmartDashboard::PutBoolean("p90", p90);
+	SmartDashboard::PutBoolean("p95", p95);
+	SmartDashboard::PutBoolean("p100", p100);
+	SmartDashboard::PutBoolean("p105", p105);
+	SmartDashboard::PutBoolean("p110", p110);
+	SmartDashboard::PutBoolean("p115", p115);
 }
 
 void Robot::TestPeriodic()
@@ -797,14 +812,18 @@ void Robot::DisabledPeriodic()
 	PresVoltage = PreSen->GetAverageVoltage();
 	Pres = 250 * (PresVoltage/5) - 25;
 
-	if(Pres>=45)
-	{
-		pressGood = true;
-	}
-	else
-	{
-		pressGood = false;
-	}
+	p60 = Pres >= 60;
+	p65 = Pres >= 65;
+	p70 = Pres >= 70;
+	p75 = Pres >= 75;
+	p80 = Pres >= 80;
+	p85 = Pres >= 85;
+	p90= Pres >= 90;
+	p95 = Pres >= 95;
+	p100 = Pres >= 100;
+	p105 = Pres >= 105;
+	p110 = Pres >= 110;
+	p115 = Pres >= 115;
 
 	SmartDashboard::PutNumber("Left Motor Final Command: ", lmotor->Get());
 	SmartDashboard::PutNumber("Right Motor Final Command: ", rmotor->Get());
@@ -823,9 +842,20 @@ void Robot::DisabledPeriodic()
 	SmartDashboard::PutBoolean("Winch Solenoid: ", winchSol);
 	//SmartDashboard::PutNumber("Ultrasonic", range);
 	SmartDashboard::PutBoolean("dirChange: ", dirChange);
-	SmartDashboard::PutBoolean("Pressure is Good!", pressGood);
 	SmartDashboard::PutNumber("Pressure: ", Pres);
 	SmartDashboard::PutNumber("Pressure Sensor Voltage: ", PresVoltage);
+	SmartDashboard::PutBoolean("p60", p60);
+	SmartDashboard::PutBoolean("p65", p65);
+	SmartDashboard::PutBoolean("p70", p70);
+	SmartDashboard::PutBoolean("p75", p75);
+	SmartDashboard::PutBoolean("p80", p80);
+	SmartDashboard::PutBoolean("p85", p85);
+	SmartDashboard::PutBoolean("p90", p90);
+	SmartDashboard::PutBoolean("p95", p95);
+	SmartDashboard::PutBoolean("p100", p100);
+	SmartDashboard::PutBoolean("p105", p105);
+	SmartDashboard::PutBoolean("p110", p110);
+	SmartDashboard::PutBoolean("p115", p115);
 }
 
 void Robot::checkbuttons() {
