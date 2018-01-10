@@ -442,8 +442,6 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
-	printf("-");
-
 	checkbuttons();
 
 	// Get joystick values
@@ -807,7 +805,7 @@ void Robot::DisabledInit()
 
 void Robot::DisabledPeriodic()
 {
-	//cameras->run();
+	cameras->run();
 
 	PresVoltage = PreSen->GetAverageVoltage();
 	Pres = 250 * (PresVoltage/5) - 25;
