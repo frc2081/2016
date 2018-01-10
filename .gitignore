@@ -31,3 +31,5 @@
 XML
 *.xml
 /Debug/
+
+.cproject

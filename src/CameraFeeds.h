@@ -21,7 +21,7 @@ public:
 	CAMERAFEEDS(Joystick *newJoy);
 	~CAMERAFEEDS();
 
-	Task *cameraThread;
+	//Task *cameraThread;
 
 	Timer *cameraDelay;
 	bool delay;
@@ -33,10 +33,10 @@ public:
 	void updateCam();
 
 private:
-	IMAQdxSession camFront;
-	IMAQdxSession camBack;
-	IMAQdxSession curCam;
-	Image *frame;
+	//IMAQdxSession camFront;
+	//IMAQdxSession camBack;
+	//IMAQdxSession curCam;
+	//Image *frame;
 	CameraServer *server;
 	const char *camNameFront = "cam0";
 	const char *camNameBack = "cam1";

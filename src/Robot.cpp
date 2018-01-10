@@ -8,13 +8,13 @@ void Robot::RobotInit()
 	stick = new Joystick(0);
 	stick2 = new Joystick(1);
 
-	printf("Beofre Camera Init");
-	cameras = new CAMERAFEEDS(stick);
-	cameras->init();
-	printf("Camera init is done");
+	//printf("Before Camera Init");
+	//cameras = new CAMERAFEEDS(stick);
+	//cameras->init();
+	//printf("Camera init is done");
 	//cameras->cameraThread->join();
 
-	// Declate buttons based on what button they literally are
+	// Declare buttons based on what button they literally are
 	buttonA = new JoystickButton(stick, 1),
 	buttonB = new JoystickButton(stick, 2),
 	buttonX = new JoystickButton(stick, 3),
@@ -805,7 +805,7 @@ void Robot::DisabledInit()
 
 void Robot::DisabledPeriodic()
 {
-	cameras->run();
+	//cameras->run();
 
 	PresVoltage = PreSen->GetAverageVoltage();
 	Pres = 250 * (PresVoltage/5) - 25;
