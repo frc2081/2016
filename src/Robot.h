@@ -12,10 +12,12 @@
 #define winchMaxExtendPower 0.3
 #define tryingtofixmotor 1 //(Dis)enables the motor correction code- 1 means it will run the correction code
 #define motorCorrectionValue 1 //Value the left motor will be mu
+#define autoTurnRate .5
 
 #include "WPILib.h"
 #include <string>
 #include <iostream>
+#include <thread>
 #include "CameraFeeds.h"
 
 class Robot: public IterativeRobot {
@@ -23,7 +25,7 @@ private:
 	Joystick *stick; // Joystick plugged in first
 	Joystick *stick2; //Joystick plugged in second
 
-	RobotDrive *drive;	// Pointer to a drive
+	RobotDrive *drive;	//Main Robot Drive Object
 
 	JoystickButton *buttonA; // All the button pointers!
 	JoystickButton *buttonB;
@@ -87,17 +89,21 @@ private:
 	bool arms, lever, poker, lifter, phoSensorVal, winchSol; // Variables to display where their respective parts are
 	bool sensor;
 	bool direction; //Holds current "front" direction of robot. False = ball grabber is front, true = track angle is front
-	bool pressGood;
+		bool p55, p60, p65, p70, p75, p80, p85, p90, p95, p100, p105, p110, p115;
+	bool autoReverse;
+	bool initReverse;
 
-	float setWinch, winchHold, ArmEncValue;
+	float startAngle, targetAngle;
+
+	float setWinch, winchHold, ArmEncValue, LEncVal, REncVal;
 	double lmotspeed, rmotspeed;
 	float Pres, PresVoltage;
 
 	bool winchMan, stateMan, dirChange;
 	int armClearDelay;
 
-	float autoDistance, autoHighDrive, autoLowDrive;
-	int autoPosition, autoDrivePower;
+	float autoDistance, autoHighDrive, autoLowDrive, autoDrivePower, autoDefenseDrivePower, autoTurnPower, autoNavigationDrive;
+	int autoMode, autoArmMoveTime, autoDelay, autoCastleTargetAngle, autoPosition, autoCastleDistance;
 
 	enum states {
 		ENTER,
@@ -112,10 +118,24 @@ private:
 		MOAT,
 		RAMPART,
 		ROCKWALL,
-		CHEVAL
+		CHEVAL,
+		PORTCULLIS
+	};
+	
+	enum auto_Step{
+		MOVE_TO_DEFENSE,
+		DEFENSE_SPECIFIC,
+		CROSS_DEFENSE,
+		ALIGN_TO_ZERO,
+		MOVE_TO_CASTLE_TURN,
+		CASTLE_TURN,
+		MV_TO_CASTLE,
+		AUTO_SHOOT
 	};
 
+	auto_Step autoCurrentStep;
 	Defense autoDefense;
+	int autoDriveDistance;
 
 	states currentState;
 	void RobotInit(); // Scopes/initialization for robot functions
@@ -126,6 +146,7 @@ private:
 	void TeleopPeriodic();
 	void TestPeriodic();
 	void DisabledPeriodic();
+	void DisabledInit();
 
 	CAMERAFEEDS *cameras;
 };

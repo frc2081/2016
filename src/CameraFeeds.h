@@ -21,6 +21,11 @@ public:
 	CAMERAFEEDS(Joystick *newJoy);
 	~CAMERAFEEDS();
 
+	Task *cameraThread;
+
+	Timer *cameraDelay;
+	bool delay;
+
 	void init();
 	void run();
 	void end();
